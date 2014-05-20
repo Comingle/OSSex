@@ -9,9 +9,9 @@ This is a basic arduino library for interacting with Comingle devices.
 Comingle dev;
 ```
 
-## Set an output to a particular power level.
+## Set an output to a particular power level
 ```
-dev.setOutput(outNumber, powerLevel);
+dev.setOutput(int outNumber, int powerLevel);
 ```
 
 **-1** can be given as an `outNumber` as shorthand for "set all outputs to `powerLevel`". Otherwise, the output will be set according to the following formula: 
@@ -19,7 +19,7 @@ dev.setOutput(outNumber, powerLevel);
 outNumber = abs(outNumber) % dev.outCount;
 ```
 
-Below is a table of how example `outNumber` arguments would work in a 4-output (`outCount` == 4, and outputs number 0, 1, 2, and 3) device:
+Below is a table of how example `outNumber` arguments would work in a 4-output (`dev.outCount` == 4, and outputs number 0, 1, 2, and 3) device:
 
 | outNumber | Actual Output |
 |:---------:|:-------------:|
@@ -36,4 +36,13 @@ Below is a table of how example `outNumber` arguments would work in a 4-output (
 
 `powerLevel`s are constrained to a value from 0 to 255 inclusive. Some devices may have outputs that are capable of negative `powerLevel`s, such as bidirectional motors. These devices have the `bothWays` flag set to `true` and will have `powerLevel` constrained to values between -255 and 255 inclusive. A `powerLevel` of 0 will turn the output off.
 
+`setOutput` returns 1 currently.
 
+## Set an LED to a particular power level
+```
+dev.setLED(int ledNumber, int powerLevel);
+```
+
+`setLED` sets a given `ledNumber` to a given `powerLevel`. This function does not yet support the **-1** short-hand to apply `powerLevel` to all LEDs. It also constrains `powerLevel` to be from 0 to 255 inclusive.
+
+`setLED` returns 1 currently.

@@ -98,7 +98,6 @@ void Comingle::checkPattern() {
 // Negative powerLevel values are coerced to 0 in devices that aren't bidirectional.
 // powerLevel of 0 turns the output off. Values greater than +/-255 get coerced to +/-255.
 // XXX Add serial (Stream object) feedback from function for diagnostics
-// returns -1 if outNumber is higher than number of available outputs. Returns 0 otherwise.
 int Comingle::setOutput(int outNumber, int powerLevel) {
 	int iterations = 1, scaledPower;
 
@@ -135,7 +134,7 @@ int Comingle::setOutput(int outNumber, int powerLevel) {
 }
 
 
-// Turn an LED on or off. lightLevel can be a value from 0-32. 0 turns the LED off.
+// Turn an LED on or off. lightLevel can be a value from 0-255. 0 turns the LED off.
 // Accept html color codes (both "#50a6c2" and "midnight blue"?)
 // Add serial (Stream object) feedback from function for diagnostics
 //void Comingle::setLED(unsigned int lightLevel, ledNumber, colorCode) {}
