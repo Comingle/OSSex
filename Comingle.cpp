@@ -1,6 +1,6 @@
 /* Comingle.cpp v0.1 - Library for controlling Arduino-based sex-toys
- * Created by Craig Durkin, May 9, 2014
- * License?
+ * Written by Craig Durkin/Comingle, May 9, 2014
+ * 
 */
 
 #include <Arduino.h>
@@ -168,18 +168,6 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 	ComingleDevice._singlePatternLength = patternLength;
 	ComingleDevice._device = _device;
 	
-	for (int i = 0; i < patternLength; i++) {
-		Serial.print('i');
-		Serial.println(i);
-		Serial.print('0');
-		Serial.println(ComingleDevice._singlePattern[i][0]);
-		Serial.print('1');
-		Serial.println(ComingleDevice._singlePattern[i][1]);
-		Serial.print('2');
-		Serial.println(ComingleDevice._singlePattern[i][2]);
-	}
-
-
 	// let it loose
 	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
 	// http://www.pjrc.com/teensy/atmega32u4.pdf has a reference of what these registers mean
@@ -189,6 +177,7 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
   	//TIFR4  = 0x00;        //Timer2 INT Flag Reg: Clear Timer Overflow Flag
   	//TIMSK4 = 0x04;        //Timer4 INT Reg: Timer2 Overflow Interrupt Enable: 00000100
   	//TCCR4B = 0x05;        //Timer4 PWM4x disable, prescale / 16: 00000101
+	// below are Timer2 settings for an arduino uno.
 	 TCNT2 = 131;
 	 TCCR2A = 0x00;
 	 TIMSK2 = 0x01;
