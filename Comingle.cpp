@@ -8,45 +8,78 @@
 #include <avr/interrupt.h> 
 #include <avr/io.h>
 
-Comingle ComingleDevice;
-
-ISR(TIMER2_OVF_vect) { // should be TIMER4
+#if defined(__AVR_ATmega328P__) // Uno
+Comingle ComingleDevice(1);
+ISR(TIMER2_OVF_vect) {
 	ComingleDevice.checkPattern();
 };
+#elif defined(__AVR_ATmega32U4__) // Lilypad USB
+Comingle ComingleDevice(0);
+ISR(TIMER4_OVF_vect) {
+	ComingleDevice.checkPattern();
+};
+#endif
 
-Comingle::Comingle() {
-	
-	// Tonga with LilyPad USB brains
-	_device.outCount = 6;  // should be 4. testing.
-	_device.outPins[0] = 3; // 3,6,10,11
-	_device.outPins[1] = 5; // should be 9. testing
-	_device.outPins[2] = 6;
-	_device.outPins[3] = 9;
-	_device.outPins[4] = 10;
-	_device.outPins[5] = 11;
+Comingle::Comingle(int deviceId) {
+#if defined(__AVR_ATmega328P__)
+	_timer_start_mask = &TCCR2B;
+	_timer_count = &TCNT2;
+    _timer_interrupt_flag = &TIFR2;
+    _timer_interrupt_mask_b = &TIMSK2;
+    _timer_interrupt_mask_a = &TCCR2A;
+    _timer_init = TIMER2_INIT;
+#elif defined(__AVR_ATmega32U4__)
+	_timer_start_mask = &TCCR4B;
+	_timer_count = &TCNT4;
+    _timer_interrupt_flag = &TIFR4;
+    _timer_interrupt_mask_b = &TIMSK4;
+    _timer_init = TIMER4_INIT;
+#endif
+
+	if (deviceId == 1) {
+		// Arduino UNO
+		_device.outCount = 6;  
+		_device.outPins[0] = 3; 
+		_device.outPins[1] = 5; 
+		_device.outPins[2] = 6;
+		_device.outPins[3] = 9;
+		_device.outPins[4] = 10;
+		_device.outPins[5] = 11;
+		
+		_device.deviceId = 1;
+		
+		_device.ledCount = 6;
+		_device.ledPins[0] = 2;
+		_device.ledPins[1] = 4;
+		_device.ledPins[2] = 7;
+		_device.ledPins[3] = 8;
+		_device.ledPins[4] = 12;
+		_device.ledPins[5] = 13;
+	} else {
+		_device.outCount = 4;  
+		_device.outPins[0] = 3; 
+		_device.outPins[1] = 6; 
+		_device.outPins[2] = 10;
+		_device.outPins[3] = 11;
+		
+		_device.deviceId = 0;
+		
+		_device.ledCount = 1;
+		_device.ledPins[0] = 13;
+	}
 	_device.bothWays = false;
 	_device.inputCount = 4;
 	_device.inputPins[0] = A2;
 	_device.inputPins[1] = A3;
 	_device.inputPins[2] = A4;
 	_device.inputPins[3] = A5;
-	
-	_device.ledCount = 6;
-	_device.ledPins[0] = 2;
-	_device.ledPins[1] = 4;
-	_device.ledPins[2] = 7;
-	_device.ledPins[3] = 8;
-	_device.ledPins[4] = 12;
-	_device.ledPins[5] = 13;
 
-	//Disable Timer4 until necessary.
-	//TCCR4B = 0x00;   
-
-	TCCR2B = 0x00;    
+	*_timer_start_mask = 0x00;
   	_tickCount = 0;
     
 	for (int i = 0; i < _device.outCount; i++) {
 		pinMode(_device.outPins[i], OUTPUT);
+		// XXX add tuoPins
 	}
 	for (int i = 0; i < _device.inputCount; i++) {
 		pinMode(_device.inputPins[i], INPUT);
@@ -60,33 +93,18 @@ Comingle::Comingle() {
 void Comingle::checkPattern() {
 	_tickCount++;
 	if (_tickCount > _singlePattern[_i][2]) {
-		//Serial.print('o');
-		//Serial.println(_singlePattern[_i][0]);
-		// Serial.print('p');
-		// Serial.println(_singlePattern[_i][1]);
-		// Serial.print('T');
-		// Serial.println(_singlePattern[_i][2]);
-		// Serial.print('i');
-		// Serial.println(_i);
-		// Serial.print('t');
-		// Serial.println(_tickCount);
   		if (_i == _singlePatternLength) { 
     		_i = 0;
-    		TCCR2B = false; // last step, so turn timer off.
+    		*_timer_start_mask = 0x00;
   		} else {
   			setOutput(_singlePattern[_i][0], _singlePattern[_i][1]);
     		_i++;
   		}
   		_tickCount = 0;            //Resets the interrupt counter
 	}
-		
-
-	//TCNT4 = TIMER4_INIT;           //Reset Timer after interrupt triggered
-	//TIFR4 = 0x00;                  //Timer4 INT Flag Reg: Clear Timer Overflow Flag
-  TCNT2 = 131;
-  TIFR2 = 0x00;
-  
-
+		         
+  *_timer_count = _timer_init;		//Reset Timer after interrupt triggered
+  *_timer_interrupt_flag = 0x00;	//Timer INT Flag Reg: Clear Timer Overflow Flag
 }
 
 
@@ -167,25 +185,21 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 	ComingleDevice._singlePatternLength = patternLength;
 	ComingleDevice._device = _device;
 	
-	// let it loose
-	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
-	// http://www.pjrc.com/teensy/atmega32u4.pdf has a reference of what these registers mean
-	// These settings work out to about a 1ms interrupt on a lilypad usb with an atmega32u4
 	_i = 0;
-	//TCNT4  = TIMER4_INIT; //Reset Timer Count to 25 out of 255
-  	//TIFR4  = 0x00;        //Timer2 INT Flag Reg: Clear Timer Overflow Flag
-  	//TIMSK4 = 0x04;        //Timer4 INT Reg: Timer2 Overflow Interrupt Enable: 00000100
-  	//TCCR4B = 0x05;        //Timer4 PWM4x disable, prescale / 16: 00000101
-	// below are Timer2 settings for an arduino uno.
-	 TCNT2 = 131;
-	 TCCR2A = 0x00;
-	 TIMSK2 = 0x01;
-	 TIFR2 = 0x00;
-	 TCCR2B = 0x05;
-
-	while (TCCR2B) {
+	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
+	if (_device.deviceId == 1) {
+		*_timer_interrupt_mask_b = 0x01;
+		*_timer_interrupt_mask_a = 0x00;
+ 	} else {
+		*_timer_interrupt_mask_b = 0x04;    //Timer INT Reg: Timer2 Overflow Interrupt Enable: 00000100   
+ 	}
+ 	*_timer_count = _timer_init;			//Reset Timer Count
+ 	*_timer_interrupt_flag = 0x00;			//Timer INT Flag Reg: Clear Timer Overflow Flag
+ 	*_timer_start_mask = 0x05;				//Timer PWM4x disable, prescale / 16: 00000101
+ 	
+ 	while (*_timer_start_mask) {
 	}
-
+	
 	return 1;
 }
 

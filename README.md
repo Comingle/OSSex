@@ -8,8 +8,10 @@ This is a basic arduino library for interacting with Comingle devices.
 ```arduino
 #include <Comingle.h>
 
-Comingle dev;
+Comingle dev(int deviceId);
 ```
+
+Create an instance of the Comingle class. If `deviceId` is 1, it set up a device based on an Arduino Uno / Atmega328, and any other number will set up a device for a LilyPad USB / Atmega32U4.
 
 ## Set an output to a particular power level
 ```arduino
@@ -83,6 +85,6 @@ void loop() {
 }
 ```
 
-This pattern will turn all outputs on to a power level of 200 for 2 seconds, turn them off for 2 seconds, turn them back on for 2 seconds, and then turn them off again (technically also for two seconds) .
+This pattern will turn all outputs on to a power level of 200 for 2 seconds, turn them off for 2 seconds, turn them back on for 2 seconds, and then turn them off again (technically also for two seconds).
 
 `runPattern` uses the internal TimerX interrupts available on a variety of Atmel processors. As such, it can run a pattern a single time (such as the example above), or it can run multiple times by being placed in a loop or in `loop()`. `runPattern` will not return until the pattern is completed.
