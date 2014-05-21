@@ -1,5 +1,5 @@
 Comingle	KEYWORD1
-setMotor	KEYWORD2
+setOutput	KEYWORD2
 setLED	KEYWORD2
 runPattern	KEYWORD2
 definePattern	KEYWORD2

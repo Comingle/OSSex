@@ -35,7 +35,6 @@ class Comingle {
     static const int _max_pattern_steps = 16;
     void checkPattern();
   private:
-    static const int _device_tonga = 0;
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
     static const int _max_inputs = 4;

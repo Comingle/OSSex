@@ -1,6 +1,6 @@
 # comingle-arduino
 
-This is a basic arduino library for interacting with Comingle devices. 
+This is an arduino library for interacting with Comingle devices. 
 
 # Available functions
 
@@ -11,7 +11,7 @@ This is a basic arduino library for interacting with Comingle devices.
 Comingle dev(int deviceId);
 ```
 
-Create an instance of the Comingle class. If `deviceId` is 1, it set up a device based on an Arduino Uno / Atmega328, and any other number will set up a device for a LilyPad USB / Atmega32U4.
+Create an instance of the Comingle class. If `deviceId` is 1, it sets up a device based on an Arduino Uno / Atmega328. Any other number will set up a device for a LilyPad USB / Atmega32U4.
 
 ## Set an output to a particular power level
 ```arduino
@@ -47,7 +47,7 @@ Below is a table of how example `outNumber` arguments would work in a 4-output (
 dev.setLED(int ledNumber, int powerLevel);
 ```
 
-`setLED` sets a given `ledNumber` to a given `powerLevel`. This function does not yet support the **-1** shorthand to apply `powerLevel` to all LEDs. It also constrains `powerLevel` to be from 0 to 255 inclusive.
+`setLED` sets a given `ledNumber` to a given `powerLevel`. This function does not yet support the **-1** shorthand to apply `powerLevel` to all LEDs. It constrains `powerLevel` to be from 0 to 255 inclusive, with `powerLevel` of 0 turning the LED off.
 
 `setLED` returns 1 currently.
 
@@ -56,7 +56,7 @@ dev.setLED(int ledNumber, int powerLevel);
 dev.runPattern(int* pattern, unsigned int patternLength);
 ```
 
-`runPattern` allows you to run a sequence of outputs at given power levels for given time durations. `pattern` is a two-dimensional array `p[m][3]`, where `m` is the number of steps in the sequence, and each step is a 3-element array consisting of:
+`runPattern` allows you to set a sequence of outputs at given power levels for given time durations. `pattern` is a two-dimensional array `p[m][3]`, where `m` is the number of steps in the sequence, and each step is a 3-element array consisting of:
 ```
 {outNumber, powerLevel, timeInMillis}
 ```
