@@ -57,7 +57,7 @@ class Comingle {
     int _deviceId;
     unsigned int _patterns[_max_pattern_steps][4];
     volatile unsigned char *_timer_start_mask;
-    volatile unsigned char *_timer_count;
+    volatile uint16_t *_timer_count;
     volatile unsigned char *_timer_interrupt_flag;
     volatile unsigned char *_timer_interrupt_mask_b;
     volatile unsigned char *_timer_interrupt_mask_a;

@@ -58,7 +58,7 @@ Comingle::Comingle(int deviceId) {
 	} else {
 		_device.outCount = 4;  
 		_device.outPins[0] = 3; 
-		_device.outPins[1] = 6; 
+		_device.outPins[1] = 9; 
 		_device.outPins[2] = 10;
 		_device.outPins[3] = 11;
 		
@@ -213,7 +213,6 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 // can't really alter the timing of each step
 // 
 void Comingle::definePattern(unsigned int patternNumber, int* pattern) {}
-
 
 
 // Read input channel
