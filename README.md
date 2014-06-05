@@ -40,30 +40,30 @@ Below is a table of how example `outNumber` arguments would work in a 4-output (
 
 `powerLevel`s are constrained to a value from 0 to 255 inclusive. Some devices may have outputs that are capable of negative `powerLevel`s, such as bidirectional motors. These devices have the `bothWays` flag set to `true` and will have `powerLevel` constrained to values between -255 and 255 inclusive. A `powerLevel` of 0 will turn the output off.
 
-`setOutput` returns 1 currently.
+`setOutput()` returns 1 currently.
 
 ## Set an LED to a particular power level
 ```arduino
 dev.setLED(int ledNumber, int powerLevel);
 ```
 
-`setLED` sets a given `ledNumber` to a given `powerLevel`. This function does not yet support the **-1** shorthand to apply `powerLevel` to all LEDs. It constrains `powerLevel` to be from 0 to 255 inclusive, with `powerLevel` of 0 turning the LED off.
+`setLED()` sets a given `ledNumber` to a given `powerLevel`. This function does not yet support the **-1** shorthand to apply `powerLevel` to all LEDs. It constrains `powerLevel` to be from 0 to 255 inclusive, with `powerLevel` of 0 turning the LED off.
 
-`setLED` returns 1 currently.
+`setLED()` returns 1 currently.
 
 ## Read an input
 ```arduino
 dev.getInput(int inNumber);
 ```
 
-`getInput` is basically a wrapper for `analogRead`. Since the inputs are not broken out in numerical order on all devices, `getInput` provides an easy way to "read input 1, now read input 2", etc. without having to remember pin numbers.
+`getInput()` is a wrapper for `analogRead()`. Since the inputs are not broken out in numerical order on all devices, `getInput()` provides an easy way to "read input 1, now read input 2", etc. without having to remember pin numbers.
 
 ## Run an output pattern
 ```arduino
 dev.runPattern(int* pattern, unsigned int patternLength);
 ```
 
-`runPattern` allows you to set a sequence of outputs at given power levels for given time durations. `pattern` is a two-dimensional array `p[m][3]`, where `m` is the number of steps in the sequence, and each step is a 3-element array consisting of:
+`runPattern()` allows you to set a sequence of outputs at given power levels for given time durations. `pattern` is a two-dimensional array `p[m][3]`, where `m` is the number of steps in the sequence, and each step is a 3-element array consisting of:
 ```
 {outNumber, powerLevel, timeInMillis}
 ```
@@ -94,7 +94,7 @@ void loop() {
 
 This pattern will turn all outputs on to a power level of 200 for 2 seconds, turn them off for 2 seconds, turn them back on for 2 seconds, and then turn them off again (technically also for two seconds).
 
-`runPattern` uses the internal TimerX interrupts available on a variety of Atmel processors. As such, it can run a pattern a single time (such as the example above), or it can run multiple times by being placed in a loop or in `loop()`. `runPattern` will not return until the pattern is completed.
+`runPattern()` uses the internal TimerX interrupts available on a variety of Atmel processors. As such, it can run a pattern a single time (such as the example above), or it can run multiple times by being placed in a loop or in `loop()`. `runPattern` will not return until the pattern is completed.
 
 ## Get device info
 ```arduino
