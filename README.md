@@ -51,6 +51,13 @@ dev.setLED(int ledNumber, int powerLevel);
 
 `setLED` returns 1 currently.
 
+## Read an input
+```arduino
+dev.getInput(int inNumber);
+```
+
+`getInput` is basically a wrapper for `analogRead`. Since the inputs are not broken out in numerical order on all devices, `getInput` provides an easy way to "read input 1, now read input 2", etc. without having to remember pin numbers.
+
 ## Run an output pattern
 ```arduino
 dev.runPattern(int* pattern, unsigned int patternLength);
@@ -88,3 +95,11 @@ void loop() {
 This pattern will turn all outputs on to a power level of 200 for 2 seconds, turn them off for 2 seconds, turn them back on for 2 seconds, and then turn them off again (technically also for two seconds).
 
 `runPattern` uses the internal TimerX interrupts available on a variety of Atmel processors. As such, it can run a pattern a single time (such as the example above), or it can run multiple times by being placed in a loop or in `loop()`. `runPattern` will not return until the pattern is completed.
+
+## Get device info
+```arduino
+Serial.begin(9600);
+dev.deviceInfo();
+```
+
+`deviceInfo` returns basic capabilities about the device: number of inputs, outputs, and LEDs, along with what pins they occupy. Using this function will increase the size of your sketch by over 1 kilobyte, so it should probably only be used for diagnostic/informative purposes. 
