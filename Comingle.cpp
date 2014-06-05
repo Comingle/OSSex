@@ -38,7 +38,7 @@ Comingle::Comingle(int deviceId) {
 
 	if (deviceId == 1) {
 		// Arduino UNO
-		_device.outCount = 6;  
+		_device.outCount = 6;
 		_device.outPins[0] = 3; 
 		_device.outPins[1] = 5; 
 		_device.outPins[2] = 6;
@@ -56,8 +56,8 @@ Comingle::Comingle(int deviceId) {
 		_device.ledPins[4] = 12;
 		_device.ledPins[5] = 13;
 	} else {
-		// Lilypad USB
-		_device.outCount = 4;  
+		// Lilypad USB  
+		_device.outCount = 4;
 		_device.outPins[0] = 3; 
 		_device.outPins[1] = 9; 
 		_device.outPins[2] = 10;
@@ -69,18 +69,21 @@ Comingle::Comingle(int deviceId) {
 		_device.ledPins[0] = 13;
 	}
 	_device.bothWays = false;
+
 	_device.inCount = 4;
 	_device.inPins[0] = A2;
 	_device.inPins[1] = A3;
 	_device.inPins[2] = A4;
 	_device.inPins[3] = A5;
-
+	
 	*_timer_start_mask = 0x00;
   	_tickCount = 0;
     
 	for (int i = 0; i < _device.outCount; i++) {
 		pinMode(_device.outPins[i], OUTPUT);
-		// XXX add tuoPins
+		if (_device.bothWays) {
+			pinMode(_device.tuoPins[i], OUTPUT);
+		}
 	}
 	for (int i = 0; i < _device.inCount; i++) {
 		pinMode(_device.inPins[i], INPUT);
@@ -89,6 +92,44 @@ Comingle::Comingle(int deviceId) {
 		pinMode(_device.ledPins[i], OUTPUT);
 	}
 
+}
+
+// make this not depend on Serial
+void Comingle::deviceInfo() {
+	// Currently prints "A1" as "20". Fix?
+	Serial.print("Inputs (");
+	Serial.print(_device.inCount);
+	Serial.print(" total): Pin ");
+	for (int i = 0; i < _device.inCount; i++) {
+		if (i != _device.inCount - 1) {
+			Serial.print(_device.inPins[i]);
+			Serial.print(", ");
+		} else {
+			Serial.println(_device.inPins[i]);
+		}
+	}
+	Serial.print("Outputs (");
+	Serial.print(_device.outCount);
+	Serial.print(" total): Pin ");
+	for (int i = 0; i < _device.outCount; i++) {
+		if (i != _device.outCount - 1) {
+			Serial.print(_device.outPins[i]);
+			Serial.print(", ");
+		} else {
+			Serial.println(_device.outPins[i]);
+		}
+	}
+	Serial.print("LEDs (");
+	Serial.print(_device.ledCount);
+	Serial.print(" total): Pin ");
+	for (int i = 0; i < _device.ledCount; i++) {
+		if (i != _device.ledCount - 1) {
+			Serial.print(_device.ledPins[i]);
+			Serial.print(", ");
+		} else {
+			Serial.println(_device.ledPins[i]);
+		}
+	}
 }
 
 void Comingle::checkPattern() {
@@ -198,7 +239,7 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
  	*_timer_interrupt_flag = 0x00;			//Timer INT Flag Reg: Clear Timer Overflow Flag
  	*_timer_start_mask = 0x05;				//Timer PWM disable, prescale / 16: 00000101
  	
- 	while (*_timer_start_mask) {			// Wait until pattern is finished to return
+ 	while (*_timer_start_mask) {			//Wait until pattern is finished to return
 	}
 	
 	return 1;
@@ -219,15 +260,9 @@ void Comingle::setPattern(unsigned int patternNumber, int* pattern) {}
 // Read input channel
 // void Comingle::getInput(int inNumber) {}
 int Comingle::getInput(int inNumber) {
-
 	inNumber = abs(inNumber) % _device.inCount;
-	
 	return analogRead(_device.inPins[inNumber]);
-
 }
-
-// return basic info about device (output counts/pins)
-void Comingle::deviceInfo() {}
 
 void Comingle::fade() {}
 

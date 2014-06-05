@@ -50,8 +50,8 @@ class Comingle {
       bool isLedMultiColor;             // do we have multicolored LEDs?
       uint8_t ledCount;                 // number of LEDs
       uint8_t ledPins[_max_leds];        // array mapping to LED output pins
-      uint8_t inputCount;               // number of input pins
-      uint8_t inputPins[_max_inputs];    // array mapping to input pins
+      uint8_t inCount;               // number of input pins
+      uint8_t inPins[_max_inputs];    // array mapping to input pins
       int deviceId;
     } _device;
     int _deviceId;
