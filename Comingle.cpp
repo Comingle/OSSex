@@ -56,6 +56,7 @@ Comingle::Comingle(int deviceId) {
 		_device.ledPins[4] = 12;
 		_device.ledPins[5] = 13;
 	} else {
+		// Lilypad USB
 		_device.outCount = 4;  
 		_device.outPins[0] = 3; 
 		_device.outPins[1] = 9; 
@@ -68,11 +69,11 @@ Comingle::Comingle(int deviceId) {
 		_device.ledPins[0] = 13;
 	}
 	_device.bothWays = false;
-	_device.inputCount = 4;
-	_device.inputPins[0] = A2;
-	_device.inputPins[1] = A3;
-	_device.inputPins[2] = A4;
-	_device.inputPins[3] = A5;
+	_device.inCount = 4;
+	_device.inPins[0] = A2;
+	_device.inPins[1] = A3;
+	_device.inPins[2] = A4;
+	_device.inPins[3] = A5;
 
 	*_timer_start_mask = 0x00;
   	_tickCount = 0;
@@ -81,8 +82,8 @@ Comingle::Comingle(int deviceId) {
 		pinMode(_device.outPins[i], OUTPUT);
 		// XXX add tuoPins
 	}
-	for (int i = 0; i < _device.inputCount; i++) {
-		pinMode(_device.inputPins[i], INPUT);
+	for (int i = 0; i < _device.inCount; i++) {
+		pinMode(_device.inPins[i], INPUT);
 	}
 	for (int i = 0; i < _device.ledCount; i++) {
 		pinMode(_device.ledPins[i], OUTPUT);
@@ -195,9 +196,9 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
  	}
  	*_timer_count = _timer_init;			//Reset Timer Count
  	*_timer_interrupt_flag = 0x00;			//Timer INT Flag Reg: Clear Timer Overflow Flag
- 	*_timer_start_mask = 0x05;				//Timer PWM4x disable, prescale / 16: 00000101
+ 	*_timer_start_mask = 0x05;				//Timer PWM disable, prescale / 16: 00000101
  	
- 	while (*_timer_start_mask) {
+ 	while (*_timer_start_mask) {			// Wait until pattern is finished to return
 	}
 	
 	return 1;
@@ -209,15 +210,21 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 // second is an MxN matrix of motor steps, where M is number of motors, N is time steps, and value is motor power level
 // third is a pattern time: 2000 milliseconds and 5 columns in the matrix means each step runs for 0.4 seconds. 1 2 3 4 5 
 // fourth is loop boolean -- run pattern once or run it looping
-//void Comingle::definePattern(int patternNumber, int motorSeq[][], unsigned int seqTime, bool loopSeq) {}
+//void Comingle::setPattern(int patternNumber, int motorSeq[][], unsigned int seqTime, bool loopSeq) {}
 // can't really alter the timing of each step
 // 
-void Comingle::definePattern(unsigned int patternNumber, int* pattern) {}
+void Comingle::setPattern(unsigned int patternNumber, int* pattern) {}
 
 
 // Read input channel
-// void Comingle::readInput(int channelNumber) {}
-void Comingle::readInput() {}
+// void Comingle::getInput(int inNumber) {}
+int Comingle::getInput(int inNumber) {
+
+	inNumber = abs(inNumber) % _device.inCount;
+	
+	return analogRead(_device.inPins[inNumber]);
+
+}
 
 // return basic info about device (output counts/pins)
 void Comingle::deviceInfo() {}
@@ -225,3 +232,5 @@ void Comingle::deviceInfo() {}
 void Comingle::fade() {}
 
 void Comingle::oscillate() {}
+
+

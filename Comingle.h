@@ -27,8 +27,8 @@ class Comingle {
     int setOutput(int, int);
     int setLED(int, int);
     int runPattern(int*, unsigned int);
-    void definePattern(unsigned int, int*);
-    void readInput();
+    void setPattern(unsigned int, int*);
+    int getInput(int);
     void deviceInfo();
     void fade();
     void oscillate();
