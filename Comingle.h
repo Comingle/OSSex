@@ -10,14 +10,13 @@
 #include <avr/interrupt.h> 
 #include <avr/io.h>
 
-#define DEVICE_TONGA (0);
-
 #define MAX_OUTPUTS (8);
 #define MAX_LEDS (8);
 #define MAX_INPUTS (4);
 #define MAX_PATTERN_STEPS (16);
 
-// 25 cycles out of 255 total (timer 4 is 8-bit). This, combined with TCCR4B and the clock speed, sets the interrupt time to ~1 ms
+// Timer4 is for ATmega32U4/Lilypad usb. Timer2 is for ATmega328P/Arduino Uno. Both values were hand-tuned to arrive at an interrupt
+// time of approximately 1ms.
 #define TIMER4_INIT 25;
 #define TIMER2_INIT 131;
 
@@ -29,19 +28,12 @@ class Comingle {
     int runPattern(int*, unsigned int);
     void setPattern(unsigned int, int*);
     int getInput(int);
-    void deviceInfo();
     void fade();
     void oscillate();
     static const int _max_pattern_steps = 16;
-    void checkPattern();
-  private:
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
     static const int _max_inputs = 4;
-    volatile int _tickCount;
-    int _singlePattern[_max_pattern_steps][3]; // {motornumber, powerlevel, time (millis)}
-    size_t _singlePatternLength; 
-    volatile int _i;
     struct device {
       bool bothWays;                    // can outputs go both forward and backward?
       uint8_t outCount;                 // number of outputs (electrodes, motors)
@@ -54,8 +46,12 @@ class Comingle {
       uint8_t inPins[_max_inputs];    // array mapping to input pins
       int deviceId;
     } _device;
-    int _deviceId;
-    unsigned int _patterns[_max_pattern_steps][4];
+  private:
+    int _singlePattern[_max_pattern_steps][3]; // {motornumber, powerlevel, time (millis)}
+    size_t _singlePatternLength; 
+    unsigned int _patterns[_max_pattern_steps][3];
+    volatile int _i;
+    volatile int _tickCount;
     volatile unsigned char *_timer_start_mask;
     volatile uint16_t *_timer_count;
     volatile unsigned char *_timer_interrupt_flag;

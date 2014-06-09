@@ -75,6 +75,8 @@ Comingle::Comingle(int deviceId) {
 	_device.inPins[1] = A3;
 	_device.inPins[2] = A4;
 	_device.inPins[3] = A5;
+
+	_device.isLedMultiColor = false;
 	
 	*_timer_start_mask = 0x00;
   	_tickCount = 0;
@@ -92,44 +94,6 @@ Comingle::Comingle(int deviceId) {
 		pinMode(_device.ledPins[i], OUTPUT);
 	}
 
-}
-
-// make this not depend on Serial
-void Comingle::deviceInfo() {
-	// Currently prints "A1" as "20". Fix?
-	Serial.print("Inputs (");
-	Serial.print(_device.inCount);
-	Serial.print(" total): Pin ");
-	for (int i = 0; i < _device.inCount; i++) {
-		if (i != _device.inCount - 1) {
-			Serial.print(_device.inPins[i]);
-			Serial.print(", ");
-		} else {
-			Serial.println(_device.inPins[i]);
-		}
-	}
-	Serial.print("Outputs (");
-	Serial.print(_device.outCount);
-	Serial.print(" total): Pin ");
-	for (int i = 0; i < _device.outCount; i++) {
-		if (i != _device.outCount - 1) {
-			Serial.print(_device.outPins[i]);
-			Serial.print(", ");
-		} else {
-			Serial.println(_device.outPins[i]);
-		}
-	}
-	Serial.print("LEDs (");
-	Serial.print(_device.ledCount);
-	Serial.print(" total): Pin ");
-	for (int i = 0; i < _device.ledCount; i++) {
-		if (i != _device.ledCount - 1) {
-			Serial.print(_device.ledPins[i]);
-			Serial.print(", ");
-		} else {
-			Serial.println(_device.ledPins[i]);
-		}
-	}
 }
 
 void Comingle::checkPattern() {
@@ -216,9 +180,9 @@ int Comingle::setLED(int ledNumber, int powerLevel) {
 }
 
 // Run preset pattern
-// Add serial (Stream object) feedback from function for diagnostics
-//void Comingle::runPattern(int patternNumber) {}
+// XXX Add serial (Stream object) feedback from function for diagnostics
 int Comingle::runPattern(int* pattern, unsigned int patternLength) {
+	patternLength = constrain(patternLength, 0, 15);
 	for (int i = 0; i < patternLength; i++) {
 		for (int j = 0; j < 3; j++) {
 			ComingleDevice._singlePattern[i][j] = *(pattern++);
@@ -258,7 +222,6 @@ void Comingle::setPattern(unsigned int patternNumber, int* pattern) {}
 
 
 // Read input channel
-// void Comingle::getInput(int inNumber) {}
 int Comingle::getInput(int inNumber) {
 	inNumber = abs(inNumber) % _device.inCount;
 	return analogRead(_device.inPins[inNumber]);
