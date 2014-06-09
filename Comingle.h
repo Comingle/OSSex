@@ -30,6 +30,7 @@ class Comingle {
     int getInput(int);
     void fade();
     void oscillate();
+    void checkPattern();
     static const int _max_pattern_steps = 16;
     static const int _max_outputs = 8;
     static const int _max_leds = 8;

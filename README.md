@@ -68,7 +68,7 @@ dev.runPattern(int* pattern, unsigned int patternLength);
 {outNumber, powerLevel, timeInMillis}
 ```
 
-`patternLength` is equal to `m`.
+`patternLength` is equal to `m` and is constrained to 16 total steps (defined by `_max_pattern_steps` in Comingle.h)
 
 Example:
 
@@ -99,7 +99,25 @@ This pattern will turn all outputs on to a power level of 200 for 2 seconds, tur
 ## Get device info
 ```arduino
 Serial.begin(9600);
-dev.deviceInfo();
+Serial.print(dev._device.outCount);
+...
 ```
 
-`deviceInfo()` returns basic capabilities about the device: number of inputs, outputs, and LEDs, along with what pins they occupy. Using this function will increase the size of your sketch by over 1 kilobyte, so it should probably be reserved for diagnostic/informative purposes. 
+Each instance of the `Comingle` class has an exposed `_device` struct that can be accessed to determine the device's capabilities. The struct's contents are currently:
+
+```
+struct device {
+  bool bothWays;                    // can outputs go both forward and backward?
+  uint8_t outCount;                 // number of outputs (electrodes, motors)
+  uint8_t outPins[_max_outputs];    // array mapping to output pins
+  uint8_t tuoPins[_max_outputs];    // array mapping to reverse output pins;
+  bool isLedMultiColor;             // do we have multicolored LEDs?
+  uint8_t ledCount;                 // number of LEDs
+  uint8_t ledPins[_max_leds];       // array mapping to LED output pins
+  uint8_t inCount;                  // number of input pins
+  uint8_t inPins[_max_inputs];      // array mapping to input pins
+  int deviceId;
+} _device;
+```
+
+This struct is defined in Comingle.h, along with the `_max_outputs`, `_max_leds`, `_max_inputs` and a few other constants.

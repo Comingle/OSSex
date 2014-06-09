@@ -182,7 +182,7 @@ int Comingle::setLED(int ledNumber, int powerLevel) {
 // Run preset pattern
 // XXX Add serial (Stream object) feedback from function for diagnostics
 int Comingle::runPattern(int* pattern, unsigned int patternLength) {
-	patternLength = constrain(patternLength, 0, 15);
+	patternLength = constrain(patternLength, 0, (_max_pattern_steps-1));
 	for (int i = 0; i < patternLength; i++) {
 		for (int j = 0; j < 3; j++) {
 			ComingleDevice._singlePattern[i][j] = *(pattern++);
