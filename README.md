@@ -126,6 +126,6 @@ This struct is defined in Comingle.h, along with the `_max_outputs`, `_max_leds`
 dev.flicker(int powerLevel, unsigned int stepTime, unsigned int totalTime);
 ```
 
-`flicker()` randomly turns outputs on and off. It will do this `totalTime` has elapsed. It will select a random output, turn it on for a time period of at most `stepTime`, turn it off, then select another output and repeat the process.
+`flicker()` randomly turns outputs on and off. It will do this until `totalTime` has elapsed. It will select a random output, turn it on for a time period of at most `stepTime`, turn it off, then select another output and repeat the process.
 
 This function is currently untested.
