@@ -23,7 +23,7 @@ dev.setOutput(int outNumber, int powerLevel);
 outNumber = abs(outNumber) % dev.outCount;
 ```
 
-Below is a table of how example `outNumber` arguments would work in a 4-output (`dev.outCount` == 4, and outputs number 0, 1, 2, and 3) device:
+Below is a table of how example `outNumber` arguments would work in a 3-output (`dev._device.outCount` == 3, and outputs number 0, 1, and 2) device:
 
 | outNumber | Actual Output |
 |:---------:|:-------------:|
@@ -32,10 +32,9 @@ Below is a table of how example `outNumber` arguments would work in a 4-output (
 | 0         | 0             |
 | 1         | 1             |
 | 2         | 2             |
-| 3         | 3             |
-| 4         | 0             |
-| 5         | 1             |
-| 6         | 2             |
+| 3         | 0             |
+| 4         | 1             |
+| 5         | 2             |
 ...
 
 `powerLevel`s are constrained to a value from 0 to 255 inclusive. Some devices may have outputs that are capable of negative `powerLevel`s, such as bidirectional motors. These devices have the `bothWays` flag set to `true` and will have `powerLevel` constrained to values between -255 and 255 inclusive. A `powerLevel` of 0 will turn the output off.
@@ -121,3 +120,12 @@ struct device {
 ```
 
 This struct is defined in Comingle.h, along with the `_max_outputs`, `_max_leds`, `_max_inputs` and a few other constants.
+
+## Flicker the outputs
+```arduino
+dev.flicker(/int/ powerLevel, /unsigned int/ stepTime, unsigned int totalTime);
+```
+
+`flicker()` randomly turns outputs on and off. It will do this `totalTime` has elapsed. It will select a random output, turn it on for a time period of at most `stepTime`, turn it off, then select another output and repeat the process.
+
+This function is currently untested.

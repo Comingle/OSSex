@@ -125,27 +125,27 @@ void Comingle::checkPattern() {
 int Comingle::setOutput(int outNumber, int powerLevel) {
 	int iterations = 1, scaledPower;
 
+	// set all outputs, starting at 0.
 	if (outNumber == -1) {
-		// set all outputs, starting at 0.
 		iterations = _device.outCount;
 		outNumber = 0;
 	} else {
 		outNumber = abs(outNumber) % _device.outCount;
 	}
+
+	if (_device.bothWays) {
+		scaledPower = constrain(powerLevel, -255, 255);
+	} else {
+		scaledPower = constrain(powerLevel, 0, 255);
+	}
 	
 	for (int i = 0; i < iterations; i++) {
-		if (_device.bothWays) {
-			scaledPower = constrain(powerLevel, -255, 255);
-		} else {
-			scaledPower = constrain(powerLevel, 0, 255);
-		}
-
-		if (powerLevel == 0) {
+		if (scaledPower == 0) {
 			analogWrite(_device.outPins[outNumber], 0);
 			if (_device.bothWays) {
 				analogWrite(_device.tuoPins[outNumber], 0);
 			}
-		} else if (powerLevel > 0) {
+		} else if (scaledPower > 0) {
 			analogWrite(_device.outPins[outNumber], scaledPower);
 		} else {
 			analogWrite(_device.tuoPins[outNumber], scaledPower);
@@ -185,7 +185,12 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 	patternLength = constrain(patternLength, 0, (_max_pattern_steps-1));
 	for (int i = 0; i < patternLength; i++) {
 		for (int j = 0; j < 3; j++) {
-			ComingleDevice._singlePattern[i][j] = *(pattern++);
+			// constrain time to positive
+			if (j == 2) {
+				ComingleDevice._singlePattern[i][j] = constrain(*(pattern++), 0, 32767);
+			} else {
+				ComingleDevice._singlePattern[i][j] = *(pattern++);
+			}
 		}
 	}
 	ComingleDevice._singlePatternLength = patternLength;
@@ -227,7 +232,31 @@ int Comingle::getInput(int inNumber) {
 	return analogRead(_device.inPins[inNumber]);
 }
 
-void Comingle::fade() {}
+int Comingle::flicker(int powerLevel, unsigned int stepTime, unsigned int totalTime) {
+	int pattern[_max_pattern_steps][3];
+	int timeAccumulator;
+	int i;
+
+	for (i = 0; i < _max_pattern_steps; i+2) {
+		pattern[i][0] = random(0, _device.outCount);
+		pattern[i][1] = powerLevel;
+		if (totalTime - timeAccumulator < stepTime) {
+			pattern[i][2] = totalTime - timeAccumulator;
+			break;
+		} else {
+			pattern[i][2] = random(0, stepTime);
+			timeAccumulator += pattern[i][2];
+		}
+		pattern[i+1][0] = pattern[i][0];
+		pattern[i+1][1] = 0;
+		pattern[i+1][2] = 10;
+		timeAccumulator += 10;
+	}
+
+	runPattern(*pattern, i);
+
+	return 1;
+}
 
 void Comingle::oscillate() {}
 

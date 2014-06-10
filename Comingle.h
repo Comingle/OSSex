@@ -28,7 +28,7 @@ class Comingle {
     int runPattern(int*, unsigned int);
     void setPattern(unsigned int, int*);
     int getInput(int);
-    void fade();
+    int flicker(int, unsigned int, unsigned int);
     void oscillate();
     void checkPattern();
     static const int _max_pattern_steps = 16;
