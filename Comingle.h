@@ -31,7 +31,7 @@ class Comingle {
     int flicker(int, unsigned int, unsigned int);
     void oscillate();
     void checkPattern();
-    static const int _max_pattern_steps = 16;
+    static const int _max_pattern_steps = 32;
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
     static const int _max_inputs = 4;
@@ -45,6 +45,7 @@ class Comingle {
       uint8_t ledPins[_max_leds];        // array mapping to LED output pins
       uint8_t inCount;               // number of input pins
       uint8_t inPins[_max_inputs];    // array mapping to input pins
+      uint8_t buttonPins[1];
       int deviceId;
     } _device;
   private:

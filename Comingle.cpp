@@ -67,6 +67,9 @@ Comingle::Comingle(int deviceId) {
 		
 		_device.ledCount = 1;
 		_device.ledPins[0] = 13;
+
+		_device.buttonPins[0] = 2;
+		pinMode(_device.buttonPins[0], INPUT_PULLUP);
 	}
 	_device.bothWays = false;
 
@@ -96,15 +99,20 @@ Comingle::Comingle(int deviceId) {
 
 }
 
+
+// Called by the timer interrupt to check if a change needs to be made to the pattern.
 void Comingle::checkPattern() {
 	_tickCount++;
 	if (_tickCount > _singlePattern[_i][2]) {
   		if (_i == _singlePatternLength) { 
+  			// stop the pattern
     		_i = 0;
     		*_timer_start_mask = 0x00;
   		} else {
+  			// run the next step
+  			_i++;
   			setOutput(_singlePattern[_i][0], _singlePattern[_i][1]);
-    		_i++;
+    		
   		}
   		_tickCount = 0;            //Resets the interrupt counter
 	}
@@ -185,12 +193,7 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 	patternLength = constrain(patternLength, 0, (_max_pattern_steps-1));
 	for (int i = 0; i < patternLength; i++) {
 		for (int j = 0; j < 3; j++) {
-			// constrain time to positive
-			if (j == 2) {
-				ComingleDevice._singlePattern[i][j] = constrain(*(pattern++), 0, 32767);
-			} else {
-				ComingleDevice._singlePattern[i][j] = *(pattern++);
-			}
+			ComingleDevice._singlePattern[i][j] = *(pattern++);
 		}
 	}
 	ComingleDevice._singlePatternLength = patternLength;
@@ -202,13 +205,15 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 		*_timer_interrupt_mask_b = 0x01;
 		*_timer_interrupt_mask_a = 0x00;
  	} else {
-		*_timer_interrupt_mask_b = 0x04;    //Timer INT Reg: Timer2 Overflow Interrupt Enable: 00000100   
+		*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer2 Overflow Interrupt Enable: 00000100   
  	}
- 	*_timer_count = _timer_init;			//Reset Timer Count
- 	*_timer_interrupt_flag = 0x00;			//Timer INT Flag Reg: Clear Timer Overflow Flag
- 	*_timer_start_mask = 0x05;				//Timer PWM disable, prescale / 16: 00000101
+ 	*_timer_count = _timer_init;			// Reset Timer Count
+ 	*_timer_interrupt_flag = 0x00;			// Timer INT Flag Reg: Clear Timer Overflow Flag
+ 	*_timer_start_mask = 0x05;				// Timer PWM disable, prescale / 16: 00000101
  	
- 	while (*_timer_start_mask) {			//Wait until pattern is finished to return
+	setOutput(ComingleDevice._singlePattern[_i][0], ComingleDevice._singlePattern[_i][1]); // Run the first step
+
+ 	while (*_timer_start_mask) {			// Wait until pattern is finished to return
 	}
 	
 	return 1;
@@ -234,28 +239,27 @@ int Comingle::getInput(int inNumber) {
 
 int Comingle::flicker(int powerLevel, unsigned int stepTime, unsigned int totalTime) {
 	int pattern[_max_pattern_steps][3];
-	int timeAccumulator;
+	int *send;
+	int timeAccumulator = 0;
 	int i;
 
 	for (i = 0; i < _max_pattern_steps; i+2) {
-		pattern[i][0] = random(0, _device.outCount);
+		pattern[i][0] = random(100, _device.outCount);
 		pattern[i][1] = powerLevel;
 		if (totalTime - timeAccumulator < stepTime) {
 			pattern[i][2] = totalTime - timeAccumulator;
 			break;
 		} else {
-			pattern[i][2] = random(0, stepTime);
+			pattern[i][2] = random(100, stepTime);
 			timeAccumulator += pattern[i][2];
 		}
 		pattern[i+1][0] = pattern[i][0];
 		pattern[i+1][1] = 0;
-		pattern[i+1][2] = 10;
-		timeAccumulator += 10;
+		pattern[i+1][2] = 50;
+		timeAccumulator += 50;
 	}
-
-	runPattern(*pattern, i);
-
-	return 1;
+	send = &pattern[0][0];
+	return runPattern(send, i);
 }
 
 void Comingle::oscillate() {}
