@@ -1,3 +1,8 @@
+/* Runs a simple Pattern
+ * Example by Craig Durkin/Comingle, May 9, 2014
+ * {♥} COMINGLE
+*/
+
 #include <Comingle.h>
 
 Comingle dev(1);

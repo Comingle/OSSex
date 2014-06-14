@@ -1,6 +1,7 @@
 # comingle-arduino
 
 This is an arduino library for interacting with Comingle devices. 
+{♥} COMINGLE
 
 # Available functions
 

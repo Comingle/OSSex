@@ -1,7 +1,8 @@
 /* Comingle.cpp v0.1.2 - Library for controlling Arduino-based sex-toys
  * Written by Craig Durkin/Comingle, May 9, 2014
- * 
+ * {♥} COMINGLE
 */
+
 
 #include <Arduino.h>
 #include <Comingle.h>
