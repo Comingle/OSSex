@@ -76,23 +76,21 @@ Example:
 #include <Comingle.h>
 
 Comingle dev(0);
+int pattern[][3] = {
+    {-1, 200, 1000},
+    {-1, 0, 1000},
+};
+unsigned int patternSize = sizeof(pattern) / sizeof(int) / 3;
 
 void setup() {
-  int pattern[][3] = {
-    {-1, 200, 2000},
-    {-1, 0, 2000},
-    {-1, 200, 2000},
-    {-1, 0, 2000}
-  }
-  unsigned int patternLength = sizeof(pattern) / sizeof(int) / 3;
-  dev.runPattern(*pattern, patternLength);
 }
 
 void loop() {
+  dev.runPattern(*pattern, patternSize);
 }
 ```
 
-This pattern will turn all outputs on to a power level of 200 for 2 seconds, turn them off for 2 seconds, turn them back on for 2 seconds, and then turn them off again (technically also for two seconds).
+This pattern will turn all outputs on to a power level of 200 for 1 second (1000 milliseconds) and turn them off for 1 second, over and over again (since `runPattern()` is being called from within `loop()`).
 
 `runPattern()` uses the internal TimerX interrupts available on a variety of Atmel processors. As such, it can run a pattern a single time (such as the example above), or it can run multiple times by being placed in a loop or in `loop()`. `runPattern()` will not return until the pattern is completed.
 

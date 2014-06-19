@@ -16,6 +16,5 @@ void setup() {
 }
 
 void loop() {
-  int ret;
-  ret = dev.runPattern(*pattern, patternSize);
+  dev.runPattern(*pattern, patternSize);
 }
