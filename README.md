@@ -1,4 +1,4 @@
-# comingle-arduino
+# ComingleArduino
 
 This is an arduino library for interacting with Comingle devices. 
 {♥} COMINGLE
@@ -130,3 +130,32 @@ dev.flicker(int powerLevel, unsigned int stepTime, unsigned int totalTime);
 `flicker()` randomly turns outputs on and off. It will do this until `totalTime` has elapsed. It will select a random output, turn it on for a time period of at most `stepTime`, turn it off, then select another output and repeat the process.
 
 This function is currently untested.
+
+## Control the button behavior
+```arduino
+dev.setButton(function);
+```
+
+`setButton()` will execute `function` function whenever the button is pressed. On Lilypad-based devices, the button is attached to digital pin 2 and will read LOW when the button is pressed. 
+
+```arduino
+#include <Comingle.h>
+
+Comingle dev(0);
+
+void led() {
+  if (digitalRead(2) == LOW) {
+    dev.setLED(0, 250);
+  } else {
+    dev.setLED(0,0);
+  }
+}
+
+void setup() {
+  dev.setButton(led);
+}
+
+void loop() {
+}
+```
+This example will turn the LED on when the button is pressed, and turn it off when the button is released.
