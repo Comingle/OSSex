@@ -32,6 +32,8 @@ class Comingle {
     int flicker(int, unsigned int, unsigned int);
     void oscillate();
     void checkPattern();
+    void (*onButton)();
+    void setButton(void (*callback)());
     static const int _max_pattern_steps = 32;
     static const int _max_outputs = 8;
     static const int _max_leds = 8;

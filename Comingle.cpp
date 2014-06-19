@@ -19,6 +19,9 @@ Comingle ComingleDevice(0);
 ISR(TIMER4_OVF_vect) {
 	ComingleDevice.checkPattern();
 };
+ISR(INT1_vect) {
+    ComingleDevice.onButton();
+}
 #endif
 
 Comingle::Comingle(int deviceId) {
@@ -71,6 +74,11 @@ Comingle::Comingle(int deviceId) {
 
 		_device.buttonPins[0] = 2;
 		pinMode(_device.buttonPins[0], INPUT_PULLUP);
+
+		cli();
+  		EICRA = B00000100;	// Set interrupt 1 (digital pin 2) to be active on CHANGE
+  		EIMSK = B00000010;	// activate interrupt 1
+  		sei();
 	}
 	_device.bothWays = false;
 
@@ -98,6 +106,7 @@ Comingle::Comingle(int deviceId) {
 		pinMode(_device.ledPins[i], OUTPUT);
 	}
 
+	ComingleDevice._device = _device;
 }
 
 
@@ -198,7 +207,7 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 		}
 	}
 	ComingleDevice._singlePatternLength = patternLength;
-	ComingleDevice._device = _device;
+	
 	
 	_i = 0;
 	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
@@ -264,5 +273,10 @@ int Comingle::flicker(int powerLevel, unsigned int stepTime, unsigned int totalT
 }
 
 void Comingle::oscillate() {}
+
+void Comingle::setButton(void (*callback)()) {
+	ComingleDevice.onButton = callback;
+	sei();
+}
 
 
