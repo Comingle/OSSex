@@ -75,7 +75,7 @@ Example:
 ```arduino
 #include <Comingle.h>
 
-Comingle dev;
+Comingle dev(0);
 
 void setup() {
   int pattern[][3] = {
@@ -136,7 +136,7 @@ This function is currently untested.
 dev.setButton(function);
 ```
 
-`setButton()` will execute `function` function whenever the button is pressed. On Lilypad-based devices, the button is attached to digital pin 2 and will read LOW when the button is pressed. 
+`setButton()` will execute `function()` whenever the button is pressed. On Lilypad-based devices, the button is attached to digital pin 2 and will read LOW when the button is pressed. 
 
 ```arduino
 #include <Comingle.h>
