@@ -75,10 +75,7 @@ Comingle::Comingle(int deviceId) {
 		_device.buttonPins[0] = 2;
 		pinMode(_device.buttonPins[0], INPUT_PULLUP);
 
-		cli();
-  		EICRA = B00000100;	// Set interrupt 1 (digital pin 2) to be active on CHANGE
-  		EIMSK = B00000010;	// activate interrupt 1
-  		sei();
+		
 	}
 	_device.bothWays = false;
 
@@ -107,6 +104,8 @@ Comingle::Comingle(int deviceId) {
 	}
 
 	ComingleDevice._device = _device;
+
+	ComingleDevice.setLED(0, 128);  // Make it obvious if device is on/off
 }
 
 
@@ -229,6 +228,38 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 	return 1;
 }
 
+/* int Comingle::runPattern(unsigned int patternNumber) {
+	patternNumber = constrain(patternNumber, 0, (_max_patterns-1));
+	unsigned int patternLength = ComingleDevice._patternLengths[patternNumber];
+
+	for (int i = 0; i < patternLength; i++) {
+		for (int j = 0; j < 3; j++) {
+			ComingleDevice._singlePattern[i][j] = ComingleDevice._patterns[patternNumber][i][j];
+		}
+	}
+	ComingleDevice._singlePatternLength = patternLength;
+
+	_i = 0;
+	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
+	if (_device.deviceId == 1) {
+		*_timer_interrupt_mask_b = 0x01;
+		*_timer_interrupt_mask_a = 0x00;
+ 	} else {
+		*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer2 Overflow Interrupt Enable: 00000100   
+ 	}
+ 	*_timer_count = _timer_init;			// Reset Timer Count
+ 	*_timer_interrupt_flag = 0x00;			// Timer INT Flag Reg: Clear Timer Overflow Flag
+ 	*_timer_start_mask = 0x05;				// Timer PWM disable, prescale / 16: 00000101
+ 	
+	setOutput(ComingleDevice._singlePattern[_i][0], ComingleDevice._singlePattern[_i][1]); // Run the first step
+
+ 	while (*_timer_start_mask) {			// Wait until pattern is finished to return
+	}
+	
+	return 1;
+
+}*/ 
+
 // Define motor/led pattern
 // ? Possible implementation: 
 // Function takes 4 arguments: first is a pattern number to assign. can be null for one-off patterns.
@@ -238,7 +269,19 @@ int Comingle::runPattern(int* pattern, unsigned int patternLength) {
 //void Comingle::setPattern(int patternNumber, int motorSeq[][], unsigned int seqTime, bool loopSeq) {}
 // can't really alter the timing of each step
 // 
-void Comingle::setPattern(unsigned int patternNumber, int* pattern) {}
+/* void Comingle::setPattern(unsigned int patternNumber, int* pattern, unsigned int patternLength) {
+	patternNumber = constrain(patternNumber, 0, (_max_patterns-1));
+	patternLength = constrain(patternLength, 0, (_max_pattern_steps-1));
+
+	ComingleDevice._patternLengths[patternNumber] = patternLength;
+	
+	for (int i = 0; i < patternLength; i++) {
+		for (int j = 0; j < 3; j++) {
+			ComingleDevice._patterns[patternNumber][i][j] = *(pattern++);
+		}
+	}
+
+}*/
 
 
 // Read input channel
@@ -247,7 +290,7 @@ int Comingle::getInput(int inNumber) {
 	return analogRead(_device.inPins[inNumber]);
 }
 
-int Comingle::flicker(int powerLevel, unsigned int stepTime, unsigned int totalTime) {
+/* int Comingle::flicker(int powerLevel, unsigned int stepTime, unsigned int totalTime) {
 	int pattern[_max_pattern_steps][3];
 	int *send;
 	int timeAccumulator = 0;
@@ -270,12 +313,15 @@ int Comingle::flicker(int powerLevel, unsigned int stepTime, unsigned int totalT
 	}
 	send = &pattern[0][0];
 	return runPattern(send, i);
-}
+}*/
 
 void Comingle::oscillate() {}
 
 void Comingle::setButton(void (*callback)()) {
 	ComingleDevice.onButton = callback;
+	cli();
+  	EICRA = B00000100;	// Set interrupt 1 (digital pin 2) to be active on CHANGE
+  	EIMSK = B00000010;	// activate interrupt 1
 	sei();
 }
 

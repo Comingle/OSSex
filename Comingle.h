@@ -27,13 +27,15 @@ class Comingle {
     int setOutput(int, int);
     int setLED(int, int);
     int runPattern(int*, unsigned int);
-    void setPattern(unsigned int, int*);
+    int runPattern(unsigned int);
+    void setPattern(unsigned int, int*, unsigned int);
     int getInput(int);
     int flicker(int, unsigned int, unsigned int);
     void oscillate();
     void checkPattern();
     void (*onButton)();
     void setButton(void (*callback)());
+    static const int _max_patterns = 10;
     static const int _max_pattern_steps = 32;
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
@@ -54,7 +56,8 @@ class Comingle {
   private:
     int _singlePattern[_max_pattern_steps][3]; // {motornumber, powerlevel, time (millis)}
     size_t _singlePatternLength; 
-    unsigned int _patterns[_max_pattern_steps][3];
+    /* int _patterns[_max_patterns][_max_pattern_steps][3];
+    unsigned int _patternLengths[_max_patterns]; */
     volatile int _i;
     volatile int _tickCount;
     volatile unsigned char *_timer_start_mask;
