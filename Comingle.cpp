@@ -1,4 +1,4 @@
-/* Comingle.cpp v0.1.2 - Library for controlling Arduino-based sex-toys
+/* Comingle.cpp v0.1.3 - Library for controlling Arduino-based sex-toys
  * Written by Craig Durkin/Comingle, May 9, 2014
  * {♥} COMINGLE
 */
@@ -79,11 +79,10 @@ Comingle::Comingle(int deviceId) {
 	}
 	_device.bothWays = false;
 
-	_device.inCount = 4;
+	_device.inCount = 3;
 	_device.inPins[0] = A2;
 	_device.inPins[1] = A3;
 	_device.inPins[2] = A4;
-	_device.inPins[3] = A5;
 
 	_device.isLedMultiColor = false;
 	
@@ -112,15 +111,15 @@ Comingle::Comingle(int deviceId) {
 // Called by the timer interrupt to check if a change needs to be made to the pattern.
 void Comingle::checkPattern() {
 	_tickCount++;
-	if (_tickCount > _singlePattern[_i][2]) {
-  		if (_i == _singlePatternLength) { 
-  			// stop the pattern
-    		_i = 0;
+	if (_tickCount > _currentStep->duration) {
+  		if (_currentStep->nextStep == NULL) { 
+  			// stop the pattern if at last step, reset to beginning.
+    		_currentStep = _singlePattern;
     		*_timer_start_mask = 0x00;
   		} else {
   			// run the next step
-  			_i++;
-  			setOutput(_singlePattern[_i][0], _singlePattern[_i][1]);
+  			_currentStep = _currentStep->nextStep;
+  			setOutput(_currentStep->outNumber, _currentStep->powerLevel);
     		
   		}
   		_tickCount = 0;            //Resets the interrupt counter
@@ -198,33 +197,48 @@ int Comingle::setLED(int ledNumber, int powerLevel) {
 
 // Run preset pattern
 // XXX Add serial (Stream object) feedback from function for diagnostics
-int Comingle::runPattern(int* pattern, unsigned int patternLength) {
-	patternLength = constrain(patternLength, 0, (_max_pattern_steps-1));
+int Comingle::runPattern(int* pattern, size_t patternLength) {
+	ComingleDevice._singlePattern = new struct patternStep;
+    patternStep* patIndex = ComingleDevice._singlePattern;
+
 	for (int i = 0; i < patternLength; i++) {
-		for (int j = 0; j < 3; j++) {
-			ComingleDevice._singlePattern[i][j] = *(pattern++);
+		patIndex->outNumber = *(pattern++);
+		patIndex->powerLevel = *(pattern++);
+		patIndex->duration = *(pattern++);
+
+		if (i < patternLength-1) {
+			patIndex->nextStep = new struct patternStep;
+			patIndex = patIndex->nextStep;
+		} else {
+			patIndex->nextStep = NULL;
 		}
 	}
-	ComingleDevice._singlePatternLength = patternLength;
 	
-	
-	_i = 0;
+	ComingleDevice._currentStep = ComingleDevice._singlePattern;
 	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
 	if (_device.deviceId == 1) {
 		*_timer_interrupt_mask_b = 0x01;
 		*_timer_interrupt_mask_a = 0x00;
  	} else {
-		*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer2 Overflow Interrupt Enable: 00000100   
+		*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer Overflow Interrupt Enable: 00000100   
  	}
  	*_timer_count = _timer_init;			// Reset Timer Count
  	*_timer_interrupt_flag = 0x00;			// Timer INT Flag Reg: Clear Timer Overflow Flag
  	*_timer_start_mask = 0x05;				// Timer PWM disable, prescale / 16: 00000101
  	
-	setOutput(ComingleDevice._singlePattern[_i][0], ComingleDevice._singlePattern[_i][1]); // Run the first step
+	setOutput(ComingleDevice._currentStep->outNumber, ComingleDevice._currentStep->powerLevel); // Run the first step
 
  	while (*_timer_start_mask) {			// Wait until pattern is finished to return
 	}
 	
+	patIndex = ComingleDevice._singlePattern;
+	patternStep* nextStep = patIndex->nextStep;
+	while (patIndex != NULL) {
+		nextStep = patIndex->nextStep;
+		free(patIndex);
+		patIndex = nextStep;
+	}
+
 	return 1;
 }
 
@@ -317,6 +331,7 @@ int Comingle::getInput(int inNumber) {
 
 void Comingle::oscillate() {}
 
+// This code is currently very LilyPad specific
 void Comingle::setButton(void (*callback)()) {
 	ComingleDevice.onButton = callback;
 	cli();

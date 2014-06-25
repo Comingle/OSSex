@@ -1,4 +1,4 @@
-/* Comingle.h v0.1.2 - Library for controlling Arduino-based sex-toys
+/* Comingle.h v0.1.3 - Library for controlling Arduino-based sex-toys
  * Written by Craig Durkin/Comingle, May 9, 2014
  * {♥} COMINGLE
 */
@@ -11,11 +11,6 @@
 #include <avr/interrupt.h> 
 #include <avr/io.h>
 
-#define MAX_OUTPUTS (8);
-#define MAX_LEDS (8);
-#define MAX_INPUTS (4);
-#define MAX_PATTERN_STEPS (16);
-
 // Timer4 is for ATmega32U4/Lilypad usb. Timer2 is for ATmega328P/Arduino Uno. Both values were hand-tuned to arrive at an interrupt
 // time of approximately 1ms.
 #define TIMER4_INIT 25;
@@ -26,7 +21,7 @@ class Comingle {
     Comingle(int);
     int setOutput(int, int);
     int setLED(int, int);
-    int runPattern(int*, unsigned int);
+    int runPattern(int*, size_t);
     int runPattern(unsigned int);
     void setPattern(unsigned int, int*, unsigned int);
     int getInput(int);
@@ -36,7 +31,6 @@ class Comingle {
     void (*onButton)();
     void setButton(void (*callback)());
     static const int _max_patterns = 10;
-    static const int _max_pattern_steps = 32;
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
     static const int _max_inputs = 4;
@@ -53,12 +47,20 @@ class Comingle {
       uint8_t buttonPins[1];
       int deviceId;
     } _device;
+   
   private:
-    int _singlePattern[_max_pattern_steps][3]; // {motornumber, powerlevel, time (millis)}
-    size_t _singlePatternLength; 
-    /* int _patterns[_max_patterns][_max_pattern_steps][3];
-    unsigned int _patternLengths[_max_patterns]; */
-    volatile int _i;
+     struct patternStep {
+      int outNumber;
+      uint8_t powerLevel;
+      unsigned int duration;
+      patternStep *nextStep; 
+    };
+    struct patternList {
+      struct patternStep *first;
+      patternList *nextPattern;
+    } _patterns;
+    patternStep *_singlePattern; 
+    volatile patternStep *_currentStep;
     volatile int _tickCount;
     volatile unsigned char *_timer_start_mask;
     volatile uint16_t *_timer_count;
@@ -67,6 +69,8 @@ class Comingle {
     volatile unsigned char *_timer_interrupt_mask_a;
     unsigned int _timer_init;
 };
+
+
 
 #endif
 
