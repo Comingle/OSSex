@@ -142,7 +142,7 @@ dev.setButton(function);
 Comingle dev(0);
 
 void led() {
-  if (digitalRead(2) == LOW) {
+  if (digitalRead(dev._device.buttonPins[0]) == LOW) {
     dev.setLED(0, 250);
   } else {
     dev.setLED(0,0);

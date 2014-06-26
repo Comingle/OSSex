@@ -340,4 +340,3 @@ void Comingle::setButton(void (*callback)()) {
 	sei();
 }
 
-
