@@ -1,4 +1,4 @@
-/* Comingle.h v0.1.3 - Library for controlling Arduino-based sex-toys
+/* Comingle.h v0.3 - Library for controlling Arduino-based sex-toys
  * Written by Craig Durkin/Comingle, May 9, 2014
  * {♥} COMINGLE
 */
@@ -10,69 +10,91 @@
 #include <Arduino.h>
 #include <avr/interrupt.h> 
 #include <avr/io.h>
+#include "OneButton.h"
+#include <EEPROM.h>
 
-// Timer4 is for ATmega32U4/Lilypad usb. Timer2 is for ATmega328P/Arduino Uno. Both values were hand-tuned to arrive at an interrupt
-// time of approximately 1ms.
+// Timer4 is for ATmega32U4/Lilypad usb and should interrupt every ~1ms. Timer2 is for ATmega328P/Arduino Uno and should interrupt ~1ms.
 #define TIMER4_INIT 25;
 #define TIMER2_INIT 131;
 
+
+
 class Comingle {
   public:
-    Comingle(int);
+    Comingle();
+    void setID(int);
     int setOutput(int, int);
     int setLED(int, int);
     int runPattern(int*, size_t);
     int runPattern(unsigned int);
-    void setPattern(unsigned int, int*, unsigned int);
+    int runPattern(int* (*callback)(int));
     int getInput(int);
-    int flicker(int, unsigned int, unsigned int);
-    void oscillate();
-    void checkPattern();
-    void (*onButton)();
-    void setButton(void (*callback)());
-    static const int _max_patterns = 10;
+    void update();
+    void attachClick(void (*callback)());
+    void attachDoubleClick(void (*callback)());
+    void attachLongPressStart(void (*callback)());
+    void attachLongPressStop(void (*callback)());
+    void attachDuringLongPress(void (*callback)());
+    void setScale(float);
+    void increasePower();
+    void decreasePower();
+    int cyclePattern();
+    int addPattern(int* (*callback)(int));
+
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
     static const int _max_inputs = 4;
-    struct device {
+    struct {
+      int deviceId;                     // device identifier number
       bool bothWays;                    // can outputs go both forward and backward?
       uint8_t outCount;                 // number of outputs (electrodes, motors)
-      uint8_t outPins[_max_outputs];     // array mapping to output pins
-      uint8_t tuoPins[_max_outputs];     // array mapping to reverse output pins;
+      uint8_t outPins[_max_outputs];    // array mapping to output pins
+      uint8_t tuoPins[_max_outputs];    // array mapping to reverse output pins;
       bool isLedMultiColor;             // do we have multicolored LEDs?
       uint8_t ledCount;                 // number of LEDs
-      uint8_t ledPins[_max_leds];        // array mapping to LED output pins
-      uint8_t inCount;               // number of input pins
-      uint8_t inPins[_max_inputs];    // array mapping to input pins
-      uint8_t buttonPins[1];
-      int deviceId;
-    } _device;
+      uint8_t ledPins[_max_leds];       // array mapping to LED output pins
+      uint8_t inCount;                  // number of input pins
+      uint8_t inPins[_max_inputs];      // array mapping to input pins
+      struct {
+        OneButton button;               // button object
+        unsigned int pin;               // onboard pin
+        unsigned int memAddress;        // EEPROM address for storing button state
+      } buttons[1];
+    } device;
    
   private:
-     struct patternStep {
+    struct pattern {
       int outNumber;
       uint8_t powerLevel;
       unsigned int duration;
-      patternStep *nextStep; 
+      pattern *nextStep; 
     };
+    pattern *_singlePattern;
+    volatile pattern *_currentStep;
+
     struct patternList {
-      struct patternStep *first;
+      int* (*patternFunc)(int);
       patternList *nextPattern;
-    } _patterns;
-    patternStep *_singlePattern; 
-    volatile patternStep *_currentStep;
-    volatile int _tickCount;
+    };
+    volatile patternList *_currentPattern;
+    volatile patternList *_first;
+    int* (*_patternCallback)(int);
+
+    float _scale;
+    float _scaleStep;
+    volatile unsigned int _tickCount;
     volatile unsigned char *_timer_start_mask;
     volatile uint16_t *_timer_count;
     volatile unsigned char *_timer_interrupt_flag;
     volatile unsigned char *_timer_interrupt_mask_b;
     volatile unsigned char *_timer_interrupt_mask_a;
     unsigned int _timer_init;
+    volatile bool _running;
+    volatile pattern* _memQueue[2];
+    volatile unsigned int _seq;
 };
 
-
+extern Comingle Device;
 
 #endif
-
-
 

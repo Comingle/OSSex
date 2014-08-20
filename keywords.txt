@@ -2,5 +2,16 @@ Comingle	KEYWORD1
 setOutput	KEYWORD2
 setLED	KEYWORD2
 runPattern	KEYWORD2
-definePattern	KEYWORD2
-readInput	KEYWORD2
+getInput	KEYWORD2
+increasePower	KEYWORD2
+decreasePower	KEYWORD2
+cyclePattern	KEYWORD2
+addPattern	KEYWORD2
+attachClick	KEYWORD2
+attachDoubleClick	KEYWORD2
+attachLongPressStart	KEYWORD2
+attachLongPressStop	KEYWORD2
+attachDuringLongPress	KEYWORD2
+setScale	KEYWORD2
+setID	KEYWORD2
+
