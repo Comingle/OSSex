@@ -133,7 +133,7 @@ dev.duringLongPress(function);
 int m = 255;
 
 void led() {
-  dev.setLED(0, m);
+  Device.setLED(0, m);
   if (m == 255) {
     m = 0;
   } else {
@@ -191,7 +191,7 @@ This would set a double-click to increase the power by 20%, and a button hold-an
 
 You can make your toy run all kinds of motor patterns: make them fade in and out, respond to a sensor, jump around randomly, be on full-blast, however you want.
 
-A motor pattern is just a sequence of **steps**. Each step has 3 parts:
+A motor pattern is a sequence of **steps**. Each step has 3 parts:
 * Which output/motor you want
 * What power level you want (generally 0-255, with 0 being off)
 * How long the step should run (in milliseconds)
@@ -247,9 +247,10 @@ void setup() {
 }
 ```
 
-(If you're not familiar with the **%** operator, it's the **modulo** operator, and it gives you the remainder after division. So `seq % 2` is saying "If `seq` divided by 2 has a remainder, then do **this**. Otherwise do **that**." It's an easy way to check if a number is odd or even, or to do something in an alternating fashion (such as turn a motor on and off repeatedly))
+(If you're not familiar with the **%** operator, it's the **modulo** operator, and it gives you the remainder after division. So `seq % 2` is saying "If `seq` divided by 2 has a remainder, then do **this**. Otherwise do **that**." It's an easy way to check if a number is odd or even, or to do something in an alternating fashion, such as turn a motor on and off repeatedly)
 
 When `runPattern()` is given a function rather than an array, it will run that function every time it needs the next step in the pattern. It provides an increasing sequence number as an argument. So the software will handle it like this:
+
 1. Run `blip(0)`
 2. Get `{-1, 200, 1000}` as a result
 3. Run it (turn all motors on to 200 for 1 second)
@@ -260,6 +261,7 @@ When `runPattern()` is given a function rather than an array, it will run that f
 8. Get `{-1, 200, 1000}` as a result
 9. Run it (turn all motors on to 200 for 1 second)
 10. Run `blip(3)`
+
 ... (run forever, or until `blip()` returns NULL)
 
 Making function arrays for something simple like turning a motor on and off for 1 second is not necessarily the easiest way, but becomes necessary for more complicated patterns. Suppose we wanted to turn all the motors on and ramp their intensity up to max (255), then ramp back down to 0. We could do it like this:
@@ -278,9 +280,9 @@ int* fade(int seq) {
   // normalize sequence
   seq %= 102;
     
-  if (seq <= 51) {
+  if (seq <= 51) { // ascending
     step[1] = 5 * seq;
-  } else {
+  } else { // descending
     step[1] = 255 - 5*(seq-51);
   }
   return step;
@@ -288,6 +290,19 @@ int* fade(int seq) {
 ```
 
 Rather than creating an array that looks like: `{-1, 0, 50}, {-1, 5, 50}, {-1, 10, 50}, {-1, 15, 50} ...` the function will do it for us. We just use our `seq` sequence number to know where we are in the pattern.
+
+You could also get even simpler, and use a periodic function like `sin()`, `cos()`, `tan()`, etc:
+
+```arduino
+int *fadeCos(int seq) {
+  step[0] = -1;
+  step[2] = 50;
+  step[1] = round(127 * cos((seq / (8*PI))-PI) + 127);
+  return step;
+}
+```
+
+Where did `127 * cos((seq / (8*PI))-PI) + 127` come from? From progressively changing `cos(x)` until it gave the right behavior. One of the easiest ways to do this is by typing "cos(x)" in to Google, viewing the graph of the function and modifying it until it looks right (starts at 0, peaks at 255ish, has a long enough period that it smoothly transitions power levels).
 
 Pattern functions make experimentation a lot easier. You could change `step[2] = 50;` from 50 to 100 and it affects all the steps without having to rewrite every step of a giant array. You could also print the output of your function to the serial console to make sure it's behaving appropriately:
 
@@ -301,6 +316,7 @@ int m = 0;
 void loop() {
   Serial.println(fade(m));
   m++;
+  delay(300);
 }
 ```
 
