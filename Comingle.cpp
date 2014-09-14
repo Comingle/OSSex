@@ -82,10 +82,9 @@ void Comingle::setID(int deviceId) {
 	}
 	device.bothWays = false;
 
-	device.inCount = 3;
-	device.inPins[0] = A2;
-	device.inPins[1] = A3;
-	device.inPins[2] = A4;
+	device.inCount = 2;
+	device.inPins[0] = A2; // D+
+	device.inPins[1] = A3; // D-
 
 	device.isLedMultiColor = false;
     

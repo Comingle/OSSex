@@ -11,7 +11,7 @@
 #include <avr/interrupt.h> 
 #include <avr/io.h>
 #include "OneButton.h"
-#include <EEPROM.h>
+
 
 // Timer4 is for ATmega32U4/Lilypad usb and should interrupt every ~1ms. Timer2 is for ATmega328P/Arduino Uno and should interrupt ~1ms.
 #define TIMER4_INIT 25;
