@@ -4,7 +4,7 @@ This is an Arduino library for interacting with Comingle open-source sex toys.
 
 # Basics
 
-An object named `Device` is available when you load the library. You can interact with your toy through this object. 
+An object named `Toy` is available when you load the library. You can interact with your toy through this object. 
 
 ## Set up your toy
 
@@ -13,7 +13,7 @@ You need to tell the library which device you're using. Use `setID(ID)` to do so
 #include <Comingle.h>
 
 void setup() {
-  Device.setID(0);
+  Toy.setID(0);
 }
 
 void loop() {
@@ -26,7 +26,7 @@ If `ID` is 1, it sets up a device based on an Arduino Uno / Atmega328. Any other
 
 ## Turn a motor (output) on/off
 ```arduino
-Device.setOutput(int outNumber, int powerLevel);
+Toy.setOutput(int outNumber, int powerLevel);
 ```
 
 **-1** can be given as an `outNumber` as shorthand for "set all outputs to `powerLevel`". Otherwise, the output will be set according to the following formula: 
@@ -54,7 +54,7 @@ Below is a table of how example `outNumber` arguments would work in a 3-output (
 
 ## Set an LED to a particular power level
 ```arduino
-Device.setLED(int ledNumber, int powerLevel);
+Toy.setLED(int ledNumber, int powerLevel);
 ```
 
 `setLED()` sets a given `ledNumber` to a given `powerLevel`. This function does not yet support the **-1** shorthand to apply `powerLevel` to all LEDs. It constrains `powerLevel` to be from 0 to 255 inclusive, with `powerLevel` of 0 turning the LED off.
@@ -63,19 +63,19 @@ Device.setLED(int ledNumber, int powerLevel);
 
 ## Read an input
 ```arduino
-Device.getInput(int inNumber);
+Toy.getInput(int inNumber);
 ```
 
 `getInput()` is a wrapper for `analogRead()`. Since the inputs are often not broken out in numerical order, `getInput()` provides an easy way to "read input 1, now read input 2", etc. without having to remember the pin mappings of a given device.
 
 ## Run an output pattern
 ```arduino
-Device.runPattern(int* pattern, unsigned int patternLength);
+Toy.runPattern(int* pattern, unsigned int patternLength);
 ```
 
 OR
 ```arduino
-Device.runPattern(int* function(int));
+Toy.runPattern(int* function(int));
 ```
 
 `runPattern()` allows you to define a sequence of setting the outputs/motors to given power levels for given time durations. See the **Getting Creative** section for more in-depth information on how to define your own motor patterns.
@@ -89,7 +89,7 @@ Serial.println(dev.device.outCount);
 ...
 ```
 
-The `Device` object has a `device` struct that can be accessed to determine the device's capabilities. The struct's contents are currently:
+The `Toy` object has a `device` struct that can be accessed to determine the device's capabilities. The struct's contents are currently:
 
 ```
 struct {
@@ -133,7 +133,7 @@ dev.duringLongPress(function);
 int m = 255;
 
 void led() {
-  Device.setLED(0, m);
+  Toy.setLED(0, m);
   if (m == 255) {
     m = 0;
   } else {
@@ -142,8 +142,8 @@ void led() {
 }
 
 void setup() {
-  Device.setID(0);
-  Device.attachClick(led);
+  Toy.setID(0);
+  Toy.attachClick(led);
 }
 
 void loop() {
@@ -167,19 +167,19 @@ On a Tonga, you can double-click the button to increase the power, or hold and r
 #include <Comingle.h>
 
 void setup() {
-  Device.setID(0);
-  Device.setScale(0.2);
-  Device.attachDoubleClick(doubleClick);
-  Device.attachLongPressStart(longPress);
+  Toy.setID(0);
+  Toy.setScale(0.2);
+  Toy.attachDoubleClick(doubleClick);
+  Toy.attachLongPressStart(longPress);
   ...
 }
 
 void doubleClick() {
-  Device.increasePower();
+  Toy.increasePower();
 }
 
 void longPress() {
-  Device.decreasePower();
+  Toy.decreasePower();
 }
 
 ...
@@ -211,11 +211,11 @@ int pattern[][3] = {
 unsigned int patternSize = sizeof(pattern) / sizeof(int) / 3;
 
 void setup() {
-  Device.setID(0);
+  Toy.setID(0);
 }
 
 void loop() {
-  Device.runPattern(*pattern, patternSize);
+  Toy.runPattern(*pattern, patternSize);
 }
 ```
 
@@ -243,7 +243,7 @@ int* blip(int seq) {
 }
 
 void setup() {
-  Device.runPattern(blip);
+  Toy.runPattern(blip);
 }
 ```
 
@@ -369,18 +369,18 @@ If you wish to cycle between various patterns, there are two functions provided 
 int step[3];
 
 void setup() {
-  Device.setID(0);
-  Device.addPattern(fade);
-  Device.addPattern(blip);
+  Toy.setID(0);
+  Toy.addPattern(fade);
+  Toy.addPattern(blip);
 
-  Device.attachClick(click);
+  Toy.attachClick(click);
 }
 
 void loop() {
 }
 
 void click() {
-  Device.cyclePattern();
+  Toy.cyclePattern();
 }
 
 int* fade(int seq) {
