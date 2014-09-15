@@ -6,7 +6,7 @@ This is an Arduino library for interacting with Comingle open-source sex toys.
 
 An object named `Toy` is available when you load the library. You can interact with your toy through this object. 
 
-## <a id="setup">Set up your toy</a>
+## Set up your toy
 
 You need to tell the library which device you're using. Use `setID(ID)` to do so:
 ```arduino
