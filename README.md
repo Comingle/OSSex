@@ -22,7 +22,7 @@ void loop() {
 
 ```
 
-If `ID` is 1, it sets up a device based on an Arduino Uno / Atmega328. Any other number will set up a device for a LilyPad USB / Atmega32U4. Almost all toys will use an `ID` of something other than 1.
+If `ID` is 1, it sets up a device based on an Arduino Uno / Atmega328. Any other number will set up a device for a LilyPad USB / Atmega32U4. Almost all toys will use an `ID` of 0.
 
 ## Turn a motor (output) on/off
 ```arduino
