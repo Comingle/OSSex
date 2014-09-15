@@ -12,7 +12,6 @@
 #include <avr/io.h>
 #include "OneButton.h"
 
-
 // Timer4 is for ATmega32U4/Lilypad usb and should interrupt every ~1ms. Timer2 is for ATmega328P/Arduino Uno and should interrupt ~1ms.
 #define TIMER4_INIT 25;
 #define TIMER2_INIT 131;
@@ -94,7 +93,7 @@ class Comingle {
     volatile unsigned int _seq;
 };
 
-extern Comingle Device;
+extern Comingle Toy;
 
 #endif
 

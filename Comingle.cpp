@@ -13,17 +13,17 @@
 // Set up the interrupt to trigger the update() function.
 #if defined(__AVR_ATmega328P__) // Uno
 ISR(TIMER2_OVF_vect) {
-	Device.update();
+	Toy.update();
 };
 #elif defined(__AVR_ATmega32U4__) // Lilypad USB
 ISR(TIMER4_OVF_vect) {
-	Device.update();
+	Toy.update();
 };
 #endif
 
 // Pre-instantiate with empty constructor. Pre-instantiation is necessary for the timer2/timer4 interrupt to work. Empty constructor because
 // the user defines which device they're using elsewhere (in setID());
-Comingle Device = Comingle();
+Comingle Toy = Comingle();
 Comingle::Comingle() {
 }
 
