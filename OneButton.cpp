@@ -47,6 +47,7 @@ OneButton::OneButton(int pin, int activeLow)
 
 } // OneButton
 
+// argument-free constructor so we can set pin/activelow later depending on device
 OneButton::OneButton() {
 
   _clickTicks = 450;        // number of millisec that have to pass by before a click is detected.
@@ -79,6 +80,8 @@ void OneButton::setActiveLow(int activeLow) {
     _buttonReleased = LOW;
     _buttonPressed = HIGH;
   } // if
+  _db_buttonState      = _buttonReleased;  // the current reading from the input pin, assume its in rest during setup
+  _db_lastButtonState  = _db_buttonState;  // the previous reading from the input pin, no previous reading so use current
 }
 
 // explicitly set the number of millisec that have to pass by before a click is detected.
