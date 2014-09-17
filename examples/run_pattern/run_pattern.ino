@@ -3,9 +3,8 @@
  * {♥} COMINGLE
 */
 
-#include <Comingle.h>
+#include <OSSex.h>
 
-Comingle dev(0);
 int pattern[][3] = {
     {-1, 200, 1000},
     {-1, 0, 1000},
@@ -13,8 +12,9 @@ int pattern[][3] = {
 unsigned int patternSize = sizeof(pattern) / sizeof(int) / 3;
 
 void setup() {
+  Toy.setID(0);
 }
 
 void loop() {
-  dev.runPattern(*pattern, patternSize);
+  Toy.runPattern(*pattern, patternSize);
 }

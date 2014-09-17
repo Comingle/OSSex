@@ -3,21 +3,18 @@
  * {♥} COMINGLE
 */
 
-#include <Comingle.h>
-
-Comingle dev(0);
-
-void led() {
-  if (digitalRead(2) == LOW) {
-    dev.setLED(0, 250);
-  } else {
-    dev.setLED(0,0);
-  }
-}
+#include <OSSex.h>
 
 void setup() {
-  dev.setButton(led);
+  Toy.setID(0);
+  Toy.attachClick(led);
 }
- 
+
 void loop() {
+}
+
+byte state = 255;
+void led() {
+  Toy.setLED(0, state);
+  state = abs(state - 255);
 }
