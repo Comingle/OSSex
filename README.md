@@ -1,4 +1,4 @@
-# OSSex
+# OSSex v0.3
 
 This is an Arduino library for interacting with Comingle open-source sex toys.
 
