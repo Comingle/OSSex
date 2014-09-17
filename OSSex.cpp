@@ -78,7 +78,6 @@ void OSSex::setID(int deviceId) {
 		device.buttons[0].button.setPin(2);
 		device.buttons[0].button.setActiveLow(true);	
 		device.buttons[0].pin = 2;	
-		pinMode(2, INPUT_PULLUP);
 	}
 	device.bothWays = false;
 
@@ -101,6 +100,7 @@ void OSSex::setID(int deviceId) {
 		pinMode(device.ledPins[i], OUTPUT);
 	}
 
+
 	// Start the interrupt timer (timer2/timer4)
 	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
 	if (device.deviceId == 1) {
@@ -122,8 +122,7 @@ void OSSex::setID(int deviceId) {
 
 // Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status;
 void OSSex::update() {
-	device.buttons[0].button.tick();
-
+	device.buttons[0].button.tick(); 
 	if (_running) {
 		_tickCount++;
 		if (_tickCount > _currentStep->duration) {
@@ -343,16 +342,20 @@ int OSSex::cyclePattern() {
 	_running = false;
 	_scale = 1.0;
 
-	if (_currentPattern->nextPattern == NULL) {
-		_currentPattern = _first;
+    if (_currentPattern) {
+		if (_currentPattern->nextPattern == NULL) {
+			_currentPattern = _first;
+		} else {
+			_currentPattern = _currentPattern->nextPattern;
+		}
+		free((void*)_memQueue[0]);
+		free((void*)_memQueue[1]);
+		_memQueue[0] = _memQueue[1] = NULL;
+		runPattern(_currentPattern->patternFunc);
+		return 1;
 	} else {
-		_currentPattern = _currentPattern->nextPattern;
+		return -1;
 	}
-	free((void*)_memQueue[0]);
-	free((void*)_memQueue[1]);
-	_memQueue[0] = _memQueue[1] = NULL;
-	runPattern(_currentPattern->patternFunc);
-	return 1;
 }
 
 int OSSex::addPattern(int* (*patternFunc)(int)) {
