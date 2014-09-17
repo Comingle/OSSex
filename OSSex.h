@@ -18,7 +18,7 @@
 
 
 
-class Comingle {
+class OSSex {
   public:
     Comingle();
     void setID(int);
@@ -93,7 +93,7 @@ class Comingle {
     volatile unsigned int _seq;
 };
 
-extern Comingle Toy;
+extern OSSex Toy;
 
 #endif
 

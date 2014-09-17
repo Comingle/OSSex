@@ -1,11 +1,11 @@
-/* Comingle.cpp v0.3 - Library for controlling Arduino-based sex-toys
+/* OSSex.cpp v0.3 - Library for controlling Arduino-based sex-toys
  * Written by Craig Durkin/Comingle, May 9, 2014
  * {♥} COMINGLE
 */
 
 
 #include <Arduino.h>
-#include <Comingle.h>
+#include <OSSex.h>
 #include <avr/interrupt.h> 
 #include <avr/io.h>
 #include "OneButton.h"
@@ -23,12 +23,12 @@ ISR(TIMER4_OVF_vect) {
 
 // Pre-instantiate with empty constructor. Pre-instantiation is necessary for the timer2/timer4 interrupt to work. Empty constructor because
 // the user defines which device they're using elsewhere (in setID());
-Comingle Toy = Comingle();
-Comingle::Comingle() {
+OSSex Toy = OSSex();
+OSSex::OSSex() {
 }
 
 // the real constructor. give it a device ID and it will set up your device's pins and timers.
-void Comingle::setID(int deviceId) {
+void OSSex::setID(int deviceId) {
 #if defined(__AVR_ATmega328P__)
 	_timer_start_mask = &TCCR2B;
 	_timer_count = &TCNT2;
@@ -121,7 +121,7 @@ void Comingle::setID(int deviceId) {
 
 
 // Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status;
-void Comingle::update() {
+void OSSex::update() {
 	device.buttons[0].button.tick();
 
 	if (_running) {
@@ -176,7 +176,7 @@ void Comingle::update() {
 // Negative powerLevel values are coerced to 0 in devices that aren't bidirectional.
 // powerLevel of 0 turns the output off. Values greater than +/-255 get coerced to +/-255.
 // XXX Add serial (Stream object) feedback from function for diagnostics
-int Comingle::setOutput(int outNumber, int powerLevel) {
+int OSSex::setOutput(int outNumber, int powerLevel) {
 	int iterations = 1, scaledPower;
 	// set all outputs, starting at 0.
 	if (outNumber == -1) {
@@ -218,8 +218,8 @@ int Comingle::setOutput(int outNumber, int powerLevel) {
 // Turn an LED on or off. lightLevel can be a value from 0-255. 0 turns the LED off.
 // Accept html color codes (both "#50a6c2" and "midnight blue"?)
 // Add serial (Stream object) feedback from function for diagnostics
-//void Comingle::setLED(unsigned int lightLevel, ledNumber, colorCode) {}
-int Comingle::setLED(int ledNumber, int powerLevel) {
+//void OSSex::setLED(unsigned int lightLevel, ledNumber, colorCode) {}
+int OSSex::setLED(int ledNumber, int powerLevel) {
 	int scaledPower;
 	if (!device.ledCount) {
 		return -1;
@@ -235,7 +235,7 @@ int Comingle::setLED(int ledNumber, int powerLevel) {
 
 // Run preset pattern from an array of {outputNumber, powerLevel, duration} steps
 // This function will not return until the pattern is finished running.
-int Comingle::runPattern(int* patSteps, size_t patternLength) {
+int OSSex::runPattern(int* patSteps, size_t patternLength) {
 	if (!_running) {
 		_singlePattern = new struct pattern;
 		if (!_singlePattern) {
@@ -280,12 +280,12 @@ int Comingle::runPattern(int* patSteps, size_t patternLength) {
 
 // Run a pattern from a callback function. The callback should return a pointer to a 3-item array: [outputNumber, powerLevel, duration]
 // This function will return before the pattern is finished running since many functions will run indefinitely and block all other processing.
-int Comingle::runPattern(int* (*callback)(int)) {
+int OSSex::runPattern(int* (*callback)(int)) {
 	setOutput(-1,0);
 	_seq = 0;
 
 	// get the first two steps of the sequence. 
-	// some patterns with short first steps won't run well
+	// if we don't, some patterns with short first steps won't run well
 	// since the next step is queued while the current one is running
 	_patternCallback = callback;
 	int *callbackStep = _patternCallback(_seq);
@@ -327,19 +327,19 @@ int Comingle::runPattern(int* (*callback)(int)) {
 
 }
 
-void Comingle::setScale(float step) {
+void OSSex::setScale(float step) {
 	_scaleStep = step;
 }
 
-void Comingle::increasePower() {
+void OSSex::increasePower() {
 	_scale *= (1.0 + _scaleStep);
 }
 
-void Comingle::decreasePower() {
+void OSSex::decreasePower() {
 	_scale *= (1.0 - _scaleStep);
 }
 
-int Comingle::cyclePattern() {
+int OSSex::cyclePattern() {
 	_running = false;
 	_scale = 1.0;
 
@@ -355,7 +355,7 @@ int Comingle::cyclePattern() {
 	return 1;
 }
 
-int Comingle::addPattern(int* (*patternFunc)(int)) {
+int OSSex::addPattern(int* (*patternFunc)(int)) {
 	if (_first == NULL) {
 		_first = new struct patternList;
 		if (!_first) {
@@ -383,28 +383,28 @@ int Comingle::addPattern(int* (*patternFunc)(int)) {
 }
 
 // Read input channel
-int Comingle::getInput(int inNumber) {
+int OSSex::getInput(int inNumber) {
 	inNumber = abs(inNumber) % device.inCount;
 	return analogRead(device.inPins[inNumber]);
 }
 
-void Comingle::attachClick(void (*callback)()) {
+void OSSex::attachClick(void (*callback)()) {
 	device.buttons[0].button.attachClick(callback);
 }
 
-void Comingle::attachDoubleClick(void (*callback)()) {
+void OSSex::attachDoubleClick(void (*callback)()) {
 	device.buttons[0].button.attachDoubleClick(callback);
 }
 
-void Comingle::attachLongPressStart(void (*callback)()) {
+void OSSex::attachLongPressStart(void (*callback)()) {
 	device.buttons[0].button.attachLongPressStart(callback);
 }
 
-void Comingle::attachLongPressStop(void (*callback)()) {
+void OSSex::attachLongPressStop(void (*callback)()) {
 	device.buttons[0].button.attachLongPressStop(callback);
 }
 
-void Comingle::attachDuringLongPress(void (*callback)()) {
+void OSSex::attachDuringLongPress(void (*callback)()) {
 	device.buttons[0].button.attachDuringLongPress(callback);
 }
 
