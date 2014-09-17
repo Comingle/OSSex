@@ -133,6 +133,13 @@ void Comingle::update() {
 	  		} else {
 	  			// run the next step
 	  			_currentStep = _currentStep->nextStep;
+
+	  			// if we're running a large pre-set pattern, we're supplied all the steps at once so we can't store
+	  			// all our allocated memory in _memQueue (since it only holds 2 elements). this !_patternCallback 
+	  			// check ensures that memory still gets freed eventually in those situations.
+	  			if (!_patternCallback) {
+	  				_memQueue[1] = _currentStep;
+	  			}
 	  			setOutput(_currentStep->outNumber, _currentStep->powerLevel);
 	  		}
 	  		free((void*)_memQueue[0]);
@@ -230,6 +237,10 @@ int Comingle::setLED(int ledNumber, int powerLevel) {
 // This function will not return until the pattern is finished running.
 int Comingle::runPattern(int* patSteps, size_t patternLength) {
 	_singlePattern = new struct pattern;
+	if (!_singlePattern) {
+			return -1;
+		}
+	_memQueue[0] = _singlePattern;
 	_singlePattern->nextStep = NULL;
     pattern* patIndex = _singlePattern;
     pattern* nextStep;
