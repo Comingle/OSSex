@@ -268,7 +268,7 @@ int Comingle::runPattern(int* patSteps, size_t patternLength) {
 			_running = true;
 
 			// Wait until pattern is finished to return
-				while (_running) {}		
+			while (_running) {}		
 			return 1;
 		} else {
 			return 0;
