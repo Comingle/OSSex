@@ -1,4 +1,4 @@
-# ComingleArduino
+# OSSex
 
 This is an Arduino library for interacting with Comingle open-source sex toys.
 
@@ -10,7 +10,7 @@ An object named `Toy` is available when you load the library. You can interact w
 
 You need to tell the library which device you're using. Use `setID(ID)` to do so:
 ```arduino
-#include <Comingle.h>
+#include <OSSex.h>
 
 void setup() {
   Toy.setID(0);
@@ -111,24 +111,24 @@ struct {
 } device;
 ```
 
-This struct is defined in Comingle.h, along with the `_max_outputs`, `_max_leds`, `_max_inputs` and a few other constants.
+This struct is defined in OSSex.h, along with the `_max_outputs`, `_max_leds`, `_max_inputs` and a few other constants.
 
 ## Control the button behavior
 
 Comingle devices use the OneButton Arduino library to allow single click, double click, and long press events on the device's button(s).
 
 ```arduino
-dev.attachClick(function);
-dev.attachDoubleClick(function);
-dev.attachLongPressStart(function);
-dev.attachLongPressStop(function);
-dev.duringLongPress(function);
+Toy.attachClick(function);
+Toy.attachDoubleClick(function);
+Toy.attachLongPressStart(function);
+Toy.attachLongPressStop(function);
+Toy.duringLongPress(function);
 ```
 
 `attachClick()` will execute `function` whenever the button is pressed. On LilyPad-based devices, the button is attached to digital pin 2 and will read LOW when the button is pressed. 
 
 ```arduino
-#include <Comingle.h>
+#include <OSSex.h>
 
 int m = 255;
 
@@ -164,7 +164,7 @@ You can increase or decrease the power of a pattern while it's running to tune i
 On a Tonga, you can double-click the button to increase the power, or hold and release the button to decrease the power. `setScale()` lets you define how much the power changes with each double-click or button-hold:
 
 ```arduino
-#include <Comingle.h>
+#include <OSSex.h>
 
 void setup() {
   Toy.setID(0);
@@ -202,7 +202,7 @@ You can run patterns a couple of different ways. Both use the `runPattern()` fun
 
 * You can make an **array**:
 ```arduino
-#include <Comingle.h>
+#include <OSSex.h>
 
 int pattern[][3] = {
     {-1, 200, 1000},
@@ -364,7 +364,7 @@ If you wish to cycle between various patterns, there are two functions provided 
 `addPattern()` will add your function to an internal list of available pattern functions. `cyclePattern()` will then switch between them:
 
 ```arduino
-#include <Comingle.h>
+#include <OSSex.h>
 
 int step[3];
 

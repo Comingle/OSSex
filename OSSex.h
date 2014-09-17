@@ -4,8 +4,8 @@
 */
 
 
-#ifndef Comingle_h
-#define Comingle_h
+#ifndef OSSex_h
+#define OSSex_h
 
 #include <Arduino.h>
 #include <avr/interrupt.h> 
@@ -20,7 +20,7 @@
 
 class OSSex {
   public:
-    Comingle();
+    OSSex();
     void setID(int);
     int setOutput(int, int);
     int setLED(int, int);
