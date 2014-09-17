@@ -273,6 +273,8 @@ int Comingle::runPattern(int* patSteps, size_t patternLength) {
 		} else {
 			return 0;
 		}
+	} else {
+		return -1;
 	}
 }
 
