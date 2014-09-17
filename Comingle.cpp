@@ -236,41 +236,43 @@ int Comingle::setLED(int ledNumber, int powerLevel) {
 // Run preset pattern from an array of {outputNumber, powerLevel, duration} steps
 // This function will not return until the pattern is finished running.
 int Comingle::runPattern(int* patSteps, size_t patternLength) {
-	_singlePattern = new struct pattern;
-	if (!_singlePattern) {
-			return -1;
-		}
-	_memQueue[0] = _singlePattern;
-	_singlePattern->nextStep = NULL;
-    pattern* patIndex = _singlePattern;
-    pattern* nextStep;
-
-    if (patternLength) {
-		for (int i = 0; i < patternLength; i++) {
-			patIndex->outNumber = *(patSteps++);
-			patIndex->powerLevel = *(patSteps++);
-			patIndex->duration = *(patSteps++);
-			if (i < patternLength-1) {
-				patIndex->nextStep = new struct pattern;
-				if (!patIndex->nextStep) {
-					return -1;
-				}
-				patIndex = patIndex->nextStep;
-			} else {
-				patIndex->nextStep = NULL;
+	if (!_running) {
+		_singlePattern = new struct pattern;
+		if (!_singlePattern) {
+				return -1;
 			}
+		_memQueue[0] = _singlePattern;
+		_singlePattern->nextStep = NULL;
+		pattern* patIndex = _singlePattern;
+		pattern* nextStep;
+
+		if (patternLength) {
+			for (int i = 0; i < patternLength; i++) {
+				patIndex->outNumber = *(patSteps++);
+				patIndex->powerLevel = *(patSteps++);
+				patIndex->duration = *(patSteps++);
+				if (i < patternLength-1) {
+					patIndex->nextStep = new struct pattern;
+					if (!patIndex->nextStep) {
+						return -1;
+					}
+					patIndex = patIndex->nextStep;
+				} else {
+					patIndex->nextStep = NULL;
+				}
+			}
+
+			// position _currentStep at start of pattern, start the first step, and set things in motion
+			_currentStep = _singlePattern;
+			setOutput(_currentStep->outNumber, _currentStep->powerLevel);
+			_running = true;
+
+			// Wait until pattern is finished to return
+				while (_running) {}		
+			return 1;
+		} else {
+			return 0;
 		}
-
-		// position _currentStep at start of pattern, start the first step, and set things in motion
-		_currentStep = _singlePattern;
-		setOutput(_currentStep->outNumber, _currentStep->powerLevel);
-		_running = true;
-
-		// Wait until pattern is finished to return
- 		while (_running) {}		
-		return 1;
-	} else {
-		return 0;
 	}
 }
 
