@@ -285,7 +285,8 @@ int Comingle::runPattern(int* (*callback)(int)) {
 	_seq = 0;
 
 	// get the first two steps of the sequence. 
-	// some patterns with short first steps won't run otherwise as there isn't time to queue the 2nd step
+	// some patterns with short first steps won't run well
+	// since the next step is queued while the current one is running
 	_patternCallback = callback;
 	int *callbackStep = _patternCallback(_seq);
 	if (callbackStep != NULL) {
