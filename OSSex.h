@@ -24,9 +24,11 @@ class OSSex {
     void setID(int);
     int setOutput(int, int);
     int setLED(int, int);
-    int runPattern(int*, size_t);
+    int runShortPattern(int*, size_t);
     int runPattern(unsigned int);
     int runPattern(int* (*callback)(int));
+    int cyclePattern();
+    int addPattern(int* (*callback)(int));
     int getInput(int);
     void update();
     void attachClick(void (*callback)());
@@ -37,8 +39,7 @@ class OSSex {
     void setScale(float);
     void increasePower();
     void decreasePower();
-    int cyclePattern();
-    int addPattern(int* (*callback)(int));
+    void stop();
 
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
@@ -91,6 +92,7 @@ class OSSex {
     volatile bool _running;
     volatile pattern* _memQueue[2];
     volatile unsigned int _seq;
+
 };
 
 extern OSSex Toy;

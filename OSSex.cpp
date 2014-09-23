@@ -24,8 +24,7 @@ ISR(TIMER4_OVF_vect) {
 // Pre-instantiate with empty constructor. Pre-instantiation is necessary for the timer2/timer4 interrupt to work. Empty constructor because
 // the user defines which device they're using elsewhere (in setID());
 OSSex Toy = OSSex();
-OSSex::OSSex() {
-}
+OSSex::OSSex() {}
 
 // the real constructor. give it a device ID and it will set up your device's pins and timers.
 void OSSex::setID(int deviceId) {
@@ -234,55 +233,54 @@ int OSSex::setLED(int ledNumber, int powerLevel) {
 
 // Run preset pattern from an array of {outputNumber, powerLevel, duration} steps
 // This function will not return until the pattern is finished running.
-int OSSex::runPattern(int* patSteps, size_t patternLength) {
-	if (!_running) {
+int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
+	stop();
+	
+	if (patternLength) {
 		_singlePattern = new struct pattern;
 		if (!_singlePattern) {
-				return -1;
-			}
+			return -1;
+		}
 		_memQueue[0] = _singlePattern;
+
 		_singlePattern->nextStep = NULL;
 		pattern* patIndex = _singlePattern;
-		pattern* nextStep;
 
-		if (patternLength) {
-			for (int i = 0; i < patternLength; i++) {
-				patIndex->outNumber = *(patSteps++);
-				patIndex->powerLevel = *(patSteps++);
-				patIndex->duration = *(patSteps++);
-				if (i < patternLength-1) {
-					patIndex->nextStep = new struct pattern;
-					if (!patIndex->nextStep) {
-						return -1;
-					}
-					patIndex = patIndex->nextStep;
-				} else {
-					patIndex->nextStep = NULL;
+		for (int i = 0; i < patternLength; i++) {
+			patIndex->outNumber = *(patSteps++);
+			patIndex->powerLevel = *(patSteps++);
+			patIndex->duration = *(patSteps++);
+			if (i < patternLength-1) {
+				patIndex->nextStep = new struct pattern;
+				if (!patIndex->nextStep) {
+					return -1;
 				}
+				patIndex = patIndex->nextStep;
+			} else {
+				patIndex->nextStep = NULL;
 			}
-
-			// position _currentStep at start of pattern, start the first step, and set things in motion
-			_currentStep = _singlePattern;
-			setOutput(_currentStep->outNumber, _currentStep->powerLevel);
-			_running = true;
-
-			// Wait until pattern is finished to return
-			while (_running) {}		
-			return 1;
-		} else {
-			return 0;
 		}
+
+		// position _currentStep at start of pattern, start the first step, and set things in motion
+		_currentStep = _singlePattern;
+		setOutput(_currentStep->outNumber, _currentStep->powerLevel);
+		_running = true;
+
+		// Wait until pattern is finished to return
+		while (_running) {}		
+		return 1;
 	} else {
-		return -1;
+		return 0;
 	}
+
 }
+
 
 // Run a pattern from a callback function. The callback should return a pointer to a 3-item array: [outputNumber, powerLevel, duration]
 // This function will return before the pattern is finished running since many functions will run indefinitely and block all other processing.
 int OSSex::runPattern(int* (*callback)(int)) {
-	setOutput(-1,0);
-	_seq = 0;
-
+	stop();
+	
 	// get the first two steps of the sequence. 
 	// if we don't, some patterns with short first steps won't run well
 	// since the next step is queued while the current one is running
@@ -326,6 +324,19 @@ int OSSex::runPattern(int* (*callback)(int)) {
 
 }
 
+// run a specific pattern from the queue
+int OSSex::runPattern(unsigned int pos) {
+	if (_currentPattern) {
+		_currentPattern = _first;
+		for (int i = 0; i < pos; i++) {
+			_currentPattern = _currentPattern->nextPattern;
+		}
+		return runPattern(_currentPattern->patternFunc);
+	} else {
+		return -1;
+	}
+}
+
 void OSSex::setScale(float step) {
 	_scaleStep = step;
 }
@@ -339,18 +350,12 @@ void OSSex::decreasePower() {
 }
 
 int OSSex::cyclePattern() {
-	_running = false;
-	_scale = 1.0;
-
     if (_currentPattern) {
 		if (_currentPattern->nextPattern == NULL) {
 			_currentPattern = _first;
 		} else {
 			_currentPattern = _currentPattern->nextPattern;
 		}
-		free((void*)_memQueue[0]);
-		free((void*)_memQueue[1]);
-		_memQueue[0] = _memQueue[1] = NULL;
 		runPattern(_currentPattern->patternFunc);
 		return 1;
 	} else {
@@ -383,6 +388,23 @@ int OSSex::addPattern(int* (*patternFunc)(int)) {
 		_currentPattern = iterator;
 		return 1;
 	}
+}
+
+// stop all the motors and patterns, reset to beginning. this could be better written.
+void OSSex::stop() {
+	_running = false;
+	_scale = 1.0;
+	_seq = 0;
+	setOutput(-1, 0);
+	_patternCallback = NULL;
+	volatile pattern* current = _memQueue[0];
+	pattern* future = current->nextStep;
+	while (current != NULL) {
+		free((void *)current);
+		current = future;
+		future = future->nextStep;
+	}
+	_memQueue[0] = _memQueue[1] = NULL;
 }
 
 // Read input channel

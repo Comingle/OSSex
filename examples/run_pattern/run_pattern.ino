@@ -1,4 +1,4 @@
-/* Runs a simple Pattern
+/* Runs a simple pattern
  * Example by Craig Durkin/Comingle, May 9, 2014
  * {♥} COMINGLE
 */
@@ -16,5 +16,5 @@ void setup() {
 }
 
 void loop() {
-  Toy.runPattern(*pattern, patternSize);
+  Toy.runShortPattern(*pattern, patternSize);
 }
