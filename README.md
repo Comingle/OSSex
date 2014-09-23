@@ -74,7 +74,7 @@ Toy.getInput(int inNumber);
 
 ## Run an output pattern
 ```arduino
-Toy.runPattern(int* pattern, unsigned int patternLength);
+Toy.runShortPattern(int* pattern, unsigned int patternLength);
 ```
 
 OR
@@ -82,9 +82,9 @@ OR
 Toy.runPattern(int* function(int));
 ```
 
-`runPattern()` allows you to define a sequence of setting the outputs/motors to given power levels for given time durations. See the **Getting Creative** section for more in-depth information on how to define your own motor patterns.
+`runShortPattern()` and `runPattern()` allow you to define a sequence of setting the outputs/motors to given power levels for given time durations. See the **Getting Creative** section for more in-depth information on how to define your own motor patterns.
 
-`runPattern()` returns 1 on success, and -1 if it cannot allocate enough memory for your pattern.
+`runShortPattern()` and `runPattern()` return 1 on success and -1 if it cannot allocate enough memory for your pattern. It will return 0 if patternLength is null or if it can't access the first two steps of the callback function.
 
 ## Get device info
 ```arduino
@@ -202,9 +202,9 @@ A motor pattern is a sequence of **steps**. Each step has 3 parts:
 
 `{1, 40, 5000}` would turn motor 1 on to a power level of 40 for 5 seconds before the next step would run.
 
-You can run patterns a couple of different ways. Both use the `runPattern()` function:
+You can run patterns a couple of different ways:
 
-* You can make an **array**:
+* You can make a pattern **array** and run it with `runShortPattern()`:
 ```arduino
 #include <OSSex.h>
 
@@ -219,15 +219,15 @@ void setup() {
 }
 
 void loop() {
-  Toy.runPattern(*pattern, patternSize);
+  Toy.runShortPattern(*pattern, patternSize);
 }
 ```
 
-Supply `runPattern()` with an array and an array length, and it will turn all the motors on to a level of 200 for 1 second, and then turn them off (also for one second). Since this function is being run within `loop()`, the pattern will just repeat over and over and the motors will turn on and off at one second intervals.
+Supply `runShortPattern()` with an array and an array length, and it will turn all the motors on to a level of 200 for 1 second, and then turn them off (also for one second). Since this function is being run within `loop()`, the pattern will just repeat over and over and the motors will turn on and off at one second intervals.
 
 This way requires you to come up with your patterns by hand, and is not practical for large patterns, but perfectly fine for simple ones like the one above.
 
-* You can make a **pattern function**:
+* You can make a **pattern function** and use `runPattern()`:
 
 ```arduino
 int step[3];
@@ -253,7 +253,7 @@ void setup() {
 
 (If you're not familiar with the **%** operator, it's the **modulo** operator, and it gives you the remainder after division. So `seq % 2` is saying "If `seq` divided by 2 has a remainder, then do **this**. Otherwise do **that**." It's an easy way to check if a number is odd or even, or to do something in an alternating fashion, such as turn a motor on and off repeatedly)
 
-When `runPattern()` is given a function rather than an array, it will run that function every time it needs the next step in the pattern. It provides an increasing sequence number as an argument. So the software will handle it like this:
+When `runPattern()` is given a function, it will run that function every time it needs the next step in the pattern. It provides an increasing sequence number as an argument. So the software will handle it like this:
 
 1. Run `blip(0)`
 2. Get `{-1, 200, 1000}` as a result
@@ -328,11 +328,9 @@ Pattern functions also use a lot less memory since you aren't storing every step
 
 ## Controlling your patterns
 
-`runPattern()`, when supplied with an array, will not return until the pattern has finished running. That means the rest of your code will not run until the pattern is finished.
+`runShortPattern()` will not return until the pattern has finished running. That means the rest of your code will not run until the pattern is finished.
 
-When supplied with a function, however, `runPattern()` will return immediately. This behavior is still being worked out but currently it's this way because you can add logic to your pattern function to control execution as you desire. This way you can create functions that are 5, 500, or infinite steps in duration without your pattern function delaying other code from running.
-
-That's why in the previous examples it is sufficient to run `runPattern(blip)` from within `setup()` to ensure the pattern ran continuously. Running it within `loop()` would result in undesirable behavior, as it would continuously run `blip(0)`, queue up the first step, run `blip(0)` again, queue up the first step, etc.
+`runPattern()`, however, will return immediately. This is because pattern functions lend themselves to running for a very long time and being interrupted (by a button click perhaps). This way you can create functions that are 5, 500, or infinite steps in duration without your pattern function delaying other code from running.
 
 We can modify the `blip()` function to terminate after running the on-off sequence twice:
 
@@ -361,11 +359,11 @@ int* blip(int seq) {
 
 We now have 5 steps: on, off, on, off, and then NULL to terminate. Since `seq` starts at 0, we know that by the time it equals 4, we're on our 5th step and should return NULL.
 
-## Pattern Cycling
+## Queuing patterns
 
-If you wish to cycle between various patterns, there are two functions provided to assist with that: `addPattern()` and `cyclePattern()`.
+If you wish to store various patterns and switch between them, there are three functions provided to assist with that: `addPattern()`, `cyclePattern()`, and `runPattern()`.
 
-`addPattern()` will add your function to an internal list of available pattern functions. `cyclePattern()` will then switch between them:
+`addPattern()` will add your function to an internal queue of available pattern functions. `cyclePattern()` will then switch to the next pattern in the queue;
 
 ```arduino
 #include <OSSex.h>
@@ -425,3 +423,4 @@ int* blip(int seq) {
 
 When you turn on the your toy, it will do nothing. Once you press the button, it will start the `fade()` pattern, and it will run indefinitely. Clicking the button again will change it to run the `blip()` pattern, and clicking it again will move it back to `fade()`.
 
+`runPattern()`, when run with an integer argument (such as `runPattern(3)`), will access that pattern from the queue and run it. It will return -1 if there are no patterns to access and -2 if the argument is greater than the number of patterns available.
