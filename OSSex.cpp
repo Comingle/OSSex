@@ -319,7 +319,7 @@ int OSSex::runPattern(int* (*callback)(int)) {
 		_running = true;
 		return 1;
 	} else {
-		return -1;
+		return 0;
 	}
 
 }
@@ -330,7 +330,11 @@ int OSSex::runPattern(unsigned int pos) {
 		_currentPattern = _first;
 		for (int i = 0; i < pos; i++) {
 			_currentPattern = _currentPattern->nextPattern;
+			if (_currentPattern == NULL) {
+				return -2;
+			}
 		}
+
 		return runPattern(_currentPattern->patternFunc);
 	} else {
 		return -1;
