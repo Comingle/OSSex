@@ -4,7 +4,7 @@ This is an Arduino library for interacting with Comingle open-source sex toys.
 
 # Installation
 
-Click the button to the right that says "Download ZIP." You will download a file named OSSex-master.zip. Rename this file to OSSex.zip. Open your Arduino IDE, and select the "Sketch" menu, then "Import Library...", and finally "Add Library...". Choose the OSSex.zip file. More information is available at the <a href="http://arduino.cc/en/Guide/Libraries">Arduino Libraries</a> page.
+Click the button to the right that says "Download ZIP." You will download a file named OSSex-master.zip. Unzip the folder inside and Rename the folder to OSSex (Arduino hates the "-" symbol and won't allow a name with that). Open your Arduino IDE, and select the "Sketch" menu, then "Import Library...", and finally "Add Library...". Choose the OSSex folder. More information is available at the <a href="http://arduino.cc/en/Guide/Libraries">Arduino Libraries</a> page.
 
 # Basics
 
