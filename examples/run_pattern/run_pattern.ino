@@ -1,4 +1,4 @@
-/* Runs a simple pattern
+/* Runs a simple pattern when the button is clicked.
  * Example by Craig Durkin/Comingle, May 9, 2014
  * {♥} COMINGLE
 */
@@ -11,10 +11,20 @@ int pattern[][3] = {
 };
 unsigned int patternSize = sizeof(pattern) / sizeof(int) / 3;
 
+bool clicked = false;
+
 void setup() {
-  Toy.setID(0);
+  Toy.setID(1);
+  
+  Toy.attachClick(click);
 }
 
 void loop() {
-  Toy.runShortPattern(*pattern, patternSize);
+  if (clicked) {
+    Toy.runShortPattern(*pattern, patternSize);
+  }
+}
+
+void click() {
+  clicked = true;
 }

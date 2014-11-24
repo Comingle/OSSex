@@ -1,5 +1,5 @@
-/* OSSex.cpp v0.3 - Library for controlling Arduino-based sex-toys
- * Written by Craig Durkin/Comingle, May 9, 2014
+/* OSSex.cpp v0.3.1 - Library for controlling Arduino-based sex-toys
+ * Written by Craig Durkin/Comingle
  * {♥} COMINGLE
 */
 
@@ -11,11 +11,7 @@
 #include "OneButton.h"
 
 // Set up the interrupt to trigger the update() function.
-#if defined(__AVR_ATmega328P__) // Uno
-ISR(TIMER2_OVF_vect) {
-	Toy.update();
-};
-#elif defined(__AVR_ATmega32U4__) // Lilypad USB
+#if defined(__AVR_ATmega32U4__) // Lilypad USB
 ISR(TIMER4_OVF_vect) {
 	Toy.update();
 };
@@ -28,14 +24,7 @@ OSSex::OSSex() {}
 
 // the real constructor. give it a device ID and it will set up your device's pins and timers.
 void OSSex::setID(int deviceId) {
-#if defined(__AVR_ATmega328P__)
-	_timer_start_mask = &TCCR2B;
-	_timer_count = &TCNT2;
-    _timer_interrupt_flag = &TIFR2;
-    _timer_interrupt_mask_b = &TIMSK2;
-    _timer_interrupt_mask_a = &TCCR2A;
-    _timer_init = TIMER2_INIT;
-#elif defined(__AVR_ATmega32U4__)
+#if defined(__AVR_ATmega32U4__)
 	_timer_start_mask = &TCCR4B;
 	_timer_count = &TCNT4;
     _timer_interrupt_flag = &TIFR4;
@@ -44,26 +33,28 @@ void OSSex::setID(int deviceId) {
 #endif
 
 	if (deviceId == 1) {
-		// Arduino UNO
-		device.outCount = 6;
+		// Beta Model
+		device.outCount = 3;
 		device.outPins[0] = 3; 
 		device.outPins[1] = 5; 
-		device.outPins[2] = 6;
-		device.outPins[3] = 9;
-		device.outPins[4] = 10;
-		device.outPins[5] = 11;
+		device.outPins[2] = 10;
 		
 		device.deviceId = 1;
 		
-		device.ledCount = 6;
-		device.ledPins[0] = 2;
-		device.ledPins[1] = 4;
-		device.ledPins[2] = 7;
-		device.ledPins[3] = 8;
-		device.ledPins[4] = 12;
-		device.ledPins[5] = 13;
+		device.ledCount = 1;
+		device.ledPins[0] = 13;
+
+		// Technically 4, but 2 inputs remain unconnected in most models
+		device.inCount = 2;
+		device.inPins[0] = A8; // D+
+		device.inPins[1] = A7; // D-
+
+		device.buttons[0].button.setPin(2);
+		device.buttons[0].button.setActiveLow(true);	
+		device.buttons[0].pin = 2;	
+
 	} else {
-		// Lilypad USB  
+		// Lilypad USB  / Alpha model
 		device.outCount = 3;
 		device.outPins[0] = 3; 
 		device.outPins[1] = 9; 
@@ -77,12 +68,12 @@ void OSSex::setID(int deviceId) {
 		device.buttons[0].button.setPin(2);
 		device.buttons[0].button.setActiveLow(true);	
 		device.buttons[0].pin = 2;	
+
+		device.inCount = 2;
+		device.inPins[0] = A2; // D+
+		device.inPins[1] = A3; // D-
 	}
 	device.bothWays = false;
-
-	device.inCount = 2;
-	device.inPins[0] = A2; // D+
-	device.inPins[1] = A3; // D-
 
 	device.isLedMultiColor = false;
     
@@ -102,29 +93,27 @@ void OSSex::setID(int deviceId) {
 
 	// Start the interrupt timer (timer2/timer4)
 	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
-	if (device.deviceId == 1) {
-		*_timer_interrupt_mask_b = 0x01;
-		*_timer_interrupt_mask_a = 0x00;
- 	} else {
-		*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer Overflow Interrupt Enable: 00000100   
- 	}
+	
+	*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer Overflow Interrupt Enable: 00000100   
   	_tickCount = 0;
  	*_timer_count = _timer_init;			// Reset Timer Count
  	*_timer_interrupt_flag = 0x00;			// Timer INT Flag Reg: Clear Timer Overflow Flag
  	*_timer_start_mask = 0x05;				// Timer PWM disable, prescale / 16: 00000101
 
- 	_scale = 1.0;
- 	_scaleStep = 0.1;
+ 	_powerScale = 1.0;
+ 	_powerScaleStep = 0.1;
+ 	_timeScale = 1.0;
+ 	_timeScaleStep = 0.1;
 
 }
 
-
-// Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status;
+// Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status.
+// If a pattern is running, it will set the _running flag
 void OSSex::update() {
 	device.buttons[0].button.tick(); 
 	if (_running) {
 		_tickCount++;
-		if (_tickCount > _currentStep->duration) {
+		if (_tickCount > (_currentStep->duration * _timeScale)) {
 	  		if (_currentStep->nextStep == NULL) { 
 	  			// stop the pattern if at last step
 	    		_running = false;
@@ -175,7 +164,7 @@ void OSSex::update() {
 // powerLevel of 0 turns the output off. Values greater than +/-255 get coerced to +/-255.
 // XXX Add serial (Stream object) feedback from function for diagnostics
 int OSSex::setOutput(int outNumber, int powerLevel) {
-	int iterations = 1, scaledPower;
+	int iterations = 1, constrainedPower;
 	// set all outputs, starting at 0.
 	if (outNumber == -1) {
 		iterations = device.outCount;
@@ -185,25 +174,25 @@ int OSSex::setOutput(int outNumber, int powerLevel) {
 	}
 
 	if (device.bothWays) {
-		scaledPower = constrain(powerLevel, -255, 255);
+		constrainedPower = constrain(powerLevel, -255, 255);
 	} else {
-		scaledPower = constrain(powerLevel, 0, 255);
+		constrainedPower = constrain(powerLevel, 0, 255);
 	}
 
-	if (_scale * scaledPower > 255) {
-		_scale = 255/scaledPower;
+	if (_powerScale * constrainedPower > 255) {
+		_powerScale = 255/constrainedPower;
 	}
 	
 	for (int i = 0; i < iterations; i++) {
-		if (scaledPower == 0) {
+		if (constrainedPower == 0) {
 			analogWrite(device.outPins[outNumber], 0);
 			if (device.bothWays) {
 				analogWrite(device.tuoPins[outNumber], 0);
 			}
-		} else if (scaledPower > 0) {
-			analogWrite(device.outPins[outNumber], scaledPower * _scale);
+		} else if (constrainedPower > 0) {
+			analogWrite(device.outPins[outNumber], constrainedPower * _powerScale);
 		} else {
-			analogWrite(device.tuoPins[outNumber], scaledPower * _scale);
+			analogWrite(device.tuoPins[outNumber], constrainedPower * _powerScale);
 		}
 		outNumber = i+1;
 	}
@@ -218,14 +207,14 @@ int OSSex::setOutput(int outNumber, int powerLevel) {
 // Add serial (Stream object) feedback from function for diagnostics
 //void OSSex::setLED(unsigned int lightLevel, ledNumber, colorCode) {}
 int OSSex::setLED(int ledNumber, int powerLevel) {
-	int scaledPower;
+	int constrainedPower;
 	if (!device.ledCount) {
 		return -1;
 	}
 	// sanitize ledNumber XXX -1 logic
 	ledNumber %= device.ledCount;
-	scaledPower = constrain(powerLevel, 0, 255);
-	analogWrite(device.ledPins[ledNumber], scaledPower);
+	constrainedPower = constrain(powerLevel, 0, 255);
+	analogWrite(device.ledPins[ledNumber], constrainedPower);
 
 	return 1;
 
@@ -312,7 +301,7 @@ int OSSex::runPattern(int* (*callback)(int)) {
 			_singlePattern->nextStep->duration = *(callbackStep++);
 			_singlePattern->nextStep->nextStep = NULL;
 		} else {
-			return -1;
+			return 0;
 		}
 		_currentStep = _singlePattern;
 		setOutput(_currentStep->outNumber, _currentStep->powerLevel);
@@ -341,16 +330,51 @@ int OSSex::runPattern(unsigned int pos) {
 	}
 }
 
+int OSSex::getPattern() {
+	if (_currentPattern) {
+		int pos = 0;
+		for (volatile patternList *stepper = _first; stepper != _currentPattern; stepper = stepper->nextPattern) {
+			if (stepper == NULL) {
+				return -2;
+			}
+			pos++;
+		}
+		return pos;
+	} else {
+		return -1;
+	}
+}
+
+void OSSex::setPowerScale(float step) {
+	_powerScaleStep = step;
+}
+
 void OSSex::setScale(float step) {
-	_scaleStep = step;
+	setPowerScale(step);
 }
 
-void OSSex::increasePower() {
-	_scale *= (1.0 + _scaleStep);
+float OSSex::increasePower() {
+	_powerScale *= (1.0 + _powerScaleStep);
+	return _powerScale;
 }
 
-void OSSex::decreasePower() {
-	_scale *= (1.0 - _scaleStep);
+float OSSex::decreasePower() {
+	_powerScale *= (1.0 - _powerScaleStep);
+	return _powerScale;
+}
+
+void OSSex::setTimeScale(float step) {
+	_timeScaleStep = step;
+}
+
+float OSSex::increaseTime() {
+	_timeScale *= (1.0 + _timeScaleStep);
+	return _timeScale;
+}
+
+float OSSex::decreaseTime() {
+	_timeScale *= (1.0 - _timeScaleStep);
+	return _timeScale;
 }
 
 int OSSex::cyclePattern() {
@@ -397,7 +421,8 @@ int OSSex::addPattern(int* (*patternFunc)(int)) {
 // stop all the motors and patterns, reset to beginning. this could be better written.
 void OSSex::stop() {
 	_running = false;
-	_scale = 1.0;
+	_powerScale = 1.0;
+	_timeScale = 1.0;
 	_seq = 0;
 	setOutput(-1, 0);
 	_patternCallback = NULL;

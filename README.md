@@ -26,7 +26,7 @@ void loop() {
 
 ```
 
-If `ID` is 1, it sets up a device based on an Arduino Uno / Atmega328. Any other number will set up a device for a LilyPad USB / Atmega32U4. Almost all toys will use an `ID` of 0.
+If `ID` is 1, it sets up a device based on the Multivibe Beta. Any other number will set up a device for a LilyPad USB / Atmega32U4. Almost all toys will use an `ID` of 0.
 
 ## Turn a motor (output) on/off
 ```arduino
@@ -161,11 +161,11 @@ This example will turn the LED on when the button is pressed, and turn it off wh
 
 You can increase or decrease the power of a pattern while it's running to tune it to a comfortable setting. You do that with 3 functions:
 
-* `setScale()`
+* `setPowerScale()`
 * `increasePower()`
 * `decreasePower()`
 
-On a Tonga, you can double-click the button to increase the power, or hold and release the button to decrease the power. `setScale()` lets you define how much the power changes with each double-click or button-hold:
+On a Multivibe you can double-click the button to increase the power, or hold and release the button to decrease the power. `setScale()` lets you define how much the power changes with each double-click or button-hold:
 
 ```arduino
 #include <OSSex.h>
@@ -190,6 +190,16 @@ void longPress() {
 ```
 
 This would set a double-click to increase the power by 20%, and a button hold-and-release to decrease the power by 20%: the scale is set to 20% (0.2), and then the `doubleClick()` function is attached to the double-click behavior, while the `longPress()` function is attached to the button hold-and-release behavior.
+
+## Adjusting the time
+
+The OSSex library includes several functions for changing the time scale of patterns:
+
+* `setTimeScale()`
+* `increaseTime()`
+* `decreaseTime()`
+
+`setTimeScale()` sets the how much `increaseTime()` and `decreaseTime()` will increase or decrease whenever called. For example, `setTimeScale(0.2)` will cause `increaseTime()` slow everything down by 20%, and `decreaseTime()` to speed everything up by 20%. 
 
 # Getting creative
 

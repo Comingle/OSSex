@@ -1,5 +1,5 @@
-/* Comingle.h v0.3 - Library for controlling Arduino-based sex-toys
- * Written by Craig Durkin/Comingle, May 9, 2014
+/* OSSex.h v0.3.1 - Library for controlling Arduino-based sex-toys
+ * Written by Craig Durkin/Comingle
  * {♥} COMINGLE
 */
 
@@ -13,10 +13,12 @@
 #include "OneButton.h"
 
 // Timer4 is for ATmega32U4/Lilypad usb and should interrupt every ~1ms. Timer2 is for ATmega328P/Arduino Uno and should interrupt ~1ms.
-#define TIMER4_INIT 25;
+#define TIMER4_INIT 16;
 #define TIMER2_INIT 131;
 
-
+// model names
+ #define ALPHA 0
+ #define BETA 1
 
 class OSSex {
   public:
@@ -30,6 +32,7 @@ class OSSex {
     int cyclePattern();
     int addPattern(int* (*callback)(int));
     int getInput(int);
+    int getPattern();
     void update();
     void attachClick(void (*callback)());
     void attachDoubleClick(void (*callback)());
@@ -37,8 +40,12 @@ class OSSex {
     void attachLongPressStop(void (*callback)());
     void attachDuringLongPress(void (*callback)());
     void setScale(float);
-    void increasePower();
-    void decreasePower();
+    void setPowerScale(float);
+    float increasePower();
+    float decreasePower();
+    void setTimeScale(float);
+    float increaseTime();
+    float decreaseTime();
     void stop();
 
     static const int _max_outputs = 8;
@@ -80,8 +87,10 @@ class OSSex {
     volatile patternList *_first;
     int* (*_patternCallback)(int);
 
-    float _scale;
-    float _scaleStep;
+    float _powerScale;
+    float _powerScaleStep;
+    float _timeScale;
+    float _timeScaleStep;
     volatile unsigned int _tickCount;
     volatile unsigned char *_timer_start_mask;
     volatile uint16_t *_timer_count;
