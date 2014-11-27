@@ -1,4 +1,4 @@
-# OSSex v0.3
+# OSSex v0.3.1
 
 This is an Arduino library for interacting with Comingle open-source sex toys.
 
@@ -27,6 +27,8 @@ void loop() {
 ```
 
 If `ID` is 1, it sets up a device based on the Multivibe Beta. Any other number will set up a device for a LilyPad USB / Atmega32U4. Almost all toys will use an `ID` of 0.
+
+> **Note:** if you include the OSSex library in your sketch via Arduino's "Import Library..." menu, it will add an unnecessary `#include <OneButton.h>` to your sketch. You should delete this line or you'll have compilation errors.
 
 ## Turn a motor (output) on/off
 ```arduino
