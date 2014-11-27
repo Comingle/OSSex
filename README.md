@@ -300,7 +300,9 @@ When `runPattern()` is given a function, it will run that function every time it
 
 ... (run forever, or until `blip()` returns NULL)
 
-Making function arrays for something simple like turning a motor on and off for 1 second is not necessarily the easiest way, but becomes necessary for more complicated patterns. Suppose we wanted to turn all the motors on and ramp their intensity up to max (255), then ramp back down to 0. We could do it like this:
+> **Note:** Since the pattern function returns the next pattern step as an array, the step variable must be a global variable. Arrays in C/C++/Arduino are passed as pointers, and if the step variable isn't global it will disappear after the function is finished and the pointer will be useless.
+
+Making pattern functions for something simple like turning a motor on and off for 1 second is not necessarily the easiest way, but becomes necessary for more complicated patterns. Suppose we wanted to turn all the motors on and ramp their intensity up to max (255), then ramp back down to 0. We could do it like this:
 
 ```arduino
 int step[3];
@@ -338,7 +340,7 @@ int *fadeCos(int seq) {
 }
 ```
 
-Where did `127 * cos((seq / (8*PI))-PI) + 127` come from? From progressively changing `cos(x)` until it gave the right behavior. One of the easiest ways to do this is by typing "cos(x)" in to Google, viewing the graph of the function and modifying it until it looks right (starts at 0, peaks at 255ish, has a long enough period that it smoothly transitions power levels).
+Where did `127 * cos((seq / (8*PI))-PI) + 127` come from? From progressively changing `cos(x)` until it gave the right behavior. One of the easiest ways to do this is by typing "cos(x)" in to Google, viewing the graph of the function and modifying it until it looks right (starts at 0, peaks at 255ish, has a long enough period that it smoothly transitions power levels). The steps for doing this are laid out in our <a href="https://www.comingle.io/howto/advanced-programming-patterns#pattern_functions>patterns howto</a>.
 
 Pattern functions make experimentation a lot easier. You could change `step[2] = 50;` from 50 to 100 and it affects all the steps without having to rewrite every step of a giant array. You could also print the output of your function to the serial console to make sure it's behaving appropriately:
 
