@@ -4,9 +4,26 @@ This is an Arduino library for interacting with Comingle open-source sex toys.
 
 # Installation
 
-Click the button to the right that says "Download ZIP." You will download a file named OSSex-master.zip. Unzip the folder inside and Rename the folder to OSSex (Arduino hates the "-" symbol and won't allow a name with that). Open your Arduino IDE, and select the "Sketch" menu, then "Import Library...", and finally "Add Library...". Choose the OSSex folder. More information is available at the <a href="http://arduino.cc/en/Guide/Libraries">Arduino Libraries</a> page.
+Head to the <a href="https://github.com/Comingle/OSSex/releases/latest">latest release</a> page and download the source in ZIP format. 
+
+Open the Arduino software, and select the "Sketch" menu, then "Import Library...", and finally "Add Library...". Choose the OSSex folder. More information is available at the <a href="http://arduino.cc/en/Guide/Libraries">Arduino Libraries</a> page.
+
+<img src="//www.comingle.io/wp-content/images/addlibrary.png">
 
 # Basics
+
+Once the library is added, import the **OSSex.h** file to make use of it:
+
+```arduino
+#include <OSSex.h>
+
+void setup() {
+ ...
+}
+
+void loop() {
+ ...
+}
 
 An object named `Toy` is available when you load the library. You can interact with your toy through this object. 
 
