@@ -8,7 +8,7 @@ Head to the <a href="https://github.com/Comingle/OSSex/releases/latest">latest r
 
 Open the Arduino software, and select the "Sketch" menu, then "Import Library...", and finally "Add Library...". Choose the OSSex folder. More information is available at the <a href="http://arduino.cc/en/Guide/Libraries">Arduino Libraries</a> page.
 
-<img src="//www.comingle.io/wp-content/images/addlibrary.png">
+<img src="https://www.comingle.io/wp-content/images/addlibrary.png">
 
 # Basics
 
