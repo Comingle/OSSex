@@ -26,11 +26,14 @@ void loop() {
 }
 ```
 
-An object named `Toy` is available when you load the library. You can interact with your toy through this object. 
+> **Note:** if you include the OSSex library in your sketch via Arduino's "Import Library..." menu, it will add an unnecessary `#include <OneButton.h>` to your sketch. You should delete this line or you'll have compilation errors.
+
 
 ## Set up your toy
 
-You need to tell the library which device you're using. Use `setID(ID)` to do so:
+An object named `Toy` is available when you load the library. You can interact with your toy through this object. 
+
+You need to tell the library which toy you're using. Use `setID(ID)` to do so:
 ```arduino
 #include <OSSex.h>
 
@@ -46,7 +49,6 @@ void loop() {
 
 If `ID` is 1, it sets up a device based on the Multivibe Beta. Any other number will set up a device for a LilyPad USB / Atmega32U4. Almost all toys will use an `ID` of 0.
 
-> **Note:** if you include the OSSex library in your sketch via Arduino's "Import Library..." menu, it will add an unnecessary `#include <OneButton.h>` to your sketch. You should delete this line or you'll have compilation errors.
 
 ## Turn a motor (output) on/off
 ```arduino
