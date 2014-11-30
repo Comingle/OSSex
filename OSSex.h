@@ -59,6 +59,7 @@ class OSSex {
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
     static const int _max_inputs = 4;
+	static const int _max_buttons = 1; // In case future models have more than one built in button
 
     struct {
       int deviceId;                     // device identifier number
@@ -74,9 +75,8 @@ class OSSex {
 	  uint8_t inCount;                  // number of input pins
       uint8_t inPins[_max_inputs];      // array mapping to input pins
 	
-	//Input Structure
 		static const int _defaultInputBufferSize = 100;
-
+	//Input Structure
 	  struct {
         unsigned int pin;               // onboard pin
 		
@@ -88,7 +88,6 @@ class OSSex {
 		int rawValue; 				//gets the most recent reading from the ADC
 		int scaledValue; 			//gets the most recent reading scaled between the min and max, and mapped between 0 and 255
 		int lastCal; 				//time in milliseconds of the last calibration (to find time since previous calibration do millis()-lastCal
-
 		
 		//Buffer Values
 		int buffersize;				 //New buffersize to set things to
@@ -102,6 +101,7 @@ class OSSex {
 		int customThreshold;        //A user defined threshold
 		int diffAVG; 			// The present value's current deviation from the computed average
 		int diffThresh;  		// abs(present value - custom Threshold);
+		int derivative;			// current "instantaneous" derivative approximation using some set number of samples
 
       } inputs[_max_inputs];
   
@@ -111,7 +111,6 @@ class OSSex {
         unsigned int memAddress;        // EEPROM address for storing button state
       } buttons[1]; //TODO in the future, this may become variable like the max_outputs
 	  
-
 	  
     } device;
    

@@ -578,6 +578,21 @@ device.inputs[inNumber].bufferAVG=average;                // the average
 	//Add other handy values
 device.inputs[inNumber].diffAVG = abs(average-device.inputs[inNumber].buffer[index]);
 device.inputs[inNumber].diffThresh = abs( device.inputs[inNumber].customThreshold-device.inputs[inNumber].buffer[index] );
+
+//Calculate the derivative with an episilon the size of one sample
+int delta = 0;
+int one = device.inputs[inNumber].buffer[index];
+int oneminust= 0;
+if(index==0){
+oneminust = device.inputs[inNumber].buffer[device._defaultInputBufferSize];
+
+}
+else{
+oneminust = device.inputs[inNumber].buffer[index-1];
+}
+
+delta = one-oneminust;
+device.inputs[inNumber].derivative = delta/1; // just currently dividing by the sample size;
   
   // advance to the next position in the array for the next time:  
   index = index + 1;                    
