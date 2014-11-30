@@ -48,25 +48,62 @@ class OSSex {
     float decreaseTime();
     void stop();
 
+	//Max number of inputs and outputs to set for the arrays for our current Lilypad USB based boards
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
     static const int _max_inputs = 4;
+	static const int _defaultInputBufferSize = 1;
+
     struct {
       int deviceId;                     // device identifier number
       bool bothWays;                    // can outputs go both forward and backward?
       uint8_t outCount;                 // number of outputs (electrodes, motors)
       uint8_t outPins[_max_outputs];    // array mapping to output pins
-      uint8_t tuoPins[_max_outputs];    // array mapping to reverse output pins;
+      uint8_t tuoPins[_max_outputs];    // array mapping to reverse output pins; //ahaha this is cute
       bool isLedMultiColor;             // do we have multicolored LEDs?
       uint8_t ledCount;                 // number of LEDs
       uint8_t ledPins[_max_leds];       // array mapping to LED output pins
-      uint8_t inCount;                  // number of input pins
+	  
+	  //Inputs section
+	  uint8_t inCount;                  // number of input pins
       uint8_t inPins[_max_inputs];      // array mapping to input pins
+	
+	//Input Structure
+	  struct {
+        unsigned int pin;               // onboard pin
+		
+		//Calibration Values
+		int min;					//the input's min from the calibration
+		int max;					//the input's max from the calibration
+		int avg;                // the computed from calibration average
+		int STDEV; 				//Computed Standard deviation from the calibration
+		int rawValue; 				//gets the most recent reading from the ADC
+		int scaledValue; 			//gets the most recent reading scaled between the min and max, and mapped between 0 and 255
+		int lastCal; 				//time in milliseconds of the last calibration (to find time since previous calibration do millis()-lastCal
+
+		
+		//Buffer Values
+		int buffersize;				 //New buffersize to set things to
+		int buffer[_defaultInputBufferSize];      // the past n readings from the analog input
+		int bufferMin;  			//value of the current lowest value in the buffer
+		int bufferMax;
+		int bufferAVG;				//Current avg of the whole buffer
+		int index;					// location in array of newest value
+		//Useful Values for Quick Access (These might be better as functions, but this can be changed)
+		int customThreshold;        //A user defined threshold
+		int diffAVG; 			// The present value's current deviation from the computed average
+		int diffThresh;  		// abs(present value - custom Threshold);
+
+      } inputs[_max_inputs];
+  
       struct {
         OneButton button;               // button object
         unsigned int pin;               // onboard pin
         unsigned int memAddress;        // EEPROM address for storing button state
-      } buttons[1];
+      } buttons[1]; //TODO in the future, this may become variable like the max_outputs
+	  
+
+	  
     } device;
    
   private:
