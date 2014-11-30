@@ -80,21 +80,16 @@ void OSSex::setID(int deviceId) {
 			device.bothWays = false;
 				device.isLedMultiColor = false;
 				
-		//Setup Inputs //The defacto buffer should have only 1 point (same as reading raw data)
-		const int numReadings = 1;
-int inputBuffer1[numReadings];      // the readings from the analog input 1
-int inputBuffer2[numReadings];
-int input1
-int index = 0;                  // the index of the current reading
-int total = 0;                  // the running total
-int average = 0;                // the average
+		//Setup Inputs
 
-int inputPin = device.inPins[inNumber];
+//int inputPin = device.inPins[inNumber];
 
 //Input Structure//Calibration Values
 //Setup input 1
-		device.inputs[0].min = 0;					//the input's min from the calibration
-		device.inputs[0].max = 1023;					//the input's max from the calibration
+
+device.inputs[0].pin = A2;
+		device.inputs[0].min = 2000;					//the input's min from the calibration
+		device.inputs[0].max = -1;					//the input's max from the calibration
 		device.inputs[0].avg = 512;                // the computed from calibration average
 		device.inputs[0].STDEV = -1; 				//Computed Standard deviation from the calibration
 		device.inputs[0].rawValue = -1; 				//gets the most recent reading from the ADC
@@ -103,18 +98,20 @@ int inputPin = device.inPins[inNumber];
 		
 		//Buffer Values
 		device.inputs[0].buffersize = -1;				 //New buffersize to set things to
-		device.inputs[0].buffer[_defaultInputBufferSize];      // the past n readings from the analog input
-		device.inputs[0].bufferMin = -1;  			//value of the current lowest value in the buffer
+		device.inputs[0].bufferMin = 2000;  			//value of the current lowest value in the buffer
 		device.inputs[0].bufferMax = -1;
 		device.inputs[0].bufferAVG = -1;				//Current avg of the whole buffer
 		device.inputs[0].index = 0;					// location in array of newest value
+		device.inputs[0].buffertotal=0;
 		//Useful Values for Quick Access (These might be better as functions, but this can be changed)
 		device.inputs[0].customThreshold = 512;        //A user defined threshold
 		device.inputs[0].diffAVG = -1; 			// The present value's current deviation from the computed average
 		device.inputs[0].diffThresh = -1;  		// abs(present value - custom Threshold);
 //Setup Input 2
-		device.inputs[1].min = 0;					//the input's min from the calibration
-		device.inputs[1].max = 1023;					//the input's max from the calibration
+device.inputs[1].pin = A3;
+
+		device.inputs[1].min = 4000;					//the input's min from the calibration
+		device.inputs[1].max = -1;					//the input's max from the calibration
 		device.inputs[1].avg = 512;                // the computed from calibration average
 		device.inputs[1].STDEV = -1; 				//Computed Standard deviation from the calibration
 		device.inputs[1].rawValue = -1; 				//gets the most recent reading from the ADC
@@ -123,11 +120,12 @@ int inputPin = device.inPins[inNumber];
 		
 		//Buffer Values
 		device.inputs[1].buffersize = -1;				 //New buffersize to set things to
-		device.inputs[1].buffer[_defaultInputBufferSize];      // the past n readings from the analog input
-		device.inputs[1].bufferMin = -1;  			//value of the current lowest value in the buffer
+		device.inputs[1].bufferMin = 3000;  			//value of the current lowest value in the buffer
 		device.inputs[1].bufferMax = -1;
 		device.inputs[1].bufferAVG = -1;				//Current avg of the whole buffer
 		device.inputs[1].index = 0;					// location in array of newest value
+		device.inputs[0].buffertotal=0;
+
 		//Useful Values for Quick Access (These might be better as functions, but this can be changed)
 		device.inputs[1].customThreshold = 512;        //A user defined threshold
 		device.inputs[1].diffAVG = -1; 			// The present value's current deviation from the computed average
@@ -503,19 +501,17 @@ void OSSex::stop() {
 
 /*** SetupInput ***/
 //Setting up the input basically establishes a new clean buffer
+//TODO FIX, NOTE RIGHT NOW THE SAMPLE SIZE IS NOT USED, and ALL BUFFERS ARE HARDCODED to 100
 void OSSex::setupInput(int inNumber, int sampleSize) {
 
-//setting a constant int lets us specify the array size
-const int numReadings = sampleSize;
-int readings[numReadings];      // the readings from the analog input
 
-int inputPin = device.inPins[inNumber];
 //Initialize the whole Array to zero
-for (int thisReading = 0; thisReading < numReadings; thisReading++){
-    readings[thisReading] = 0;    }
-	
-	//Set the Buffer on the input to the new fresh one we just created
-		device.inputs[inNumber].buffer = readings;
+		for (int j=0; j<device._defaultInputBufferSize; j++) //This should be dynamic in the future
+		{
+		device.inputs[inNumber].buffer[j] = 0;
+
+		}
+
 	return;
 }
 
@@ -534,72 +530,79 @@ int OSSex::getInput(int inNumber) {
 int OSSex::updateInput(int inNumber) {
 
 int index = device.inputs[inNumber].index;                  // the index of the current reading
-int total = device.inputs[inNumber].total;                  // the running total
-int average = device.inputs[inNumber].avg;                // the average
-int readings[] = device.inputs[inNumber].buffer[] 			//Copy the buffer over //Might be better to just have pointers
+double total = device.inputs[inNumber].buffertotal;                  // the running total
+int average = -1;
+///Yeah this is the general idea, but of course this don't work, gotta play with memory shit andy
+//Or vectors, but craig probably won't want the C++ library floating around here
+//int readings[] = device.inputs[inNumber].buffer[] ;			//Copy the buffer over //Might be better to just have pointers
 	
 
 // subtract the last reading:
-  total = total - readings[index];         
-  // read from the sensor:  
-  readings[index] = analogRead(inputPin); 
+  total = total - device.inputs[inNumber].buffer[index];
+//recheck if this value was the old min or max???
+
+  
+  // read from the sensor, and replace old index value with new:  
+  device.inputs[inNumber].buffer[index] = analogRead(device.inputs[inNumber].pin); 
   // store this value as the current RAw value
-   device.inputs[inNumber].rawValue = readings[index];
+   device.inputs[inNumber].rawValue = device.inputs[inNumber].buffer[index];
    //Store the scaled version of this value to the scaledValue var
     device.inputs[inNumber].scaledValue = map(device.inputs[inNumber].rawValue, 
 		device.inputs[inNumber].min,device.inputs[inNumber].max,0,255);
   
   // add the reading to the total:
-  total = total + readings[index];       
-  // advance to the next position in the array:  
-  index = index + 1;                    
+  total = total + device.inputs[inNumber].buffer[index];       
+ device.inputs[inNumber].buffertotal =total;                  // the running total
 
-  // if we're at the end of the array...
-  if (index >= numReadings)              
-    // ...wrap around to the beginning: 
-    index = 0;                           
 
   // calculate the average:
-  average = total / numReadings;  
-
+  average = total / device._defaultInputBufferSize;  
+device.inputs[inNumber].bufferAVG=average;                // the average
 //Calculate if we need to update the bufferMax and bufferMin
 
-   if (readings[index] > device.inputs[inNumber].bufferMax) {
-      device.inputs[inNumber].bufferMax = readings[index];
+   if (device.inputs[inNumber].buffer[index] > device.inputs[inNumber].bufferMax) {
+      device.inputs[inNumber].bufferMax = device.inputs[inNumber].buffer[index];
     }
 
     // record the minimum sensor value
-    if (readings[index] < device.inputs[inNumber].bufferMin) {
-      device.inputs[inNumber].bufferMin = readings[index];
+    if (device.inputs[inNumber].buffer[index] < device.inputs[inNumber].bufferMin) {
+      device.inputs[inNumber].bufferMin = device.inputs[inNumber].buffer[index];
     }
   
   
   
   // update the Structure
 	
-	device.inputs[inNumber].index=index;                  // the index of the current reading
-device.inputs[inNumber].total =total;                  // the running total
-device.inputs[inNumber].avg=average;                // the average
-device.inputs[inNumber].buffer[]=readings[]; 			//Copy the buffer over //Might be better to just have pointers
+
 	
 	//Add other handy values
-device.inputs[inNumber].diffAVG = abs(average-readings[index]);
-device.inputs[inNumber].diffThresh = abs( device.inputs[inNumber].customThreshold-readings[index] );
- 
+device.inputs[inNumber].diffAVG = abs(average-device.inputs[inNumber].buffer[index]);
+device.inputs[inNumber].diffThresh = abs( device.inputs[inNumber].customThreshold-device.inputs[inNumber].buffer[index] );
+  
+  // advance to the next position in the array for the next time:  
+  index = index + 1;                    
+  // if we're at the end of the array...
+  if (index >= device._defaultInputBufferSize)  {            
+    // ...wrap around to the beginning: 
+    index = 0;                           
+}
+	device.inputs[inNumber].index=index;                  // the index of the current reading
+
 	return analogRead(device.inPins[inNumber]);
 }
 
 /*** Calibration ***/
 //Adapted from Arduino example (Mellis, Igoe)
 //specify sensor number and duration of calibration
-void OSSex::calibrateInput(int inNumber, int duration) {
-const int sensorPin = device.inPins[inNumber];    // pin that the sensor is attached to
+
+void OSSex::calibrateInput(int inNumber, unsigned int duration) {
+const int sensorPin = device.inputs[inNumber].pin;    // pin that the sensor is attached to
 
 	int sensorValue = 0;         // the sensor value
-int sensorMin = 1023;        // minimum sensor value
-int sensorMax = 0;           // maximum sensor value
-int total = 0;
-int loopcounter=0;
+int sensorMin = 2200;        // minimum sensor value
+int sensorMax = -1;           // maximum sensor value
+double total = 0;
+double loopcounter=0;
 	
 	// calibrate during n milliseconds 
   while (millis() < duration) {
@@ -616,17 +619,7 @@ int loopcounter=0;
       sensorMin = sensorValue;
     }
   
-	
-	
-    // record the maximum sensor value
-   if (readings[index] > device.inputs[inNumber].bufferMax) {
-      device.inputs[inNumber].bufferMax = readings[index];
-    }
 
-    // record the minimum sensor value
-    if (readings[index] < device.inputs[inNumber].bufferMin) {
-      device.inputs[inNumber].bufferMin = readings[index];
-    }
 	total=total+sensorValue;
 	loopcounter++;
   }
@@ -635,21 +628,21 @@ int loopcounter=0;
   
   device.inputs[inNumber].min = sensorMin;
   device.inputs[inNumber].max = sensorMax;
-  device.inputs[inNumber].avg = total/loopcounter;
+  device.inputs[inNumber].avg = 1.0*total/loopcounter;
   
   
   
   //Just for the hell of it, return the currently read value mapped to the calibration
+  /*
      sensorValue = analogRead(sensorPin);
    sensorValue = map(sensorValue, sensorMin, sensorMax, 0, 255);
     // in case the sensor value is outside the range seen during calibration
   sensorValue = constrain(sensorValue, 0, 255);
+  */
   
   //Record a timestamp for when this calibration took place
     device.inputs[inNumber].lastCal = millis();
-
-  
-	return sensorValue ;
+	return;
 }
 
 void ResizeArray(int **orig, int size) {

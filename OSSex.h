@@ -31,8 +31,15 @@ class OSSex {
     int runPattern(int* (*callback)(int));
     int cyclePattern();
     int addPattern(int* (*callback)(int));
+	
+	//Inputs
     int getInput(int);
-    int getPattern();
+    void calibrateInput(int,unsigned int);
+	int updateInput(int);
+	void setupInput(int, int);
+	
+	//Buttons and Patterns
+	int getPattern();
     void update();
     void attachClick(void (*callback)());
     void attachDoubleClick(void (*callback)());
@@ -52,7 +59,6 @@ class OSSex {
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
     static const int _max_inputs = 4;
-	static const int _defaultInputBufferSize = 1;
 
     struct {
       int deviceId;                     // device identifier number
@@ -69,6 +75,8 @@ class OSSex {
       uint8_t inPins[_max_inputs];      // array mapping to input pins
 	
 	//Input Structure
+		static const int _defaultInputBufferSize = 100;
+
 	  struct {
         unsigned int pin;               // onboard pin
 		
@@ -89,6 +97,7 @@ class OSSex {
 		int bufferMax;
 		int bufferAVG;				//Current avg of the whole buffer
 		int index;					// location in array of newest value
+		double buffertotal; 					//the total value of the buffer at any given time
 		//Useful Values for Quick Access (These might be better as functions, but this can be changed)
 		int customThreshold;        //A user defined threshold
 		int diffAVG; 			// The present value's current deviation from the computed average
