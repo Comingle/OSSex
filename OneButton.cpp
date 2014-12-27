@@ -39,6 +39,13 @@ OneButton::OneButton(int pin, int activeLow)
     _buttonReleased = LOW;
     _buttonPressed = HIGH;
   } // if
+
+  _doubleClickFunc = NULL;
+  _pressFunc = NULL;
+  _longPressStartFunc = NULL;
+  _longPressStopFunc = NULL;
+  _duringLongPressFunc = NULL;
+
   // Debounce init
   _db_buttonState      = _buttonReleased;  // the current reading from the input pin, assume its in rest during setup
   _db_lastButtonState  = _db_buttonState;  // the previous reading from the input pin, no previous reading so use current
@@ -140,7 +147,7 @@ bool OneButton::isLongPressed(){
   return _isLongPressed;
 }
 
-int OneButton::tick(void)
+void OneButton::tick(void)
 {
   // Detect the input information 
   int buttonLevel = debounce(digitalRead(_pin)); // current button signal. (debounced)
@@ -197,7 +204,6 @@ int OneButton::tick(void)
     } // if  
 
   } // if  
-  return _state;
 } // OneButton.tick()
 
 boolean OneButton::debounce(boolean reading){

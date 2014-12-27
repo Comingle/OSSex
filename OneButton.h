@@ -55,7 +55,7 @@ public:
   // ----- State machine functions -----
 
   // call this function every some milliseconds for handling button events.
-  int tick(void);
+  void tick(void);
   bool isLongPressed();
 
   // ----- public debounce functions ------
