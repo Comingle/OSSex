@@ -14,7 +14,7 @@ unsigned int patternSize = sizeof(pattern) / sizeof(int) / 3;
 bool clicked = false;
 
 void setup() {
-  Toy.setID(1);
+  Toy.setID(0);
   
   Toy.attachClick(click);
 }
