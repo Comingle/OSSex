@@ -383,7 +383,8 @@ int step[3];
 int* blip(int seq) {
   step[0] = -1;
   
-  **seq %= 5;**
+  /* NEW */
+  seq %= 5;
 
   if (seq % 2) {
     step[1] = 0;
@@ -393,11 +394,12 @@ int* blip(int seq) {
 
   step[2] = 1000;
 
-  **if (seq == 4) {**
-    **return NULL;**
-  **} else {**
+  /* NEW */
+  if (seq == 4) {
+    return NULL;
+  } else {
     return step;
-  **}**
+  }
 }
 ```
 
