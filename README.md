@@ -197,7 +197,7 @@ You can increase or decrease the power of a pattern while it's running to tune i
 * `increasePower()`
 * `decreasePower()`
 
-On a Mmod you can double-click the button to increase the power, or hold and release the button to decrease the power. `setScale()` lets you define how much the power changes with each double-click or button-hold:
+On a Mod you can double-click the button to increase the power, or hold and release the button to decrease the power. `setScale()` lets you define how much the power changes with each double-click or button-hold:
 
 ```arduino
 #include <OSSex.h>
