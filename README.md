@@ -10,6 +10,16 @@ Open the Arduino software, and select the "Sketch" menu, then "Import Library...
 
 <img src="https://www.comingle.io/wp-content/images/addlibrary.png">
 
+In the Arduino application, make sure to set your board type as a "Lilypad Arduino USB":
+
+<img src="https://www.comingle.io/wp-content/images/addlibrary.png">
+
+Finally, plug in your toy and turn it on. In the Tools menu, choose Port, and then you can select the port to which your toy is connected. On a Mac, this will show up as a **usbmodem** port, often as something like `/dev/tty.usbmodem621` or `/dev/cu.usbmodem621` -- you can select either the `tty.usbmodem` port or the `cu.usbmodem` port and either will work.
+
+On a Windows machine, your toy will show up as an additional **COM** port.
+
+<img src="https://www.comingle.io/wp-content/images/addlibrary.png">
+
 # Basics
 
 Once the library is added, import the **OSSex.h** file to make use of it:
@@ -47,7 +57,7 @@ void loop() {
 
 ```
 
-If `ID` is 1, it sets up a device based on the Multivibe Beta. Any other number will set up a device for a LilyPad USB / Atmega32U4. Almost all toys will use an `ID` of 0.
+If `ID` is 1, it sets up a device based on the Mod Beta. Any other number will set up a device for a LilyPad USB / Atmega32U4. Almost all toys will use an `ID` of 0.
 
 
 ## Turn a motor (output) on/off
@@ -187,7 +197,7 @@ You can increase or decrease the power of a pattern while it's running to tune i
 * `increasePower()`
 * `decreasePower()`
 
-On a Multivibe you can double-click the button to increase the power, or hold and release the button to decrease the power. `setScale()` lets you define how much the power changes with each double-click or button-hold:
+On a Mmod you can double-click the button to increase the power, or hold and release the button to decrease the power. `setScale()` lets you define how much the power changes with each double-click or button-hold:
 
 ```arduino
 #include <OSSex.h>
