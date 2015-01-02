@@ -12,13 +12,13 @@ Open the Arduino software, and select the "Sketch" menu, then "Import Library...
 
 In the Arduino application, make sure to set your board type as a "Lilypad Arduino USB":
 
-<img src="https://www.comingle.io/wp-content/images/addlibrary.png">
+<img src="https://www.comingle.io/wp-content/images/selectboard.png">
 
 Finally, plug in your toy and turn it on. In the Tools menu, choose Port, and then you can select the port to which your toy is connected. On a Mac, this will show up as a **usbmodem** port, often as something like `/dev/tty.usbmodem621` or `/dev/cu.usbmodem621` -- you can select either the `tty.usbmodem` port or the `cu.usbmodem` port and either will work.
 
 On a Windows machine, your toy will show up as an additional **COM** port.
 
-<img src="https://www.comingle.io/wp-content/images/addlibrary.png">
+<img src="https://www.comingle.io/wp-content/images/selectport.png">
 
 # Basics
 
