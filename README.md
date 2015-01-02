@@ -350,7 +350,7 @@ int *fadeCos(int seq) {
 }
 ```
 
-Where did `127 * cos((seq / (8*PI))-PI) + 127` come from? From progressively changing `cos(x)` until it gave the right behavior. One of the easiest ways to do this is by typing "cos(x)" in to Google, viewing the graph of the function and modifying it until it looks right (starts at 0, peaks at 255ish, has a long enough period that it smoothly transitions power levels). The steps for doing this are laid out in our <a href="https://www.comingle.io/howto/advanced-programming-patterns#pattern_functions>patterns howto</a>.
+Where did `127 * cos((seq / (8*PI))-PI) + 127` come from? From progressively changing `cos(x)` until it gave the right behavior. One of the easiest ways to do this is by typing "cos(x)" in to Google, viewing the graph of the function and modifying it until it looks right (starts at 0, peaks at 255ish, has a long enough period that it smoothly transitions power levels). The steps for doing this are laid out in our <a href="https://www.comingle.io/howto/advanced-programming-patterns#pattern_functions">patterns howto</a>.
 
 Pattern functions make experimentation a lot easier. You could change `step[2] = 50;` from 50 to 100 and it affects all the steps without having to rewrite every step of a giant array. You could also print the output of your function to the serial console to make sure it's behaving appropriately:
 
