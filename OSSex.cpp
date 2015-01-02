@@ -35,9 +35,9 @@ void OSSex::setID(int deviceId) {
 	if (deviceId == 1) {
 		// Beta Model
 		device.outCount = 3;
-		device.outPins[0] = 3; 
-		device.outPins[1] = 5; 
-		device.outPins[2] = 10;
+		device.outPins[0] = 5; 
+		device.outPins[1] = 10; 
+		device.outPins[2] = 11;
 		
 		device.deviceId = 1;
 		
@@ -49,9 +49,10 @@ void OSSex::setID(int deviceId) {
 		device.inPins[0] = A8; // D+
 		device.inPins[1] = A7; // D-
 
-		device.buttons[0].button.setPin(2);
-		device.buttons[0].button.setActiveLow(true);	
-		device.buttons[0].pin = 2;	
+		device.muxPins[0] = 8;
+		device.muxPins[1] = 12;
+		pinMode(device.muxPins[0], OUTPUT);
+		pinMode(device.muxPins[1], OUTPUT);
 
 	} else {
 		// Lilypad USB  / Alpha model
@@ -65,10 +66,6 @@ void OSSex::setID(int deviceId) {
 		device.ledCount = 1;
 		device.ledPins[0] = 13;
 
-		device.buttons[0].button.setPin(2);
-		device.buttons[0].button.setActiveLow(true);	
-		device.buttons[0].pin = 2;	
-
 		device.inCount = 2;
 		device.inPins[0] = A2; // D+
 		device.inPins[1] = A3; // D-
@@ -76,6 +73,10 @@ void OSSex::setID(int deviceId) {
 	device.bothWays = false;
 
 	device.isLedMultiColor = false;
+
+	device.buttons[0].pin = 2;
+	device.buttons[0].button.setPin(device.buttons[0].pin);
+	device.buttons[0].button.setActiveLow(true);	
     
 	for (int i = 0; i < device.outCount; i++) {
 		pinMode(device.outPins[i], OUTPUT);
@@ -89,7 +90,6 @@ void OSSex::setID(int deviceId) {
 	for (int i = 0; i < device.ledCount; i++) {
 		pinMode(device.ledPins[i], OUTPUT);
 	}
-
 
 	// Start the interrupt timer (timer2/timer4)
 	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
@@ -434,6 +434,36 @@ void OSSex::stop() {
 		future = future->nextStep;
 	}
 	_memQueue[0] = _memQueue[1] = NULL;
+}
+
+#define HACKER_PORT_AIN 0
+#define HACKER_PORT_PWM 0
+#define HACKER_PORT_I2C 1
+#define HACKER_PORT_SERIAL 2
+
+int OSSex::setHackerPort(unsigned int flag) {
+	if (device.deviceId < 1) {
+		return -1;
+	}
+	switch (flag) {
+		case HACKER_PORT_AIN:
+			digitalWrite(device.muxPins[0], LOW);
+			digitalWrite(device.muxPins[1], LOW);
+			break;
+		case HACKER_PORT_I2C:
+			digitalWrite(device.muxPins[0], HIGH);
+			digitalWrite(device.muxPins[1], LOW);
+			break;
+		case HACKER_PORT_SERIAL:
+			digitalWrite(device.muxPins[0], LOW);
+			digitalWrite(device.muxPins[1], HIGH);
+			break;
+		default:
+			return -1;
+
+	}
+	return 0;
+
 }
 
 // Read input channel

@@ -47,6 +47,7 @@ class OSSex {
     float increaseTime();
     float decreaseTime();
     void stop();
+    int setHackerPort(unsigned int);
 
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
@@ -67,6 +68,7 @@ class OSSex {
         unsigned int pin;               // onboard pin
         unsigned int memAddress;        // EEPROM address for storing button state
       } buttons[1];
+      uint8_t muxPins[2];               // pins for controlling hacker port multiplexer
     } device;
    
   private:
