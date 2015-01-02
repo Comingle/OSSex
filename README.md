@@ -374,7 +374,7 @@ Pattern functions also use a lot less memory since you aren't storing every step
 
 `runShortPattern()` will not return until the pattern has finished running. That means the rest of your code will not run until the pattern is finished.
 
-`runPattern()`, however, will return immediately. This is because pattern functions lend themselves to running for a very long time and being interrupted (by a button click perhaps). This way you can create functions that are 5, 500, or infinite steps in duration without your pattern function delaying other code from running.
+`runPattern()`, however, will return immediately, even while your pattern continues to run. This is because pattern functions lend themselves to running for a very long time and being interrupted (by a button click perhaps). This way you can create functions that are 5, 500, or infinite steps in duration without your pattern function delaying other code from running.
 
 We can modify the `blip()` function to terminate after running the on-off sequence twice:
 
