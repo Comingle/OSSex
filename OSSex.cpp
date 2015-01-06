@@ -54,6 +54,7 @@ void OSSex::setID(int deviceId) {
 		pinMode(device.muxPins[0], OUTPUT);
 		pinMode(device.muxPins[1], OUTPUT);
 
+		device.buttons[0].pin = 4;
 	} else {
 		// Lilypad USB  / Alpha model
 		device.outCount = 3;
@@ -69,14 +70,17 @@ void OSSex::setID(int deviceId) {
 		device.inCount = 2;
 		device.inPins[0] = A2; // D+
 		device.inPins[1] = A3; // D-
+
+		device.buttons[0].pin = 2;
 	}
 	device.bothWays = false;
 
 	device.isLedMultiColor = false;
 
-	device.buttons[0].pin = 2;
 	device.buttons[0].button.setPin(device.buttons[0].pin);
 	device.buttons[0].button.setActiveLow(true);	
+
+	
     
 	for (int i = 0; i < device.outCount; i++) {
 		pinMode(device.outPins[i], OUTPUT);
