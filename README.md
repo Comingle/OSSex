@@ -57,7 +57,7 @@ void loop() {
 
 ```
 
-If `ID` is 1, it sets up a device based on the Mod Beta. Any other number will set up a device for a LilyPad USB / Atmega32U4. Almost all toys will use an `ID` of 0.
+If `ID` is 1, it sets up a device based on the Mod Beta. Any other number will set up a device for a LilyPad USB / Atmega32U4.
 
 
 ## Turn a motor (output) on/off
@@ -197,14 +197,14 @@ You can increase or decrease the power of a pattern while it's running to tune i
 * `increasePower()`
 * `decreasePower()`
 
-On a Mod you can double-click the button to increase the power, or hold and release the button to decrease the power. `setScale()` lets you define how much the power changes with each double-click or button-hold:
+On a Mod you can double-click the button to increase the power, or hold and release the button to decrease the power. `setPowerScale()` lets you define how much the power changes with each double-click or button-hold:
 
 ```arduino
 #include <OSSex.h>
 
 void setup() {
   Toy.setID(0);
-  Toy.setScale(0.2);
+  Toy.setPowerScale(0.2);
   Toy.attachDoubleClick(doubleClick);
   Toy.attachLongPressStart(longPress);
   ...
