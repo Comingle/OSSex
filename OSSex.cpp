@@ -292,21 +292,22 @@ int OSSex::runPattern(int* (*callback)(int)) {
 		_singlePattern->duration = *(callbackStep++);
 		
 		callbackStep = _patternCallback(_seq);
-		if (callbackStep != NULL) {
-			_seq++;
-			_singlePattern->nextStep = new struct pattern;
-			if (!_singlePattern->nextStep) {
-				return -1;
-			}
-			_memQueue[1] = _singlePattern->nextStep;
+        if(!callbackStep){
+            return 0;
+        }
 
-			_singlePattern->nextStep->outNumber = *(callbackStep++);
-			_singlePattern->nextStep->powerLevel = *(callbackStep++);
-			_singlePattern->nextStep->duration = *(callbackStep++);
-			_singlePattern->nextStep->nextStep = NULL;
-		} else {
-			return 0;
-		}
+        _seq++;
+        _singlePattern->nextStep = new struct pattern;
+        if (!_singlePattern->nextStep) {
+            return -1;
+        }
+        _memQueue[1] = _singlePattern->nextStep;
+
+        _singlePattern->nextStep->outNumber = *(callbackStep++);
+        _singlePattern->nextStep->powerLevel = *(callbackStep++);
+        _singlePattern->nextStep->duration = *(callbackStep++);
+        _singlePattern->nextStep->nextStep = NULL;
+
 		_currentStep = _singlePattern;
 		setOutput(_currentStep->outNumber, _currentStep->powerLevel);
 		_running = true;
@@ -319,34 +320,33 @@ int OSSex::runPattern(int* (*callback)(int)) {
 
 // run a specific pattern from the queue
 int OSSex::runPattern(unsigned int pos) {
-	if (_currentPattern) {
-		_currentPattern = _first;
-		for (int i = 0; i < pos; i++) {
-			_currentPattern = _currentPattern->nextPattern;
-			if (_currentPattern == NULL) {
-				return -2;
-			}
-		}
+    if(!_currentPattern) {
+        return -1;
+    }
+		
+    _currentPattern = _first;
+    for (int i = 0; i < pos; i++) {
+        _currentPattern = _currentPattern->nextPattern;
+        if (_currentPattern == NULL) {
+            return -2;
+        }
+    }
 
-		return runPattern(_currentPattern->patternFunc);
-	} else {
-		return -1;
-	}
+    return runPattern(_currentPattern->patternFunc);
 }
 
 int OSSex::getPattern() {
-	if (_currentPattern) {
-		int pos = 0;
-		for (volatile patternList *stepper = _first; stepper != _currentPattern; stepper = stepper->nextPattern) {
-			if (stepper == NULL) {
-				return -2;
-			}
-			pos++;
-		}
-		return pos;
-	} else {
-		return -1;
-	}
+	if (!_currentPattern) {
+        return -1;
+    }
+    int pos = 0;
+    for (volatile patternList *stepper = _first; stepper != _currentPattern; stepper = stepper->nextPattern) {
+        if (stepper == NULL) {
+            return -2;
+        }
+        pos++;
+    }
+    return pos;
 }
 
 void OSSex::setPowerScale(float step) {
@@ -382,17 +382,17 @@ float OSSex::decreaseTime() {
 }
 
 int OSSex::cyclePattern() {
-    if (_currentPattern) {
-		if (_currentPattern->nextPattern == NULL) {
-			_currentPattern = _first;
-		} else {
-			_currentPattern = _currentPattern->nextPattern;
-		}
-		runPattern(_currentPattern->patternFunc);
-		return 1;
-	} else {
-		return -1;
-	}
+    if (!_currentPattern) {
+        return -1;
+    }
+
+    if (_currentPattern->nextPattern == NULL) {
+        _currentPattern = _first;
+    } else {
+        _currentPattern = _currentPattern->nextPattern;
+    }
+    runPattern(_currentPattern->patternFunc);
+    return 1;
 }
 
 int OSSex::addPattern(int* (*patternFunc)(int)) {
