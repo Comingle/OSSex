@@ -28,9 +28,9 @@ class OSSex {
     int setLED(int, int);
     int runShortPattern(int*, size_t);
     int runPattern(unsigned int);
-    int runPattern(int* (*callback)(int));
+    int runPattern(int (*callback)(int));
     int cyclePattern();
-    int addPattern(int* (*callback)(int));
+    int addPattern(int (*callback)(int));
     int getInput(int);
     int getPattern();
     void update();
@@ -70,11 +70,12 @@ class OSSex {
       } buttons[1];
       uint8_t muxPins[2];               // pins for controlling hacker port multiplexer
     } device;
+
+    int step[4];
    
   private:
     struct pattern {
-      int outNumber;
-      uint8_t powerLevel;
+      int power[3];
       unsigned int duration;
       pattern *nextStep; 
     };
@@ -82,12 +83,12 @@ class OSSex {
     volatile pattern *_currentStep;
 
     struct patternList {
-      int* (*patternFunc)(int);
+      int (*patternFunc)(int);
       patternList *nextPattern;
     };
     volatile patternList *_currentPattern;
     volatile patternList *_first;
-    int* (*_patternCallback)(int);
+    int (*_patternCallback)(int);
 
     float _powerScale;
     float _powerScaleStep;
@@ -103,7 +104,6 @@ class OSSex {
     volatile bool _running;
     volatile pattern* _memQueue[2];
     volatile unsigned int _seq;
-
 };
 
 extern OSSex Toy;

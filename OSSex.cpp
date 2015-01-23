@@ -46,7 +46,7 @@ void OSSex::setID(int deviceId) {
 
 		// Technically 4, but 2 inputs remain unconnected in most models
 		device.inCount = 2;
-		device.inPins[0] = A8; // D+
+		device.inPins[0] = A9; // D+
 		device.inPins[1] = A7; // D-
 
 		device.muxPins[0] = 8;
@@ -55,6 +55,12 @@ void OSSex::setID(int deviceId) {
 		pinMode(device.muxPins[1], OUTPUT);
 
 		device.buttons[0].pin = 4;
+
+// TODO: Hacker port inputs as PWM outputs. Handle with setOutput():
+// set as input, store previous hacker port state and restore as before.
+#define H0 9
+#define H1 6
+
 	} else {
 		// Lilypad USB  / Alpha model
 		device.outCount = 3;
@@ -79,8 +85,6 @@ void OSSex::setID(int deviceId) {
 
 	device.buttons[0].button.setPin(device.buttons[0].pin);
 	device.buttons[0].button.setActiveLow(true);	
-
-	
     
 	for (int i = 0; i < device.outCount; i++) {
 		pinMode(device.outPins[i], OUTPUT);
@@ -112,7 +116,7 @@ void OSSex::setID(int deviceId) {
 }
 
 // Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status.
-// If a pattern is running, it will set the _running flag
+// If a pattern is running, the _running flag will be true
 void OSSex::update() {
 	device.buttons[0].button.tick(); 
 	if (_running) {
@@ -131,7 +135,11 @@ void OSSex::update() {
 	  			if (!_patternCallback) {
 	  				_memQueue[1] = _currentStep;
 	  			}
-	  			setOutput(_currentStep->outNumber, _currentStep->powerLevel);
+	  			for (int i = 0; i < device.outCount; i++) {
+	  				if (_currentStep->power[i] >= 0) {
+ 	  					setOutput(i, _currentStep->power[i]);
+ 	  				}
+	  			}
 	  		}
 	  		free((void*)_memQueue[0]);
 	  		_memQueue[0] = _memQueue[1];
@@ -139,14 +147,14 @@ void OSSex::update() {
 	  		_tickCount = 0; 
 		} else if (_currentStep->nextStep == NULL && _patternCallback) {
 			// if it's not time for the next step, go ahead and queue it up
-			int *callbackStep = _patternCallback(_seq);
-			if (callbackStep != NULL) {
+			if (_patternCallback(_seq)) {
 				_seq++;
 				_currentStep->nextStep = new struct pattern;
 				_memQueue[1] = _currentStep->nextStep;
-				_currentStep->nextStep->outNumber =  *(callbackStep++);
-				_currentStep->nextStep->powerLevel = *(callbackStep++);
-				_currentStep->nextStep->duration = *(callbackStep++);
+				_currentStep->nextStep->power[0] = step[0];
+				_currentStep->nextStep->power[1] = step[1];
+				_currentStep->nextStep->power[2] = step[2];
+				_currentStep->nextStep->duration = step[3];
 				_currentStep->nextStep->nextStep = NULL;
 			} else {
 				_running = false;
@@ -240,8 +248,9 @@ int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 		pattern* patIndex = _singlePattern;
 
 		for (int i = 0; i < patternLength; i++) {
-			patIndex->outNumber = *(patSteps++);
-			patIndex->powerLevel = *(patSteps++);
+			patIndex->power[0] = *(patSteps++);
+			patIndex->power[1] = *(patSteps++);
+			patIndex->power[2] = *(patSteps++);
 			patIndex->duration = *(patSteps++);
 			if (i < patternLength-1) {
 				patIndex->nextStep = new struct pattern;
@@ -256,7 +265,11 @@ int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 
 		// position _currentStep at start of pattern, start the first step, and set things in motion
 		_currentStep = _singlePattern;
-		setOutput(_currentStep->outNumber, _currentStep->powerLevel);
+		for (int i = 0; i < device.outCount; i++) {
+			if (_currentStep->power[i] >= 0) {
+				setOutput(i, _currentStep->power[i]);
+			}
+		}
 		_running = true;
 
 		// Wait until pattern is finished to return
@@ -271,56 +284,60 @@ int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 
 // Run a pattern from a callback function. The callback should return a pointer to a 3-item array: [outputNumber, powerLevel, duration]
 // This function will return before the pattern is finished running since many functions will run indefinitely and block all other processing.
-int OSSex::runPattern(int* (*callback)(int)) {
+int OSSex::runPattern(int (*callback)(int)) {
 	stop();
 	
 	// get the first two steps of the sequence. 
-	// if we don't, some patterns with short first steps won't run well
+	// if we don't, some patterns with short first steps won't run well and will have a race condition
 	// since the next step is queued while the current one is running
 	_patternCallback = callback;
-	int *callbackStep = _patternCallback(_seq);
-	if (callbackStep != NULL) {
-		_seq++;
-		_singlePattern = new struct pattern;
-		if (!_singlePattern) {
-			return -1;
-		}
-		_memQueue[0] = _singlePattern;
-
-		_singlePattern->outNumber = *(callbackStep++);
-		_singlePattern->powerLevel = *(callbackStep++);
-		_singlePattern->duration = *(callbackStep++);
-		
-		callbackStep = _patternCallback(_seq);
-        if(!callbackStep){
-            return 0;
-        }
-
-        _seq++;
-        _singlePattern->nextStep = new struct pattern;
-        if (!_singlePattern->nextStep) {
-            return -1;
-        }
-        _memQueue[1] = _singlePattern->nextStep;
-
-        _singlePattern->nextStep->outNumber = *(callbackStep++);
-        _singlePattern->nextStep->powerLevel = *(callbackStep++);
-        _singlePattern->nextStep->duration = *(callbackStep++);
-        _singlePattern->nextStep->nextStep = NULL;
-
-		_currentStep = _singlePattern;
-		setOutput(_currentStep->outNumber, _currentStep->powerLevel);
-		_running = true;
-		return 1;
-	} else {
+	if (!_patternCallback(_seq)) {
 		return 0;
 	}
+	_seq++;
+	_singlePattern = new struct pattern;
+	if (!_singlePattern) {
+		return -1;
+	}
+	_memQueue[0] = _singlePattern;
+
+	_singlePattern->power[0] = step[0];
+	_singlePattern->power[1] = step[1];
+	_singlePattern->power[2] = step[2];
+	_singlePattern->duration = step[3];
+	
+	// get second step
+    if (!_patternCallback(_seq)) {
+        return 0;
+    }
+    _seq++;
+    _singlePattern->nextStep = new struct pattern;
+    if (!_singlePattern->nextStep) {
+        return -1;
+    }
+    _memQueue[1] = _singlePattern->nextStep;
+
+	_singlePattern->nextStep->power[0] = step[0];
+	_singlePattern->nextStep->power[1] = step[1];
+	_singlePattern->nextStep->power[2] = step[2];
+	_singlePattern->nextStep->duration = step[3];
+    _singlePattern->nextStep->nextStep = NULL;
+
+	_currentStep = _singlePattern;
+	for (int i = 0; i < device.outCount; i++) {
+		if (_currentStep->power[i] >= 0) {
+			setOutput(i, _currentStep->power[i]);
+		}
+	}
+
+	_running = true;
+	return 1;
 
 }
 
 // run a specific pattern from the queue
 int OSSex::runPattern(unsigned int pos) {
-    if(!_currentPattern) {
+    if (!_currentPattern) {
         return -1;
     }
 		
@@ -395,7 +412,8 @@ int OSSex::cyclePattern() {
     return 1;
 }
 
-int OSSex::addPattern(int* (*patternFunc)(int)) {
+// Add a pattern function to the queue of vibration patterns
+int OSSex::addPattern(int (*patternFunc)(int)) {
 	if (_first == NULL) {
 		_first = new struct patternList;
 		if (!_first) {
@@ -422,7 +440,7 @@ int OSSex::addPattern(int* (*patternFunc)(int)) {
 	}
 }
 
-// stop all the motors and patterns, reset to beginning. this could be better written.
+// stop all the motors and patterns, reset to beginning. this could be better-written.
 void OSSex::stop() {
 	_running = false;
 	_powerScale = 1.0;
@@ -430,6 +448,8 @@ void OSSex::stop() {
 	_seq = 0;
 	setOutput(-1, 0);
 	_patternCallback = NULL;
+	step[0] = step[1] = step[2] = -1;
+	step[3] = 0;
 	volatile pattern* current = _memQueue[0];
 	pattern* future = current->nextStep;
 	while (current != NULL) {
@@ -445,6 +465,7 @@ void OSSex::stop() {
 #define HACKER_PORT_I2C 1
 #define HACKER_PORT_SERIAL 2
 
+// Set hacker port multiplexer for reading certain types of inputs. Accepts any of the above #defines as an option. 
 int OSSex::setHackerPort(unsigned int flag) {
 	if (device.deviceId < 1) {
 		return -1;
