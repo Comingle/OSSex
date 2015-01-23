@@ -241,7 +241,7 @@ A motor pattern is a sequence of **steps**. Each step has 4 parts:
 * The power to set motors 1, 2, and 3
 * How long the step should run (in milliseconds)
 
-`{40, -1, -1, 5000}` would turn motor 1 on to a power level of 40 for 5 seconds before the next step would run. The `-1` signifies "leave this motor alone". Whatever it was doing prior to this step, it can continue doing it.
+`{40, -1, -1, 5000}` would turn motor 1 on to a power level of 40 for 5 seconds before the next step would run. The `-1` signifies "leave this motor alone", so we won't modify motors 2 or 3. Whatever they were doing prior to this step, they can continue doing it.
 
 You can run patterns a couple of different ways:
 
@@ -251,7 +251,7 @@ You can run patterns a couple of different ways:
 
 int pattern[][4] = {
     {200, 200, 200, 1000},
-    {200, 200, 200, 1000},
+    {0, 0, 0, 1000},
 };
 unsigned int patternSize = sizeof(pattern) / sizeof(int) / 4;
 
@@ -309,7 +309,7 @@ When `runPattern()` is given a function, it will run that function every time it
 
 ... (run forever, or until `blip()` returns something less than 1)
 
-> **In short:** When OSSex calls your pattern function to get the next step in the pattern, all you need to do is update the `Toy.step` array with whatever you want and return 1.
+> **In short:** When OSSex calls your pattern function to get the next step in the pattern, all you need to do is update the `Toy.step` array with whatever you want and return 1. You also have access to the previous step and can use it to influence the upcoming step.
 
 Making pattern functions for something simple like turning a motor on and off for 1 second is not necessarily the easiest way, but becomes necessary for more complicated patterns. Suppose we wanted to turn all the motors on and ramp their intensity up to max (255), then ramp back down to 0. We could do it like this:
 
