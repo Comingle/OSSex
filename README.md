@@ -111,7 +111,7 @@ Toy.runShortPattern(int* pattern, unsigned int patternLength);
 
 OR
 ```arduino
-Toy.runPattern(int* function(int));
+Toy.runPattern(int function(int));
 ```
 
 `runShortPattern()` and `runPattern()` allow you to define a sequence of setting the outputs/motors to given power levels for given time durations. See the **Getting Creative** section for more in-depth information on how to define your own motor patterns.
@@ -237,12 +237,11 @@ The OSSex library includes several functions for changing the time scale of patt
 
 You can make your toy run all kinds of motor patterns: make them fade in and out, respond to a sensor, jump around randomly, be on full-blast, however you want.
 
-A motor pattern is a sequence of **steps**. Each step has 3 parts:
-* Which output/motor you want
-* What power level you want (generally 0-255, with 0 being off)
+A motor pattern is a sequence of **steps**. Each step has 4 parts:
+* The power to set motors 1, 2, and 3
 * How long the step should run (in milliseconds)
 
-`{1, 40, 5000}` would turn motor 1 on to a power level of 40 for 5 seconds before the next step would run.
+`{40, -1, -1, 5000}` would turn motor 1 on to a power level of 40 for 5 seconds before the next step would run. The `-1` signifies "leave this motor alone". Whatever it was doing prior to this step, it can continue doing it.
 
 You can run patterns a couple of different ways:
 
@@ -251,8 +250,8 @@ You can run patterns a couple of different ways:
 #include <OSSex.h>
 
 int pattern[][3] = {
-    {-1, 200, 1000},
-    {-1, 0, 1000},
+    {200, 200, 200, 1000},
+    {200, 200, 200, 1000},
 };
 unsigned int patternSize = sizeof(pattern) / sizeof(int) / 3;
 
@@ -272,19 +271,19 @@ This way requires you to come up with your patterns by hand, and is not practica
 * You can make a **pattern function** and use `runPattern()`:
 
 ```arduino
-int step[3];
-int* blip(int seq) {
-  step[0] = -1;
+int blip(int seq) {
   
   if (seq % 2) {
-    step[1] = 0;
+    Toy.step[0] = 0;
   } else {
-    step[1] = 200;
+    Toy.step[0] = 200;
   }
+
+  Toy.step[1] = Toy.step[2] = Toy.step[0];
   
-  step[2] = 1000;
+  Toy.step[3] = 1000;
   
-  return step;
+  return 1;
   
 }
 
@@ -298,61 +297,60 @@ void setup() {
 When `runPattern()` is given a function, it will run that function every time it needs the next step in the pattern. It provides an increasing sequence number as an argument. So the software will handle it like this:
 
 1. Run `blip(0)`
-2. Get `{-1, 200, 1000}` as a result
+2. Read `{200, 200, 200, 1000}` from `Toy.step`
 3. Run it (turn all motors on to 200 for 1 second)
 4. Run `blip(1)`
-5. Get `{-1, 0, 1000}` as a result
+5. Read `{0, 0, 0, 1000}` from `Toy.step`
 6. Run it (turn all motors off for 1 second)
 7. Run `blip(2)`
-8. Get `{-1, 200, 1000}` as a result
+8. Read `{200, 200, 200, 1000}` from `Toy.step`
 9. Run it (turn all motors on to 200 for 1 second)
 10. Run `blip(3)`
 
-... (run forever, or until `blip()` returns NULL)
+... (run forever, or until `blip()` returns something less than 1)
 
-> **Note:** Since the pattern function returns the next pattern step as an array, the step variable must be a global variable. Arrays in C/C++/Arduino are passed as pointers, and if the step variable isn't global it will disappear after the function is finished and the pointer will be useless.
+> **In short:** When OSSex calls your pattern function to get the next step in the pattern, all you need to do is update the `Toy.step` array with whatever you want and return 1.
 
 Making pattern functions for something simple like turning a motor on and off for 1 second is not necessarily the easiest way, but becomes necessary for more complicated patterns. Suppose we wanted to turn all the motors on and ramp their intensity up to max (255), then ramp back down to 0. We could do it like this:
 
 ```arduino
-int step[3];
-int* fade(int seq) {
-  step[0] = -1;
-  step[2] = 50;
+int fade(int seq) {
+  // set step timing
+  Toy.step[3] = 50;
 
-  // Our sequence runs from 0 to 255 and back to 0 in increments of 5 
-  // 0 -> 255: 51 steps
-  // 255 -> 0: 51 steps
+  // Our sequence runs from 0 to 255 and back to 0 in increments of 5
+  // 0 -> 255: 255/5 = 51 steps
+  // 255 -> 0: 255/5 = 51 steps
   // --------- 102 steps total
-  
+ 
   // normalize sequence
   seq %= 102;
-    
+
   if (seq <= 51) { // ascending
-    step[1] = 5 * seq;
+    Toy.step[0] = 5 * seq;
   } else { // descending
-    step[1] = 255 - 5*(seq-51);
+    Toy.step[0] = 255 - 5*(seq-51);
   }
-  return step;
+  Toy.step[1] = Toy.step[2] = Toy.step[0];
+  return 1;
 }
 ```
 
-Rather than creating an array that looks like: `{-1, 0, 50}, {-1, 5, 50}, {-1, 10, 50}, {-1, 15, 50} ...` the function will do it for us. We just use our `seq` sequence number to know where we are in the pattern.
+Rather than creating an array that looks like: `{0, 0, 0, 50}, {5, 5, 5, 50}, {10, 10, 10, 50}, {15, 15, 15, 50} ...` the function will do it for us. We just use our `seq` sequence number to know where we are in the pattern.
 
 You could also get even simpler, and use a periodic function like `sin()`, `cos()`, `tan()`, etc:
 
 ```arduino
-int *fadeCos(int seq) {
-  step[0] = -1;
-  step[2] = 50;
-  step[1] = round(127 * cos((seq / (8*PI))-PI) + 127);
-  return step;
+int fadeCos(int seq) {
+  Toy.step[0] = Toy.step[1] = Toy.step[2] = round(127 * cos((seq / (8*PI))-PI) + 127);
+  Toy.step[3] = 50;
+  return 1; 
 }
 ```
 
 Where did `127 * cos((seq / (8*PI))-PI) + 127` come from? From progressively changing `cos(x)` until it gave the right behavior. One of the easiest ways to do this is by typing "cos(x)" in to Google, viewing the graph of the function and modifying it until it looks right (starts at 0, peaks at 255ish, has a long enough period that it smoothly transitions power levels). The steps for doing this are laid out in our <a href="https://www.comingle.io/howto/advanced-programming-patterns#pattern_functions">patterns howto</a>.
 
-Pattern functions make experimentation a lot easier. You could change `step[2] = 50;` from 50 to 100 and it affects all the steps without having to rewrite every step of a giant array. You could also print the output of your function to the serial console to make sure it's behaving appropriately:
+Pattern functions make experimentation a lot easier. You could change `step[3] = 50;` from 50 to 100 and it affects all the steps without having to rewrite every step of a giant array. You could also print the output of your function to the serial console to make sure it's behaving appropriately:
 
 ```arduino
 
@@ -379,27 +377,27 @@ Pattern functions also use a lot less memory since you aren't storing every step
 We can modify the `blip()` function to terminate after running the on-off sequence twice:
 
 ```arduino
-int step[3];
-int* blip(int seq) {
-  step[0] = -1;
-  
+int blip(int seq) {
   /* NEW */
-  seq %= 5;
-
+  seq %= 5; 
+ 
   if (seq % 2) {
-    step[1] = 0;
+    Toy.step[0] = 0;
   } else {
-    step[1] = 200;
+    Toy.step[0] = 200;
   }
 
-  step[2] = 1000;
+  Toy.step[1] = Toy.step[2] = Toy.step[0];
+ 
+  Toy.step[3] = 1000;
 
   /* NEW */
   if (seq == 4) {
     return NULL;
   } else {
-    return step;
+    return 1;
   }
+ 
 }
 ```
 
@@ -413,8 +411,6 @@ If you wish to store various patterns and switch between them, there are three f
 
 ```arduino
 #include <OSSex.h>
-
-int step[3];
 
 void setup() {
   Toy.setID(0);
@@ -431,40 +427,42 @@ void click() {
   Toy.cyclePattern();
 }
 
-int* fade(int seq) {
-  step[0] = -1;
-  step[2] = 50;
+int blip(int seq) {
+ 
+  if (seq % 2) {
+    Toy.step[0] = 0;
+  } else {
+    Toy.step[0] = 200;
+  }
+
+  Toy.step[1] = Toy.step[2] = Toy.step[0];
+ 
+  Toy.step[3] = 1000;
+ 
+  return 1;
+ 
+}
+
+int fade(int seq) {
+  Toy.step[3] = 50;
 
   // Our sequence runs from 0 to 255 and back to 0 in increments of 5
   // 0 -> 255: 51 steps
   // 255 -> 0: 51 steps
   // --------- 102 steps total
-
+ 
   // normalize sequence
   seq %= 102;
 
-  if (seq <= 51) {
-    step[1] = 5 * seq;
-  } else {
-    step[1] = 255 - 5*(seq-51);
+  if (seq <= 51) { // ascending
+    Toy.step[0] = 5 * seq;
+  } else { // descending
+    Toy.step[0] = 255 - 5*(seq-51);
   }
-  return step;
+  Toy.step[1] = Toy.step[2] = Toy.step[0];
+  return 1;
 }
 
-int* blip(int seq) {
-  step[0] = -1;
-
-  if (seq % 2) {
-    step[1] = 0;
-  } else {
-    step[1] = 200;
-  }
-
-  step[2] = 1000;
-
-  return step;
-
-}
 ```
 
 When you turn on the your toy, it will do nothing. Once you press the button, it will start the `fade()` pattern, and it will run indefinitely. Clicking the button again will change it to run the `blip()` pattern, and clicking it again will move it back to `fade()`.
