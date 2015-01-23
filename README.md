@@ -1,4 +1,4 @@
-# OSSex v0.3.1
+# OSSex v0.3.2
 
 This is an Arduino library for interacting with Comingle open-source sex toys.
 
@@ -249,11 +249,11 @@ You can run patterns a couple of different ways:
 ```arduino
 #include <OSSex.h>
 
-int pattern[][3] = {
+int pattern[][4] = {
     {200, 200, 200, 1000},
     {200, 200, 200, 1000},
 };
-unsigned int patternSize = sizeof(pattern) / sizeof(int) / 3;
+unsigned int patternSize = sizeof(pattern) / sizeof(int) / 4;
 
 void setup() {
   Toy.setID(0);
@@ -342,7 +342,8 @@ You could also get even simpler, and use a periodic function like `sin()`, `cos(
 
 ```arduino
 int fadeCos(int seq) {
-  Toy.step[0] = Toy.step[1] = Toy.step[2] = round(127 * cos((seq / (8*PI))-PI) + 127);
+  Toy.step[0] = round(127 * cos((seq / (8*PI))-PI) + 127);
+  Toy.step[1] = Toy.step[2] = Toy.step[0];
   Toy.step[3] = 50;
   return 1; 
 }

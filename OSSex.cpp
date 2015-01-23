@@ -1,4 +1,4 @@
-/* OSSex.cpp v0.3.1 - Library for controlling Arduino-based sex-toys
+/* OSSex.cpp v0.3.2 - Library for controlling Arduino-based sex-toys
  * Written by Craig Durkin/Comingle
  * {♥} COMINGLE
 */
