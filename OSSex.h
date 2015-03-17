@@ -19,6 +19,11 @@
 // model names
  #define ALPHA 0
  #define BETA 1
+// Hacker Port Codes
+ #define HACKER_PORT_AIN 0
+#define HACKER_PORT_PWM 0
+#define HACKER_PORT_I2C 1
+#define HACKER_PORT_SERIAL 2
 
 class OSSex {
   public:

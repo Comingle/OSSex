@@ -460,10 +460,7 @@ void OSSex::stop() {
 	_memQueue[0] = _memQueue[1] = NULL;
 }
 
-#define HACKER_PORT_AIN 0
-#define HACKER_PORT_PWM 0
-#define HACKER_PORT_I2C 1
-#define HACKER_PORT_SERIAL 2
+
 
 // Set hacker port multiplexer for reading certain types of inputs. Accepts any of the above #defines as an option. 
 int OSSex::setHackerPort(unsigned int flag) {
