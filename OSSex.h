@@ -23,7 +23,7 @@
  #define HACKER_PORT_AIN 0  // A7 A9
 #define HACKER_PORT_PWM 0   // D6 D9 //same actual pins as AIN
 #define HACKER_PORT_I2C 1   // 
-#define HACKER_PORT_SERIAL 2  //15 and 14
+#define HACKER_PORT_SERIAL 2  //15 rx and 14 is tx
 
 class OSSex {
   public:
