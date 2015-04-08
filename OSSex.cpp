@@ -27,9 +27,9 @@ void OSSex::setID(int deviceId) {
 #if defined(__AVR_ATmega32U4__)
 	_timer_start_mask = &TCCR4B;
 	_timer_count = &TCNT4;
-    _timer_interrupt_flag = &TIFR4;
-    _timer_interrupt_mask_b = &TIMSK4;
-    _timer_init = TIMER4_INIT;
+  _timer_interrupt_flag = &TIFR4;
+  _timer_interrupt_mask_b = &TIMSK4;
+  _timer_init = TIMER4_INIT;
 #endif
 
 	if (deviceId == 1) {
@@ -374,8 +374,14 @@ int OSSex::getPattern() {
     return pos;
 }
 
-void OSSex::setPowerScale(float step) {
+// Set power scaling step to step -- power scaling will change by step
+// with each call of increasePower() or decreasePower()
+void OSSex::setPowerScaleStep(float step) {
 	_powerScaleStep = step;
+}
+
+void OSSex::setPowerScale(float step) {
+	setPowerScaleStep(step);
 }
 
 void OSSex::setScale(float step) {
@@ -392,8 +398,27 @@ float OSSex::decreasePower() {
 	return _powerScale;
 }
 
-void OSSex::setTimeScale(float step) {
+// Set power scaling factor to powerScale
+float OSSex::setPower(float powerScale) {
+	_powerScale = powerScale;
+	return _powerScale;
+}
+
+// Set time scaling factor to timeScale
+float OSSex::setTime(float timeScale) {
+  _timeScale = timeScale;
+  return _timeScale;
+}
+
+
+// Set time scaling step to step -- time scaling will change by step
+// with each call of increaseTime() or decreaseTime()
+void OSSex::setTimeScaleStep(float step) {
 	_timeScaleStep = step;
+}
+
+void OSSex::setTimeScale(float step) {
+	setTimeScaleStep(step);
 }
 
 float OSSex::increaseTime() {
