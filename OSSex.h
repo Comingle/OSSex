@@ -41,23 +41,25 @@ class OSSex {
     unsigned int getInput(int);
     int getPattern();
     void update();
+
     void attachClick(void (*callback)());
     void attachDoubleClick(void (*callback)());
     void attachLongPressStart(void (*callback)());
     void attachLongPressStop(void (*callback)());
     void attachDuringLongPress(void (*callback)());
-    void setScale(float);
+
     void setPowerScaleStep(float);
-    float setPower(float);
-    void setPowerScale(float);
+    float setPowerScaleFactor(float);
     float increasePower();
     float decreasePower();
+
     void setTimeScaleStep(float);
-    void setTimeScale(float);
-    float setTime(float);
+    float setTimeScaleFactor(float);
     float increaseTime();
     float decreaseTime();
+
     void stop();
+
     int setHackerPort(unsigned int);
 
     static const int _max_outputs = 8;

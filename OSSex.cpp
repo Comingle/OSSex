@@ -374,18 +374,16 @@ int OSSex::getPattern() {
     return pos;
 }
 
-// Set power scaling step to step -- power scaling will change by step
+// Set power scaling step to step -- power scaling factor will change by step
 // with each call of increasePower() or decreasePower()
 void OSSex::setPowerScaleStep(float step) {
 	_powerScaleStep = step;
 }
 
-void OSSex::setPowerScale(float step) {
-	setPowerScaleStep(step);
-}
-
-void OSSex::setScale(float step) {
-	setPowerScale(step);
+// Set power scaling factor to powerScale
+float OSSex::setPowerScaleFactor(float powerScale) {
+	_powerScale = powerScale;
+	return _powerScale;
 }
 
 float OSSex::increasePower() {
@@ -398,27 +396,16 @@ float OSSex::decreasePower() {
 	return _powerScale;
 }
 
-// Set power scaling factor to powerScale
-float OSSex::setPower(float powerScale) {
-	_powerScale = powerScale;
-	return _powerScale;
-}
-
-// Set time scaling factor to timeScale
-float OSSex::setTime(float timeScale) {
-  _timeScale = timeScale;
-  return _timeScale;
-}
-
-
-// Set time scaling step to step -- time scaling will change by step
+// Set time scaling step to "step" -- time scaling will change by step
 // with each call of increaseTime() or decreaseTime()
 void OSSex::setTimeScaleStep(float step) {
 	_timeScaleStep = step;
 }
 
-void OSSex::setTimeScale(float step) {
-	setTimeScaleStep(step);
+// Set time scaling factor to timeScale
+float OSSex::setTimeScaleFactor(float timeScale) {
+  _timeScale = timeScale;
+  return _timeScale;
 }
 
 float OSSex::increaseTime() {
