@@ -238,7 +238,9 @@ int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 	stop();
 
 	if (patternLength) {
+		noInterrupts();
 		_singlePattern = new struct pattern;
+		interrupts();
 		if (!_singlePattern) {
 			return -1;
 		}
@@ -253,7 +255,9 @@ int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 			patIndex->power[2] = *(patSteps++);
 			patIndex->duration = *(patSteps++);
 			if (i < patternLength-1) {
+				noInterrupts();
 				patIndex->nextStep = new struct pattern;
+				interrupts();
 				if (!patIndex->nextStep) {
 					return -1;
 				}
@@ -295,7 +299,9 @@ int OSSex::runPattern(int (*callback)(int)) {
 		return 0;
 	}
 	_seq++;
+	noInterrupts();
 	_singlePattern = new struct pattern;
+	interrupts();
 	if (!_singlePattern) {
 		return -1;
 	}
@@ -311,7 +317,9 @@ int OSSex::runPattern(int (*callback)(int)) {
         return 0;
     }
     _seq++;
+		noInterrupts();
     _singlePattern->nextStep = new struct pattern;
+		interrupts();
     if (!_singlePattern->nextStep) {
         return -1;
     }
@@ -415,7 +423,9 @@ int OSSex::cyclePattern() {
 // Add a pattern function to the queue of vibration patterns
 int OSSex::addPattern(int (*patternFunc)(int)) {
 	if (_first == NULL) {
+		noInterrupts();
 		_first = new struct patternList;
+		interrupts();
 		if (!_first) {
 			return -1;
 		}
@@ -428,7 +438,9 @@ int OSSex::addPattern(int (*patternFunc)(int)) {
 		while (iterator->nextPattern != NULL) {
 			iterator = iterator->nextPattern;
 		}
+		noInterrupts();
 		iterator->nextPattern = new struct patternList;
+		interrupts();
 		if (!iterator->nextPattern) {
 			return -1;
 		}
