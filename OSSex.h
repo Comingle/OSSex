@@ -8,7 +8,7 @@
 #define OSSex_h
 
 #include <Arduino.h>
-#include <avr/interrupt.h> 
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include "OneButton.h"
 
@@ -31,7 +31,7 @@ class OSSex {
     int runPattern(int (*callback)(int));
     int cyclePattern();
     int addPattern(int (*callback)(int));
-    int getInput(int);
+    unsigned int getInput(int);
     int getPattern();
     void update();
     void attachClick(void (*callback)());
@@ -72,12 +72,12 @@ class OSSex {
     } device;
 
     int step[4];
-   
+
   private:
     struct pattern {
       int power[3];
       unsigned int duration;
-      pattern *nextStep; 
+      pattern *nextStep;
     };
     pattern *_singlePattern;
     volatile pattern *_currentStep;
@@ -109,4 +109,3 @@ class OSSex {
 extern OSSex Toy;
 
 #endif
-

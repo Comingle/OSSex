@@ -529,7 +529,7 @@ int OSSex::setHackerPort(unsigned int flag) {
 }
 
 // Read input channel
-int OSSex::getInput(int inNumber) {
+unsigned int OSSex::getInput(int inNumber) {
 	inNumber = abs(inNumber) % device.inCount;
 	return analogRead(device.inPins[inNumber]);
 }
