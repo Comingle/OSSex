@@ -27,13 +27,16 @@ class OneButton
 {
 public:
   // ----- Constructor -----
-  OneButton(int pin, int active);
+  OneButton(int pin, int active, bool (*callback)(void));
   OneButton();
-  
+
   // ----- Set runtime parameters -----
 
   // set button pin
   void setPin(int pin);
+
+  // set if button is on pseudo pin
+  void setPseudo(bool (*callback)(void));
 
   // set if button is active when low
   void setActiveLow(int activeLow);
@@ -62,7 +65,7 @@ public:
   void setDebounceDelay(int delay);
 
 private:
-  int _pin;        // hardware pin number. 
+  int _pin;        // hardware pin number.
   int _clickTicks; // number of ticks that have to pass by before a click is detected
   int _pressTicks; // number of ticks that have to pass by before a lonn button press is detected
 
@@ -84,6 +87,9 @@ private:
   int _state;
   unsigned long _startTime; // will be set in state 1
 
+  // if we're reading a button from a pseudo pin
+  bool (*_pseudo)(void);
+
   // Debounce variables and functions
   // Help prevent bouncing button states from being read as double clicks
   int _db_buttonState;                // the current reading from the input pin
@@ -94,5 +100,3 @@ private:
 };
 
 #endif
-
-

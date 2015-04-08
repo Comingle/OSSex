@@ -17,7 +17,7 @@
 
 // ----- Initialization and Default Values -----
 
-OneButton::OneButton(int pin, int activeLow)
+OneButton::OneButton(int pin, int activeLow, bool (*pseudo)(void))
 {
 
   /*_clickTicks = 450;        // number of millisec that have to pass by before a click is detected.
@@ -26,6 +26,7 @@ OneButton::OneButton(int pin, int activeLow)
   _state = 0; // starting with state 0: waiting for button to be pressed
   _isLongPressed = false;  // Keep track of long press state*/
 
+  setPseudo(pseudo);
   setPin(pin);
   setActiveLow(activeLow);
   OneButton();
@@ -67,8 +68,12 @@ OneButton::OneButton() {
 }
 
 void OneButton::setPin(int pin) {
-  pinMode(pin, INPUT);      // sets the MenuPin as input
+  if (!_pseudo) pinMode(pin, INPUT);      // sets the MenuPin as input
   _pin = pin;
+}
+
+void OneButton::setPseudo(bool (*newFunction)(void)) {
+  _pseudo = newFunction;
 }
 
 void OneButton::setActiveLow(int activeLow) {
@@ -76,7 +81,7 @@ void OneButton::setActiveLow(int activeLow) {
     // button connects ground to the pin when pressed.
     _buttonReleased = HIGH; // notPressed
     _buttonPressed = LOW;
-    pinMode(_pin, INPUT_PULLUP);   // turn on pullUp resistor
+    if (!_pseudo) pinMode(_pin, INPUT_PULLUP);   // turn on pullUp resistor
 
   } else {
     // button connects VCC to the pin when pressed.
@@ -143,8 +148,13 @@ bool OneButton::isLongPressed(){
 
 void OneButton::tick(void)
 {
+  int buttonLevel;
   // Detect the input information
-  int buttonLevel = debounce(digitalRead(_pin)); // current button signal. (debounced)
+  if (_pseudo) {
+    buttonLevel = debounce(_pseudo());
+  } else {
+    buttonLevel = debounce(digitalRead(_pin)); // current button signal. (debounced)
+  }
   unsigned long now = millis(); // current (relative) time in msecs.
 
   // Implementation of the state machine
