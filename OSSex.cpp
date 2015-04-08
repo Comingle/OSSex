@@ -6,7 +6,7 @@
 
 #include <Arduino.h>
 #include <OSSex.h>
-#include <avr/interrupt.h> 
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include "OneButton.h"
 
@@ -35,19 +35,19 @@ void OSSex::setID(int deviceId) {
 	if (deviceId == 1) {
 		// Beta Model
 		device.outCount = 3;
-		device.outPins[0] = 5; 
-		device.outPins[1] = 10; 
+		device.outPins[0] = 5;
+		device.outPins[1] = 10;
 		device.outPins[2] = 11;
-		
+
 		device.deviceId = 1;
-		
+
 		device.ledCount = 1;
 		device.ledPins[0] = 13;
 
 		// Technically 4, but 2 inputs remain unconnected in most models
 		device.inCount = 2;
-		device.inPins[0] = A9; // D+
-		device.inPins[1] = A7; // D-
+		device.inPins[0] = A7; // D-
+		device.inPins[1] = A9; // D+
 
 		device.muxPins[0] = 8;
 		device.muxPins[1] = 12;
@@ -64,12 +64,12 @@ void OSSex::setID(int deviceId) {
 	} else {
 		// Lilypad USB  / Alpha model
 		device.outCount = 3;
-		device.outPins[0] = 3; 
-		device.outPins[1] = 9; 
+		device.outPins[0] = 3;
+		device.outPins[1] = 9;
 		device.outPins[2] = 10;
-		
+
 		device.deviceId = 0;
-		
+
 		device.ledCount = 1;
 		device.ledPins[0] = 13;
 
@@ -84,8 +84,8 @@ void OSSex::setID(int deviceId) {
 	device.isLedMultiColor = false;
 
 	device.buttons[0].button.setPin(device.buttons[0].pin);
-	device.buttons[0].button.setActiveLow(true);	
-    
+	device.buttons[0].button.setActiveLow(true);
+
 	for (int i = 0; i < device.outCount; i++) {
 		pinMode(device.outPins[i], OUTPUT);
 		if (device.bothWays) {
@@ -101,8 +101,8 @@ void OSSex::setID(int deviceId) {
 
 	// Start the interrupt timer (timer2/timer4)
 	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
-	
-	*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer Overflow Interrupt Enable: 00000100   
+
+	*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer Overflow Interrupt Enable: 00000100
   	_tickCount = 0;
  	*_timer_count = _timer_init;			// Reset Timer Count
  	*_timer_interrupt_flag = 0x00;			// Timer INT Flag Reg: Clear Timer Overflow Flag
@@ -118,11 +118,11 @@ void OSSex::setID(int deviceId) {
 // Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status.
 // If a pattern is running, the _running flag will be true
 void OSSex::update() {
-	device.buttons[0].button.tick(); 
+	device.buttons[0].button.tick();
 	if (_running) {
 		_tickCount++;
 		if (_tickCount > (_currentStep->duration * _timeScale)) {
-	  		if (_currentStep->nextStep == NULL) { 
+	  		if (_currentStep->nextStep == NULL) {
 	  			// stop the pattern if at last step
 	    		_running = false;
 	  		} else {
@@ -130,7 +130,7 @@ void OSSex::update() {
 	  			_currentStep = _currentStep->nextStep;
 
 	  			// if we're running a large pre-set pattern, we're supplied all the steps at once so we can't store
-	  			// all our allocated memory in _memQueue (since it only holds 2 elements). this !_patternCallback 
+	  			// all our allocated memory in _memQueue (since it only holds 2 elements). this !_patternCallback
 	  			// check ensures that memory still gets freed eventually in those situations.
 	  			if (!_patternCallback) {
 	  				_memQueue[1] = _currentStep;
@@ -144,7 +144,7 @@ void OSSex::update() {
 	  		free((void*)_memQueue[0]);
 	  		_memQueue[0] = _memQueue[1];
 	  		_memQueue[1] = NULL;
-	  		_tickCount = 0; 
+	  		_tickCount = 0;
 		} else if (_currentStep->nextStep == NULL && _patternCallback) {
 			// if it's not time for the next step, go ahead and queue it up
 			if (_patternCallback(_seq)) {
@@ -160,7 +160,7 @@ void OSSex::update() {
 				_running = false;
 			}
 		}
-	} 
+	}
 
 	*_timer_count = _timer_init;		//Reset timer after interrupt triggered
   	*_timer_interrupt_flag = 0x00;		//Clear timer overflow flag
@@ -171,7 +171,7 @@ void OSSex::update() {
 // outNumber of any other negative number or a number greater than or equal to the number of available outputs will be rolled over.
 // Ex: in a 4 output device, you can access outputs 0, 1, 2, and 3.
 // Specifying outNumber of -3 will map to output 3. Specifying an outNumber of 5 will map to output 1.
-// powerLevel can be from 0..255 in devices that aren't bidirectional, and -255..255 in birdirectional devices. 
+// powerLevel can be from 0..255 in devices that aren't bidirectional, and -255..255 in birdirectional devices.
 // Negative powerLevel values are coerced to 0 in devices that aren't bidirectional.
 // powerLevel of 0 turns the output off. Values greater than +/-255 get coerced to +/-255.
 // XXX Add serial (Stream object) feedback from function for diagnostics
@@ -194,7 +194,7 @@ int OSSex::setOutput(int outNumber, int powerLevel) {
 	if (_powerScale * constrainedPower > 255) {
 		_powerScale = 255/constrainedPower;
 	}
-	
+
 	for (int i = 0; i < iterations; i++) {
 		if (constrainedPower == 0) {
 			analogWrite(device.outPins[outNumber], 0);
@@ -236,7 +236,7 @@ int OSSex::setLED(int ledNumber, int powerLevel) {
 // This function will not return until the pattern is finished running.
 int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 	stop();
-	
+
 	if (patternLength) {
 		_singlePattern = new struct pattern;
 		if (!_singlePattern) {
@@ -273,7 +273,7 @@ int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 		_running = true;
 
 		// Wait until pattern is finished to return
-		while (_running) {}		
+		while (_running) {}
 		return 1;
 	} else {
 		return 0;
@@ -286,8 +286,8 @@ int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 // This function will return before the pattern is finished running since many functions will run indefinitely and block all other processing.
 int OSSex::runPattern(int (*callback)(int)) {
 	stop();
-	
-	// get the first two steps of the sequence. 
+
+	// get the first two steps of the sequence.
 	// if we don't, some patterns with short first steps won't run well and will have a race condition
 	// since the next step is queued while the current one is running
 	_patternCallback = callback;
@@ -305,7 +305,7 @@ int OSSex::runPattern(int (*callback)(int)) {
 	_singlePattern->power[1] = step[1];
 	_singlePattern->power[2] = step[2];
 	_singlePattern->duration = step[3];
-	
+
 	// get second step
     if (!_patternCallback(_seq)) {
         return 0;
@@ -340,7 +340,7 @@ int OSSex::runPattern(unsigned int pos) {
     if (!_currentPattern) {
         return -1;
     }
-		
+
     _currentPattern = _first;
     for (int i = 0; i < pos; i++) {
         _currentPattern = _currentPattern->nextPattern;
@@ -465,7 +465,7 @@ void OSSex::stop() {
 #define HACKER_PORT_I2C 1
 #define HACKER_PORT_SERIAL 2
 
-// Set hacker port multiplexer for reading certain types of inputs. Accepts any of the above #defines as an option. 
+// Set hacker port multiplexer for reading certain types of inputs. Accepts any of the above #defines as an option.
 int OSSex::setHackerPort(unsigned int flag) {
 	if (device.deviceId < 1) {
 		return -1;
@@ -516,6 +516,3 @@ void OSSex::attachLongPressStop(void (*callback)()) {
 void OSSex::attachDuringLongPress(void (*callback)()) {
 	device.buttons[0].button.attachDuringLongPress(callback);
 }
-
-
-
