@@ -16,9 +16,15 @@
 #define TIMER4_INIT 16;
 #define TIMER2_INIT 131;
 
+#define HACKER_PORT_AIN 0
+#define HACKER_PORT_PWM 0
+#define HACKER_PORT_I2C 1
+#define HACKER_PORT_SERIAL 2
+
 // model names
  #define ALPHA 0
  #define BETA 1
+ #define MOD 1
 
 class OSSex {
   public:
