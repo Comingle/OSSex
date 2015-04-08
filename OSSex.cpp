@@ -446,7 +446,9 @@ int OSSex::cyclePattern() {
 }
 
 // Add a pattern function to the queue of vibration patterns
+// Create queue if necessary
 int OSSex::addPattern(int (*patternFunc)(int)) {
+	volatile patternList *next;
 	if (_first == NULL) {
 		noInterrupts();
 		_first = new struct patternList;
@@ -454,10 +456,7 @@ int OSSex::addPattern(int (*patternFunc)(int)) {
 		if (!_first) {
 			return -1;
 		}
-		_first->patternFunc = patternFunc;
-		_first->nextPattern = NULL;
-		_currentPattern = _first;
-		return 1;
+		next = _first;
 	} else {
 		volatile patternList *iterator = _first;
 		while (iterator->nextPattern != NULL) {
@@ -469,12 +468,13 @@ int OSSex::addPattern(int (*patternFunc)(int)) {
 		if (!iterator->nextPattern) {
 			return -1;
 		}
-		iterator = iterator->nextPattern;
-		iterator->patternFunc = patternFunc;
-		iterator->nextPattern = NULL;
-		_currentPattern = iterator;
-		return 1;
+		next = iterator->nextPattern;
 	}
+	next->patternFunc = patternFunc;
+
+	next->nextPattern = NULL;
+	_currentPattern = next;
+	return 1;
 }
 
 // stop all the motors and patterns, reset to beginning. this could be better-written.
