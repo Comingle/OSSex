@@ -19,28 +19,18 @@
 
 OneButton::OneButton(int pin, int activeLow)
 {
-  pinMode(pin, INPUT);      // sets the MenuPin as input
-  _pin = pin;
 
-  _clickTicks = 450;        // number of millisec that have to pass by before a click is detected.
+  /*_clickTicks = 450;        // number of millisec that have to pass by before a click is detected.
   _pressTicks = 1000;       // number of millisec that have to pass by before a long button press is detected.
- 
+
   _state = 0; // starting with state 0: waiting for button to be pressed
-  _isLongPressed = false;  // Keep track of long press state
+  _isLongPressed = false;  // Keep track of long press state*/
 
-  if (activeLow) {
-    // button connects ground to the pin when pressed.
-    _buttonReleased = HIGH; // notPressed
-    _buttonPressed = LOW;
-    pinMode(pin, INPUT_PULLUP);   // turn on pullUp resistor
+  setPin(pin);
+  setActiveLow(activeLow);
+  OneButton();
 
-  } else {
-    // button connects VCC to the pin when pressed.
-    _buttonReleased = LOW;
-    _buttonPressed = HIGH;
-  } // if
-
-  _doubleClickFunc = NULL;
+  /*_doubleClickFunc = NULL;
   _pressFunc = NULL;
   _longPressStartFunc = NULL;
   _longPressStopFunc = NULL;
@@ -51,7 +41,7 @@ OneButton::OneButton(int pin, int activeLow)
   _db_lastButtonState  = _db_buttonState;  // the previous reading from the input pin, no previous reading so use current
   _db_lastDebounceTime = 0;                // the last time the output pin was toggled, init to zero
   _db_debounceDelay    = 25;               // the debounce time; increase if the output flickers. Settable with setDebounceDelay() function
-
+*/
 } // OneButton
 
 // argument-free constructor so we can set pin/activelow later depending on device
@@ -62,6 +52,12 @@ OneButton::OneButton() {
 
   _state = 0; // starting with state 0: waiting for button to be pressed
   _isLongPressed = false;  // Keep track of long press state
+
+  _doubleClickFunc = NULL;
+  _pressFunc = NULL;
+  _longPressStartFunc = NULL;
+  _longPressStopFunc = NULL;
+  _duringLongPressFunc = NULL;
 
   // Debounce init
   _db_buttonState      = _buttonReleased;  // the current reading from the input pin, assume its in rest during setup
@@ -87,12 +83,10 @@ void OneButton::setActiveLow(int activeLow) {
     _buttonReleased = LOW;
     _buttonPressed = HIGH;
   } // if
-  _db_buttonState      = _buttonReleased;  // the current reading from the input pin, assume its in rest during setup
-  _db_lastButtonState  = _db_buttonState;  // the previous reading from the input pin, no previous reading so use current
 }
 
 // explicitly set the number of millisec that have to pass by before a click is detected.
-void OneButton::setClickTicks(int ticks) { 
+void OneButton::setClickTicks(int ticks) {
   _clickTicks = ticks;
 } // setClickTicks
 
@@ -118,7 +112,7 @@ void OneButton::attachDoubleClick(callbackFunction newFunction)
 
 
 // save function for press event
-// DEPRECATED, is replaced by attachLongPressStart, attachLongPressStop, attachDuringLongPress, 
+// DEPRECATED, is replaced by attachLongPressStart, attachLongPressStop, attachDuringLongPress,
 void OneButton::attachPress(callbackFunction newFunction)
 {
   _pressFunc = newFunction;
@@ -149,7 +143,7 @@ bool OneButton::isLongPressed(){
 
 void OneButton::tick(void)
 {
-  // Detect the input information 
+  // Detect the input information
   int buttonLevel = debounce(digitalRead(_pin)); // current button signal. (debounced)
   unsigned long now = millis(); // current (relative) time in msecs.
 
@@ -170,7 +164,7 @@ void OneButton::tick(void)
 	  if (_longPressStartFunc) _longPressStartFunc();
 	  if (_duringLongPressFunc) _duringLongPressFunc();
       _state = 6; // step to state 6
-      
+
     } else {
       // wait. Stay in this state.
     } // if
@@ -201,24 +195,24 @@ void OneButton::tick(void)
 	  // button is being long pressed
 	  _isLongPressed = true; // Keep track of long press state
 	  if (_duringLongPressFunc) _duringLongPressFunc();
-    } // if  
+    } // if
 
-  } // if  
+  } // if
 } // OneButton.tick()
 
 boolean OneButton::debounce(boolean reading){
   // Source: http://arduino.cc/en/Tutorial/Debounce
-  
+
   // check to see if you just pressed the button
   // (i.e. the input went from LOW to HIGH),  and you've waited
-  // long enough since the last press to ignore any noise:  
+  // long enough since the last press to ignore any noise:
 
   // If the switch changed, due to noise or pressing:
   if (reading != _db_lastButtonState) {
     // reset the debouncing timer
     _db_lastDebounceTime = millis();
   }
- 
+
   if ((millis() - _db_lastDebounceTime) > _db_debounceDelay) {
     // whatever the reading is at, it's been there for longer
     // than the debounce delay, so take it as the actual current state:
@@ -243,4 +237,3 @@ void OneButton::setDebounceDelay(int delay){
 
 
 // end.
-
