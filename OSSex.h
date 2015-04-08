@@ -16,6 +16,7 @@
 #define TIMER4_INIT 16;
 #define TIMER2_INIT 131;
 
+// Hacker port modes
 #define HACKER_PORT_AIN 0
 #define HACKER_PORT_PWM 0
 #define HACKER_PORT_I2C 1
@@ -46,10 +47,14 @@ class OSSex {
     void attachLongPressStop(void (*callback)());
     void attachDuringLongPress(void (*callback)());
     void setScale(float);
+    void setPowerScaleStep(float);
+    float setPower(float);
     void setPowerScale(float);
     float increasePower();
     float decreasePower();
+    void setTimeScaleStep(float);
     void setTimeScale(float);
+    float setTime(float);
     float increaseTime();
     float decreaseTime();
     void stop();
