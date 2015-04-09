@@ -152,7 +152,6 @@ void OneButton::tick(void)
   // Implementation of the state machine
   if (_state == 0) { // waiting for menu pin being pressed.
     if (buttonLevel == _buttonPressed) {
-      _blah = buttonLevel;
       _state = 1; // step to state 1
       _startTime = now; // remember starting time
     } // if
