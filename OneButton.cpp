@@ -17,38 +17,26 @@
 
 // ----- Initialization and Default Values -----
 
-OneButton::OneButton(int pin, int activeLow, bool (*pseudo)(void))
-{
-
-  /*_clickTicks = 450;        // number of millisec that have to pass by before a click is detected.
-  _pressTicks = 1000;       // number of millisec that have to pass by before a long button press is detected.
-
-  _state = 0; // starting with state 0: waiting for button to be pressed
-  _isLongPressed = false;  // Keep track of long press state*/
-
-  setPseudo(pseudo);
+OneButton::OneButton(int pin, int activeLow) {
+  init();
   setPin(pin);
   setActiveLow(activeLow);
-  OneButton();
 
-  /*_doubleClickFunc = NULL;
-  _pressFunc = NULL;
-  _longPressStartFunc = NULL;
-  _longPressStopFunc = NULL;
-  _duringLongPressFunc = NULL;
-
-  // Debounce init
-  _db_buttonState      = _buttonReleased;  // the current reading from the input pin, assume its in rest during setup
-  _db_lastButtonState  = _db_buttonState;  // the previous reading from the input pin, no previous reading so use current
-  _db_lastDebounceTime = 0;                // the last time the output pin was toggled, init to zero
-  _db_debounceDelay    = 25;               // the debounce time; increase if the output flickers. Settable with setDebounceDelay() function
-*/
 } // OneButton
 
 // argument-free constructor so we can set pin/activelow later depending on device
 OneButton::OneButton() {
+  init();
+}
 
-  _clickTicks = 450;        // number of millisec that have to pass by before a click is detected.
+OneButton::OneButton(bool (*pseudo)(void), bool activeLow) {
+  init();
+  setPseudo(pseudo);
+  setActiveLow(activeLow);
+}
+
+void OneButton::init() {
+  _clickTicks = 250;        // number of millisec that have to pass by before a click is detected.
   _pressTicks = 1000;       // number of millisec that have to pass by before a long button press is detected.
 
   _state = 0; // starting with state 0: waiting for button to be pressed
@@ -65,15 +53,14 @@ OneButton::OneButton() {
   _db_lastButtonState  = _db_buttonState;  // the previous reading from the input pin, no previous reading so use current
   _db_lastDebounceTime = 0;                // the last time the output pin was toggled, init to zero
   _db_debounceDelay    = 25;               // the debounce time; increase if the output flickers. Settable with setDebounceDelay() function
+
 }
 
 void OneButton::setPin(int pin) {
-  if (!_pseudo) pinMode(pin, INPUT);      // sets the MenuPin as input
-  _pin = pin;
-}
-
-void OneButton::setPseudo(bool (*newFunction)(void)) {
-  _pseudo = newFunction;
+  if (!_pseudo) {
+    pinMode(pin, INPUT);      // sets the MenuPin as input
+    _pin = pin;
+  }
 }
 
 void OneButton::setActiveLow(int activeLow) {
@@ -101,6 +88,11 @@ void OneButton::setPressTicks(int ticks) {
   _pressTicks = ticks;
 } // setPressTicks
 
+// if we're reading from a pseudo button (ie, not directly off a digital pin), newFunction
+// will return the button state (boolean) when called with no arguments
+void OneButton::setPseudo(bool (*newFunction)(void)) {
+  _pseudo = newFunction;
+}
 
 // save function for click event
 void OneButton::attachClick(callbackFunction newFunction)
@@ -160,6 +152,7 @@ void OneButton::tick(void)
   // Implementation of the state machine
   if (_state == 0) { // waiting for menu pin being pressed.
     if (buttonLevel == _buttonPressed) {
+      _blah = buttonLevel;
       _state = 1; // step to state 1
       _startTime = now; // remember starting time
     } // if
@@ -171,8 +164,8 @@ void OneButton::tick(void)
     } else if ((buttonLevel == _buttonPressed) && (now > _startTime + _pressTicks)) {
       _isLongPressed = true;  // Keep track of long press state
       if (_pressFunc) _pressFunc();
-	  if (_longPressStartFunc) _longPressStartFunc();
-	  if (_duringLongPressFunc) _duringLongPressFunc();
+  	  if (_longPressStartFunc) _longPressStartFunc();
+  	  if (_duringLongPressFunc) _duringLongPressFunc();
       _state = 6; // step to state 6
 
     } else {
@@ -181,6 +174,7 @@ void OneButton::tick(void)
 
   } else if (_state == 2) { // waiting for menu pin being pressed the second time or timeout.
     if (now > _startTime + _clickTicks) {
+      //_blah = 43;
       // this was only a single short click
       if (_clickFunc) _clickFunc();
       _state = 0; // restart.

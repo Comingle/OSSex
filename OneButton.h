@@ -27,10 +27,14 @@ class OneButton
 {
 public:
   // ----- Constructor -----
-  OneButton(int pin, int active, bool (*callback)(void));
+  OneButton(int pin, int active);
   OneButton();
+  OneButton(bool (*callback)(void), bool);
+
 
   // ----- Set runtime parameters -----
+  // set up defaults
+  void init();
 
   // set button pin
   void setPin(int pin);
@@ -87,7 +91,8 @@ private:
   int _state;
   unsigned long _startTime; // will be set in state 1
 
-  // if we're reading a button from a pseudo pin
+  // if we're reading a button from a pseudo (not a direct digial pin)
+  // then _pseudo is a function that returns a true/false button state
   bool (*_pseudo)(void);
 
   // Debounce variables and functions
