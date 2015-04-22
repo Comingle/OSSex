@@ -62,6 +62,7 @@
 class WiiChuck {
   public:
     WiiChuck();
+    WiiChuck(bool (*c_update)(void), bool (*z_update)(void));
     void begin();
     void calibrateJoy();
     void update();
@@ -94,8 +95,8 @@ class WiiChuck {
     uint8_t joyX;
     uint8_t joyY;
     struct {
-      OneButton button;               // button object
-      bool value;               // onboard pin
+      OneButton button;         // button object
+      bool value;               // whether button is pressed or not
     } buttonZ, buttonC;
     uint8_t baselineX;
     uint8_t baselineY;
@@ -104,10 +105,6 @@ class WiiChuck {
 
   private:
     uint8_t status[6];              // array to store wiichuck output
-    //uint8_t averageCounter; // doesn't seem to be used
-    //int accelArray[3][AVERAGE_N];  // X,Y,Z
-    // int i; no need for permanent loop iterator
-    // int total; NOT USED
     uint8_t zeroJoyX;   // these are about where mine are
     uint8_t zeroJoyY; // use calibrateJoy when the stick is at zero to correct
     int lastJoyX;
@@ -115,8 +112,6 @@ class WiiChuck {
     int angles[3];
 
     void _send_zero();
-
-
 
 };
 

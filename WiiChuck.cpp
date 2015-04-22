@@ -1,6 +1,16 @@
 #include <WiiChuck.h>
 
-WiiChuck::WiiChuck() {}
+WiiChuck::WiiChuck() {
+  buttonZ.button.setActiveLow(false);
+  buttonC.button.setActiveLow(false);
+}
+
+WiiChuck::WiiChuck(bool (*c_update)(void), bool (*z_update)(void)) {
+  buttonZ.button.setActiveLow(false);
+  buttonC.button.setActiveLow(false);
+  attachZUpdate(z_update);
+  attachCUpdate(c_update);
+}
 
 void WiiChuck::begin()
 {
@@ -33,8 +43,6 @@ void WiiChuck::begin()
     zeroJoyX = DEFAULT_ZERO_JOY_X;
     zeroJoyY = DEFAULT_ZERO_JOY_Y;
 
-    buttonZ.button.setActiveLow(false);
-    buttonC.button.setActiveLow(false);
 }
 
 void WiiChuck::calibrateJoy() {
