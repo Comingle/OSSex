@@ -1,4 +1,4 @@
-/* OSSex.cpp v0.3.2 - Library for controlling Arduino-based sex-toys
+/* OSSex.cpp v0.4 - Library for controlling Arduino-based sex-toys
  * Written by Craig Durkin/Comingle
  * {♥} COMINGLE
 */
@@ -23,7 +23,7 @@ OSSex Toy = OSSex();
 OSSex::OSSex() {}
 
 // the real constructor. give it a device ID and it will set up your device's pins and timers.
-void OSSex::setID(int deviceId) {
+void OSSex::setID(int deviceId = MOD) {
 #if defined(__AVR_ATmega32U4__)
 	_timer_start_mask = &TCCR4B;
 	_timer_count = &TCNT4;
@@ -103,7 +103,7 @@ void OSSex::setID(int deviceId) {
 	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
 
 	*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer Overflow Interrupt Enable: 00000100
-  	_tickCount = 0;
+  _tickCount = 0;
  	*_timer_count = _timer_init;			// Reset Timer Count
  	*_timer_interrupt_flag = 0x00;			// Timer INT Flag Reg: Clear Timer Overflow Flag
  	*_timer_start_mask = 0x05;				// Timer PWM disable, prescale / 16: 00000101

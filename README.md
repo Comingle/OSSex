@@ -1,4 +1,4 @@
-# OSSex v0.3.2
+# OSSex v0.4
 
 This is an Arduino library for interacting with Comingle open-source sex toys.
 
@@ -38,27 +38,7 @@ void loop() {
 
 > **Note:** if you include the OSSex library in your sketch via Arduino's "Import Library..." menu, it will add an unnecessary `#include <OneButton.h>` to your sketch. You should delete this line or you'll have compilation errors.
 
-
-## Set up your toy
-
-An object named `Toy` is available when you load the library. You can interact with your toy through this object. 
-
-You need to tell the library which toy you're using. Use `setID(ID)` to do so:
-```arduino
-#include <OSSex.h>
-
-void setup() {
-  Toy.setID(0);
-}
-
-void loop() {
- ...
-}
-
-```
-
-If `ID` is 1, it sets up a device based on the Mod Beta. Any other number will set up a device for a LilyPad USB / Atmega32U4.
-
+An object named `Toy` is available when you load the library. You can interact with your Mod through this object. 
 
 ## Turn a motor (output) on/off
 ```arduino
@@ -193,18 +173,21 @@ This example will turn the LED on when the button is pressed, and turn it off wh
 
 You can increase or decrease the power of a pattern while it's running to tune it to a comfortable setting. You do that with 3 functions:
 
-* `setPowerScale()`
+* `setPowerScaleFactor()`
+* `setPowerScaleStep()`
 * `increasePower()`
 * `decreasePower()`
 
-On a Mod you can double-click the button to increase the power, or hold and release the button to decrease the power. `setPowerScale()` lets you define how much the power changes with each double-click or button-hold:
+`setPowerScaleFactor()` lets you define a power scaling factor: a power scale of 0.5 will run all patterns at 50% power. 
+
+On a Mod you can double-click the button to increase the power, or hold and release the button to decrease the power. `setPowerScaleStep()` lets you define how much the power changes with each call to `increasePower()` (double-click) or `decreasePower()` (click-hold).
 
 ```arduino
 #include <OSSex.h>
 
 void setup() {
   Toy.setID(0);
-  Toy.setPowerScale(0.2);
+  Toy.setPowerScaleStep(0.2);
   Toy.attachDoubleClick(doubleClick);
   Toy.attachLongPressStart(longPress);
   ...
@@ -223,15 +206,18 @@ void longPress() {
 
 This would set a double-click to increase the power by 20%, and a button hold-and-release to decrease the power by 20%: the scale is set to 20% (0.2), and then the `doubleClick()` function is attached to the double-click behavior, while the `longPress()` function is attached to the button hold-and-release behavior.
 
-## Adjusting the time
+## Adjusting the pattern time
 
-The OSSex library includes several functions for changing the time scale of patterns:
+The OSSex library includes several functions for adjusting how fast or slow vibration patterns run:
 
-* `setTimeScale()`
+* `setTimeScaleFactor()`
+* `setTimeScaleStep()`
 * `increaseTime()`
 * `decreaseTime()`
 
-`setTimeScale()` sets the how much `increaseTime()` and `decreaseTime()` will increase or decrease whenever called. For example, `setTimeScale(0.2)` will cause `increaseTime()` slow everything down by 20%, and `decreaseTime()` to speed everything up by 20%. 
+`setPowerScaleFactor()` lets you define a time scaling factor: a time scale of 0.5 will run all patterns at 50% speed (twice as fast as normal). 
+
+`setTimeScaleStep()` sets the how much `increaseTime()` and `decreaseTime()` will increase or decrease whenever called. For example, `setTimeScaleStep(0.2)` will cause `increaseTime()` slow everything down by 20%, and `decreaseTime()` to speed everything up by 20%. 
 
 # Getting creative
 

@@ -14,11 +14,13 @@ attachDoubleClick	KEYWORD2
 attachLongPressStart	KEYWORD2
 attachLongPressStop	KEYWORD2
 attachDuringLongPress	KEYWORD2
-setScale	KEYWORD2
-setPowerScale	KEYWORD2
-setTimeScale	KEYWORD2
+setPowerScaleFactor	KEYWORD2
+setPowerScaleStep	KEYWORD2
+setTimeScaleFactor	KEYWORD2
+setTimeScaleStep	KEYWORD2
 increasePower	KEYWORD2
 decreasePower	KEYWORD2
 increaseTime	KEYWORD2
 decreaseTime	KEYWORD2
 stop	KEYWORD2
+setHackerPort	KEYWORD2
