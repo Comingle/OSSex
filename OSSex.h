@@ -50,6 +50,7 @@ class OSSex {
 
     void setPowerScaleStep(float);
     float setPowerScaleFactor(float);
+    float getPowerScaleFactor();
     float increasePower();
     float decreasePower();
 

@@ -386,6 +386,11 @@ float OSSex::setPowerScaleFactor(float powerScale) {
 	return _powerScale;
 }
 
+// Return power scaling factor
+float OSSex::getPowerScaleFactor() {
+	return _powerScale;
+}
+
 float OSSex::increasePower() {
 	_powerScale *= (1.0 + _powerScaleStep);
 	return _powerScale;
