@@ -83,6 +83,8 @@ class OSSex {
         unsigned int memAddress;        // EEPROM address for storing button state
       } buttons[1];
       uint8_t muxPins[2];               // pins for controlling hacker port multiplexer
+      byte HP0;                         // hacker port pin 0
+      byte HP1;                         // hacker port pin 1
     } device;
 
     int step[4];

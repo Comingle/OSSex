@@ -56,11 +56,6 @@ void OSSex::setID(int deviceId = MOD) {
 
 		device.buttons[0].pin = 4;
 
-// TODO: Hacker port inputs as PWM outputs. Handle with setOutput():
-// set as input, store previous hacker port state and restore as before.
-#define H0 9
-#define H1 6
-
 	} else {
 		// Lilypad USB  / Alpha model
 		device.outCount = 3;
@@ -498,14 +493,20 @@ int OSSex::setHackerPort(unsigned int flag) {
 		case HACKER_PORT_AIN:
 			digitalWrite(device.muxPins[0], LOW);
 			digitalWrite(device.muxPins[1], LOW);
+			device.HP0 = A7;
+			device.HP1 = A9;
 			break;
 		case HACKER_PORT_I2C:
 			digitalWrite(device.muxPins[0], HIGH);
 			digitalWrite(device.muxPins[1], LOW);
+			device.HP0 = 2;
+			device.HP1 = 3;
 			break;
 		case HACKER_PORT_SERIAL:
 			digitalWrite(device.muxPins[0], LOW);
 			digitalWrite(device.muxPins[1], HIGH);
+			device.HP0 = 15;
+			device.HP1 = 17;
 			break;
 		default:
 			return -1;
