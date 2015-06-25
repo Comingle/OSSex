@@ -137,6 +137,7 @@ void OSSex::update() {
 	  				}
   			}
   		}
+			// Possibly dangerous to free/malloc memory in an interrupt
   		free((void*)_memQueue[0]);
   		_memQueue[0] = _memQueue[1];
   		_memQueue[1] = NULL;
@@ -145,6 +146,7 @@ void OSSex::update() {
 			// if it's not time for the next step, go ahead and queue it up
 			if (_patternCallback(_seq)) {
 				_seq++;
+				// Possibly dangerous to free/malloc memory in an interrupt
 				_currentStep->nextStep = new struct pattern;
 				_memQueue[1] = _currentStep->nextStep;
 				_currentStep->nextStep->power[0] = step[0];
@@ -234,9 +236,9 @@ int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 	stop();
 
 	if (patternLength) {
-		noInterrupts();
+
 		_singlePattern = new struct pattern;
-		interrupts();
+
 		if (!_singlePattern) {
 			return -1;
 		}
@@ -251,9 +253,9 @@ int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 			patIndex->power[2] = *(patSteps++);
 			patIndex->duration = *(patSteps++);
 			if (i < patternLength-1) {
-				noInterrupts();
+
 				patIndex->nextStep = new struct pattern;
-				interrupts();
+
 				if (!patIndex->nextStep) {
 					return -1;
 				}
@@ -295,9 +297,8 @@ int OSSex::runPattern(int (*callback)(int)) {
 		return 0;
 	}
 	_seq++;
-	noInterrupts();
 	_singlePattern = new struct pattern;
-	interrupts();
+
 	if (!_singlePattern) {
 		return -1;
 	}
@@ -313,9 +314,8 @@ int OSSex::runPattern(int (*callback)(int)) {
         return 0;
     }
     _seq++;
-		noInterrupts();
     _singlePattern->nextStep = new struct pattern;
-		interrupts();
+
     if (!_singlePattern->nextStep) {
         return -1;
     }
@@ -443,9 +443,9 @@ int OSSex::cyclePattern() {
 int OSSex::addPattern(int (*patternFunc)(int)) {
 	volatile patternList *next;
 	if (_first == NULL) {
-		noInterrupts();
+
 		_first = new struct patternList;
-		interrupts();
+
 		if (!_first) {
 			return -1;
 		}
@@ -455,9 +455,9 @@ int OSSex::addPattern(int (*patternFunc)(int)) {
 		while (iterator->nextPattern != NULL) {
 			iterator = iterator->nextPattern;
 		}
-		noInterrupts();
+
 		iterator->nextPattern = new struct patternList;
-		interrupts();
+
 		if (!iterator->nextPattern) {
 			return -1;
 		}
