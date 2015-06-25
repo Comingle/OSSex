@@ -53,6 +53,7 @@ void OSSex::setID(int deviceId = MOD) {
 		device.muxPins[1] = 12;
 		pinMode(device.muxPins[0], OUTPUT);
 		pinMode(device.muxPins[1], OUTPUT);
+		setHackerPort(HACKER_PORT_AIN);
 
 		device.buttons[0].pin = 4;
 
@@ -117,29 +118,29 @@ void OSSex::update() {
 	if (_running) {
 		_tickCount++;
 		if (_tickCount > (_currentStep->duration * _timeScale)) {
-	  		if (_currentStep->nextStep == NULL) {
-	  			// stop the pattern if at last step
-	    		_running = false;
-	  		} else {
-	  			// run the next step
-	  			_currentStep = _currentStep->nextStep;
+  		if (_currentStep->nextStep == NULL) {
+  			// stop the pattern if at last step
+    		_running = false;
+  		} else {
+  			// run the next step
+  			_currentStep = _currentStep->nextStep;
 
-	  			// if we're running a large pre-set pattern, we're supplied all the steps at once so we can't store
-	  			// all our allocated memory in _memQueue (since it only holds 2 elements). this !_patternCallback
-	  			// check ensures that memory still gets freed eventually in those situations.
-	  			if (!_patternCallback) {
-	  				_memQueue[1] = _currentStep;
-	  			}
-	  			for (int i = 0; i < device.outCount; i++) {
-	  				if (_currentStep->power[i] >= 0) {
- 	  					setOutput(i, _currentStep->power[i]);
- 	  				}
-	  			}
-	  		}
-	  		free((void*)_memQueue[0]);
-	  		_memQueue[0] = _memQueue[1];
-	  		_memQueue[1] = NULL;
-	  		_tickCount = 0;
+  			// if we're running a large pre-set pattern, we're supplied all the steps at once so we can't store
+  			// all our allocated memory in _memQueue (since it only holds 2 elements). this !_patternCallback
+  			// check ensures that memory still gets freed eventually in those situations.
+  			if (!_patternCallback) {
+  				_memQueue[1] = _currentStep;
+  			}
+  			for (int i = 0; i < device.outCount; i++) {
+  				if (_currentStep->power[i] >= 0) { // -1 value is "leave this motor alone"
+	  					setOutput(i, _currentStep->power[i]);
+	  				}
+  			}
+  		}
+  		free((void*)_memQueue[0]);
+  		_memQueue[0] = _memQueue[1];
+  		_memQueue[1] = NULL;
+  		_tickCount = 0;
 		} else if (_currentStep->nextStep == NULL && _patternCallback) {
 			// if it's not time for the next step, go ahead and queue it up
 			if (_patternCallback(_seq)) {
@@ -158,7 +159,7 @@ void OSSex::update() {
 	}
 
 	*_timer_count = _timer_init;		//Reset timer after interrupt triggered
-  	*_timer_interrupt_flag = 0x00;		//Clear timer overflow flag
+	*_timer_interrupt_flag = 0x00;		//Clear timer overflow flag
 }
 
 
@@ -369,7 +370,7 @@ int OSSex::getPattern() {
     return pos;
 }
 
-// Set power scaling step to step -- power scaling factor will change by step
+// Set power scaling step value -- power scaling factor will change by step
 // with each call of increasePower() or decreasePower()
 void OSSex::setPowerScaleStep(float step) {
 	_powerScaleStep = step;
@@ -415,6 +416,11 @@ float OSSex::increaseTime() {
 
 float OSSex::decreaseTime() {
 	_timeScale *= (1.0 - _timeScaleStep);
+	return _timeScale;
+}
+
+// Return time scaling factor
+float OSSex::getTimeScaleFactor() {
 	return _timeScale;
 }
 
@@ -486,25 +492,28 @@ void OSSex::stop() {
 
 // Set hacker port multiplexer for reading certain types of inputs. Accepts any of the above #defines as an option.
 int OSSex::setHackerPort(unsigned int flag) {
+	byte pin0, pin1;
+
 	if (device.deviceId < 1) {
 		return -1;
 	}
+
 	switch (flag) {
 		case HACKER_PORT_AIN:
-			digitalWrite(device.muxPins[0], LOW);
-			digitalWrite(device.muxPins[1], LOW);
+			pin0 = LOW;
+			pin1 = LOW;
 			device.HP0 = A7;
 			device.HP1 = A9;
 			break;
 		case HACKER_PORT_I2C:
-			digitalWrite(device.muxPins[0], HIGH);
-			digitalWrite(device.muxPins[1], LOW);
+			pin0 = HIGH;
+			pin1 = LOW;
 			device.HP0 = 2;
 			device.HP1 = 3;
 			break;
 		case HACKER_PORT_SERIAL:
-			digitalWrite(device.muxPins[0], LOW);
-			digitalWrite(device.muxPins[1], HIGH);
+			pin0 = LOW;
+			pin1 = HIGH;
 			device.HP0 = 15;
 			device.HP1 = 17;
 			break;
@@ -512,6 +521,10 @@ int OSSex::setHackerPort(unsigned int flag) {
 			return -1;
 
 	}
+
+	digitalWrite(device.muxPins[0], pin0);
+	digitalWrite(device.muxPins[1], pin1);
+
 	return 0;
 
 }

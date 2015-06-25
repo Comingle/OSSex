@@ -56,6 +56,7 @@ class OSSex {
 
     void setTimeScaleStep(float);
     float setTimeScaleFactor(float);
+    float getTimeScaleFactor();
     float increaseTime();
     float decreaseTime();
 
@@ -110,6 +111,7 @@ class OSSex {
     float _powerScaleStep;
     float _timeScale;
     float _timeScaleStep;
+
     volatile unsigned int _tickCount;
     volatile unsigned char *_timer_start_mask;
     volatile uint16_t *_timer_count;
