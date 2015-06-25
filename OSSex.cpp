@@ -514,8 +514,8 @@ int OSSex::setHackerPort(unsigned int flag) {
 		case HACKER_PORT_SERIAL:
 			pin0 = LOW;
 			pin1 = HIGH;
-			device.HP0 = 15;
-			device.HP1 = 17;
+			device.HP0 = 15;	// RX
+			device.HP1 = 14;	// TX
 			break;
 		default:
 			return -1;

@@ -16,21 +16,16 @@
 #define TIMER4_INIT 16;
 #define TIMER2_INIT 131;
 
-// Hacker port modes
-#define HACKER_PORT_AIN 0
-#define HACKER_PORT_PWM 0
-#define HACKER_PORT_I2C 1
-#define HACKER_PORT_SERIAL 2
-
 // model names
- #define ALPHA 0
- #define BETA 1
- #define MOD 1
+#define ALPHA 0
+#define BETA 1
+#define MOD 1
+
 // Hacker Port Codes
- #define HACKER_PORT_AIN 0  // A7 A9
-#define HACKER_PORT_PWM 0   // D6 D9 //same actual pins as AIN
-#define HACKER_PORT_I2C 1   //
-#define HACKER_PORT_SERIAL 2  //15 rx and 14 is tx
+#define HACKER_PORT_AIN 0     // 0:A7 1:A9
+#define HACKER_PORT_PWM 0     // 0:D6 1:D9 (same actual pins as AIN)
+#define HACKER_PORT_I2C 1     // 0:D2 1:D3
+#define HACKER_PORT_SERIAL 2  // 0:D15 (RX) 1:D14 (TX)
 
 class OSSex {
   public:
