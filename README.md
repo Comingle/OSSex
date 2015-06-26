@@ -38,6 +38,13 @@ void loop() {
 
 > **Note:** if you include the OSSex library in your sketch via Arduino's "Import Library..." menu, it will add an unnecessary `#include <OneButton.h>` to your sketch. You should delete this line or you'll have compilation errors.
 
+> You may also need to include **Wire.h** for the moment. We're working on ways of eliminating this. In any case, the result would look like:
+```arduino
+#include <Wire.h>
+#include <OSSex.h>
+```
+
+
 An object named `Toy` is available when you load the library. You can interact with your Mod through this object. 
 
 ## Turn a motor (output) on/off

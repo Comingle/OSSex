@@ -137,7 +137,7 @@ void OSSex::update() {
 	  				}
   			}
   		}
-			// Possibly dangerous to free/malloc memory in an interrupt
+			// XXX Possibly dangerous to free/malloc memory in an interrupt
   		free((void*)_memQueue[0]);
   		_memQueue[0] = _memQueue[1];
   		_memQueue[1] = NULL;
@@ -146,7 +146,7 @@ void OSSex::update() {
 			// if it's not time for the next step, go ahead and queue it up
 			if (_patternCallback(_seq)) {
 				_seq++;
-				// Possibly dangerous to free/malloc memory in an interrupt
+				// XXX Possibly dangerous to free/malloc memory in an interrupt
 				_currentStep->nextStep = new struct pattern;
 				_memQueue[1] = _currentStep->nextStep;
 				_currentStep->nextStep->power[0] = step[0];
@@ -172,7 +172,7 @@ void OSSex::update() {
 // powerLevel can be from 0..255 in devices that aren't bidirectional, and -255..255 in birdirectional devices.
 // Negative powerLevel values are coerced to 0 in devices that aren't bidirectional.
 // powerLevel of 0 turns the output off. Values greater than +/-255 get coerced to +/-255.
-// XXX Add serial (Stream object) feedback from function for diagnostics
+
 int OSSex::setOutput(int outNumber, int powerLevel) {
 	int iterations = 1, constrainedPower;
 	// set all outputs, starting at 0.
