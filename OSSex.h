@@ -30,7 +30,7 @@
 class OSSex {
   public:
     OSSex();
-    void setID(int);
+    void setID(int deviceId = MOD);
     int setOutput(int, int);
     int setLED(int, int);
     int runShortPattern(int*, size_t);

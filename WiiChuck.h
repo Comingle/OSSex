@@ -100,8 +100,7 @@ class WiiChuck {
     } buttonZ, buttonC;
     uint8_t baselineX;
     uint8_t baselineY;
-
-
+  
 
   private:
     uint8_t status[6];              // array to store wiichuck output

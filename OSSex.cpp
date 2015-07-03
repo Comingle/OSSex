@@ -17,13 +17,15 @@ ISR(TIMER4_OVF_vect) {
 };
 #endif
 
-// Pre-instantiate with empty constructor. Pre-instantiation is necessary for the timer2/timer4 interrupt to work. Empty constructor because
-// the user defines which device they're using elsewhere (in setID());
+// Pre-instantiate as a Mod. Pre-instantiation is necessary for the timer2/timer4 interrupt to work. IF using a different toy,
+// call Toy.setID(<toy model>) in setup() of your sketch.
 OSSex Toy = OSSex();
-OSSex::OSSex() {}
+OSSex::OSSex() {
+	setID(MOD);
+}
 
 // the real constructor. give it a device ID and it will set up your device's pins and timers.
-void OSSex::setID(int deviceId = MOD) {
+void OSSex::setID(int deviceId) {
 #if defined(__AVR_ATmega32U4__)
 	_timer_start_mask = &TCCR4B;
 	_timer_count = &TCNT4;

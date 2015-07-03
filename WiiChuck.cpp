@@ -153,6 +153,7 @@ void WiiChuck::_send_zero()
     Wire.endTransmission ();
 }
 
+
 void WiiChuck::attachZClick(void (*callback)(void)) {
   buttonZ.button.attachClick(callback);
 }
