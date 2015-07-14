@@ -22,12 +22,13 @@ On a Windows machine, your toy will show up as an additional **COM** port.
 
 # Basics
 
-Once the library is added, import the **OSSex.h** file to make use of it:
+Once the library is added, import the **OSSex.h** file to make use of it. The library will create a `Toy` object that you can use to interact with your toy. The first thing to do is set the ID of the toy so it can configure itself correctly:
 
 ```arduino
 #include <OSSex.h>
 
 void setup() {
+ Toy.setID(MOD);
  ...
 }
 
@@ -35,6 +36,8 @@ void loop() {
  ...
 }
 ```
+
+`MOD` is currently the only option for `setID()`, but more will be created in the future, and there's no reason you couldn't create your own.
 
 > **Note:** if you include the OSSex library in your sketch via Arduino's "Import Library..." menu, it will add an unnecessary `#include <OneButton.h>` to your sketch. You should delete this line or you'll have compilation errors.
 
@@ -44,8 +47,7 @@ void loop() {
 #include <OSSex.h>
 ```
 
-
-An object named `Toy` is available when you load the library. You can interact with your Mod through this object. 
+All interaction with your toy happens through the `Toy` object:
 
 ## Turn a motor (output) on/off
 ```arduino
