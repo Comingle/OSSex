@@ -10,32 +10,23 @@
 #include <avr/io.h>
 #include "OneButton.h"
 
+// Pre-instantiate as a Mod. Pre-instantiation is necessary for the timer2/timer4 interrupt to work. IF using a different toy,
+// call Toy.setID(<toy model>) in setup() of your sketch.
+OSSex::OSSex() {
+}
+OSSex Toy = OSSex();
+
 // Set up the interrupt to trigger the update() function.
-#if defined(__AVR_ATmega32U4__) // Lilypad USB
+#if defined(__AVR_ATmega32U4__) // Lilypad USB / Mod
 ISR(TIMER4_OVF_vect) {
 	Toy.update();
 };
 #endif
 
-// Pre-instantiate as a Mod. Pre-instantiation is necessary for the timer2/timer4 interrupt to work. IF using a different toy,
-// call Toy.setID(<toy model>) in setup() of your sketch.
-OSSex Toy = OSSex();
-OSSex::OSSex() {
-	setID(MOD);
-}
-
 // the real constructor. give it a device ID and it will set up your device's pins and timers.
 void OSSex::setID(int deviceId) {
-#if defined(__AVR_ATmega32U4__)
-	_timer_start_mask = &TCCR4B;
-	_timer_count = &TCNT4;
-  _timer_interrupt_flag = &TIFR4;
-  _timer_interrupt_mask_b = &TIMSK4;
-  _timer_init = TIMER4_INIT;
-#endif
-
 	if (deviceId == 1) {
-		// Beta Model
+		// Mod
 		device.outCount = 3;
 		device.outPins[0] = 5;
 		device.outPins[1] = 10;
@@ -51,6 +42,7 @@ void OSSex::setID(int deviceId) {
 		device.inPins[0] = A7; // D-
 		device.inPins[1] = A9; // D+
 
+    // Pins for setting the Hacker Port mode
 		device.muxPins[0] = 8;
 		device.muxPins[1] = 12;
 		pinMode(device.muxPins[0], OUTPUT);
@@ -58,6 +50,9 @@ void OSSex::setID(int deviceId) {
 		setHackerPort(HACKER_PORT_AIN);
 
 		device.buttons[0].pin = 4;
+
+		// A0 is connected to battery voltage
+		pinMode(A0, INPUT);
 
 	} else {
 		// Lilypad USB  / Alpha model
@@ -99,6 +94,13 @@ void OSSex::setID(int deviceId) {
 
 	// Start the interrupt timer (timer2/timer4)
 	// Thanks for Noah at arduinomega.blogspot.com for clarifying this
+	#if defined(__AVR_ATmega32U4__)
+		_timer_start_mask = &TCCR4B;
+		_timer_count = &TCNT4;
+	  _timer_interrupt_flag = &TIFR4;
+	  _timer_interrupt_mask_b = &TIMSK4;
+	  _timer_init = TIMER4_INIT;
+	#endif
 
 	*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer Overflow Interrupt Enable: 00000100
   _tickCount = 0;
@@ -106,6 +108,9 @@ void OSSex::setID(int deviceId) {
  	*_timer_interrupt_flag = 0x00;			// Timer INT Flag Reg: Clear Timer Overflow Flag
  	*_timer_start_mask = 0x05;				// Timer PWM disable, prescale / 16: 00000101
 
+  // Initial power and time scale is 1.0 (normal / 100% power and time).
+	// Scale step of 0.1 increases/decreases power/time by 10%
+	// with each call to increaseTime(), decreaseTime(), increasePower(), decreasePower()
  	_powerScale = 1.0;
  	_powerScaleStep = 0.1;
  	_timeScale = 1.0;
@@ -445,9 +450,7 @@ int OSSex::cyclePattern() {
 int OSSex::addPattern(int (*patternFunc)(int)) {
 	volatile patternList *next;
 	if (_first == NULL) {
-
 		_first = new struct patternList;
-
 		if (!_first) {
 			return -1;
 		}
