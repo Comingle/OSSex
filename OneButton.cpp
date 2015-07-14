@@ -48,12 +48,6 @@ void OneButton::init() {
   _longPressStopFunc = NULL;
   _duringLongPressFunc = NULL;
 
-  // Debounce init
-  _db_buttonState      = _buttonReleased;  // the current reading from the input pin, assume its in rest during setup
-  _db_lastButtonState  = _db_buttonState;  // the previous reading from the input pin, no previous reading so use current
-  _db_lastDebounceTime = 0;                // the last time the output pin was toggled, init to zero
-  _db_debounceDelay    = 25;               // the debounce time; increase if the output flickers. Settable with setDebounceDelay() function
-
 }
 
 void OneButton::setPin(int pin) {
@@ -75,6 +69,12 @@ void OneButton::setActiveLow(int activeLow) {
     _buttonReleased = LOW;
     _buttonPressed = HIGH;
   } // if
+
+  // Debounce init
+  _db_buttonState      = _buttonReleased;  // the current reading from the input pin, assume its in rest during setup
+  _db_lastButtonState  = _db_buttonState;  // the previous reading from the input pin, no previous reading so use current
+  _db_lastDebounceTime = 0;                // the last time the output pin was toggled, init to zero
+  _db_debounceDelay    = 25;               // the debounce time; increase if the output flickers. Settable with setDebounceDelay() function
 }
 
 // explicitly set the number of millisec that have to pass by before a click is detected.
