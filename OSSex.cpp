@@ -13,6 +13,7 @@
 // Pre-instantiate as a Mod. Pre-instantiation is necessary for the timer2/timer4 interrupt to work. IF using a different toy,
 // call Toy.setID(<toy model>) in setup() of your sketch.
 OSSex::OSSex() {
+	setID(MOD);
 }
 OSSex Toy = OSSex();
 
@@ -102,11 +103,11 @@ void OSSex::setID(int deviceId) {
 	  _timer_init = TIMER4_INIT;
 	#endif
 
+	*_timer_start_mask = 0x05;				// Timer PWM disable, prescale / 16: 00000101
+	*_timer_count = _timer_init;			// Reset Timer Count
+	*_timer_interrupt_flag = 0x00;			// Timer INT Flag Reg: Clear Timer Overflow Flag
 	*_timer_interrupt_mask_b = 0x04;    // Timer INT Reg: Timer Overflow Interrupt Enable: 00000100
   _tickCount = 0;
- 	*_timer_count = _timer_init;			// Reset Timer Count
- 	*_timer_interrupt_flag = 0x00;			// Timer INT Flag Reg: Clear Timer Overflow Flag
- 	*_timer_start_mask = 0x05;				// Timer PWM disable, prescale / 16: 00000101
 
   // Initial power and time scale is 1.0 (normal / 100% power and time).
 	// Scale step of 0.1 increases/decreases power/time by 10%
@@ -121,6 +122,9 @@ void OSSex::setID(int deviceId) {
 // Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status.
 // If a pattern is running, the _running flag will be true
 void OSSex::update() {
+	// Hack alert -- this only needs to be initialized once, but pre-instantiation messes up our value
+	// so we ensure timer start mask set properly here.
+	*_timer_start_mask = 0x05;
 	device.buttons[0].button.tick();
 	if (_running) {
 		_tickCount++;

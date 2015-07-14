@@ -18,7 +18,6 @@
 
 // model names
 #define ALPHA 0
-#define BETA 1
 #define MOD 1
 
 // Hacker Port Codes
@@ -112,13 +111,12 @@ class OSSex {
     float _timeScale;
     float _timeScaleStep;
 
-    volatile unsigned int _tickCount;
+    unsigned int _timer_init;
     volatile unsigned char *_timer_start_mask;
+    volatile unsigned char *_timer_interrupt_mask_b;
+    volatile unsigned int _tickCount;
     volatile uint16_t *_timer_count;
     volatile unsigned char *_timer_interrupt_flag;
-    volatile unsigned char *_timer_interrupt_mask_b;
-    volatile unsigned char *_timer_interrupt_mask_a;
-    unsigned int _timer_init;
     volatile bool _running;
     volatile pattern* _memQueue[2];
     volatile unsigned int _seq;
