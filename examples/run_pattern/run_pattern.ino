@@ -4,17 +4,18 @@
 */
 
 #include <OSSex.h>
+#include <Wire.h>
 
-int pattern[][3] = {
-    {-1, 200, 1000},
-    {-1, 0, 1000},
+int pattern[][4] = {
+    {200, 200, 200, 500},
+    {0, 0, 0, 500},
 };
-unsigned int patternSize = sizeof(pattern) / sizeof(int) / 3;
+unsigned int patternSize = sizeof(pattern) / sizeof(int) / 4;
 
 bool clicked = false;
 
 void setup() {
-  Toy.setID(0);
+  Toy.setID(MOD);
   
   Toy.attachClick(click);
 }
@@ -22,9 +23,11 @@ void setup() {
 void loop() {
   if (clicked) {
     Toy.runShortPattern(*pattern, patternSize);
+  } else {
+    Toy.setOutput(-1, 0);
   }
 }
 
 void click() {
-  clicked = true;
+  clicked = !clicked;
 }

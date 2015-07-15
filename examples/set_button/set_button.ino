@@ -4,9 +4,10 @@
 */
 
 #include <OSSex.h>
+#include <Wire.h>
 
 void setup() {
-  Toy.setID(0);
+  Toy.setID(MOD);
   Toy.attachClick(led);
 }
 
