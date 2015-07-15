@@ -122,9 +122,6 @@ void OSSex::setID(int deviceId) {
 // Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status.
 // If a pattern is running, the _running flag will be true
 void OSSex::update() {
-	// Hack alert -- this only needs to be initialized once, but pre-instantiation messes up our value
-	// so we ensure timer start mask set properly here.
-	*_timer_start_mask = 0x05;
 	device.buttons[0].button.tick();
 	if (_running) {
 		_tickCount++;
@@ -170,7 +167,10 @@ void OSSex::update() {
 			}
 		}
 	}
-
+	// Hack alert -- start mask only needs to be initialized once, but wiring.c of the Arduino core
+	// changes the mask back to 0x07 before setup() runs
+	// So if running Toy.setID() from setup() - no problem, if preinsantiating as a Mod, problem.
+	*_timer_start_mask = 0x05;
 	*_timer_count = _timer_init;		//Reset timer after interrupt triggered
 	*_timer_interrupt_flag = 0x00;		//Clear timer overflow flag
 }
