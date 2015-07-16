@@ -321,16 +321,16 @@ int OSSex::runPattern(int (*callback)(int)) {
 	_singlePattern->duration = step[3];
 
 	// get second step
-    if (!_patternCallback(_seq)) {
-        return 0;
-    }
-    _seq++;
-    _singlePattern->nextStep = new struct pattern;
+  if (!_patternCallback(_seq)) {
+      return 0;
+  }
+  _seq++;
+  _singlePattern->nextStep = new struct pattern;
 
-    if (!_singlePattern->nextStep) {
-        return -1;
-    }
-    _memQueue[1] = _singlePattern->nextStep;
+  if (!_singlePattern->nextStep) {
+      return -1;
+  }
+  _memQueue[1] = _singlePattern->nextStep;
 
 	_singlePattern->nextStep->power[0] = step[0];
 	_singlePattern->nextStep->power[1] = step[1];
@@ -353,15 +353,15 @@ int OSSex::runPattern(int (*callback)(int)) {
 // run a specific pattern from the queue
 int OSSex::runPattern(unsigned int pos) {
     if (!_currentPattern) {
-        return -1;
+      return -1;
     }
 
     _currentPattern = _first;
     for (int i = 0; i < pos; i++) {
-        _currentPattern = _currentPattern->nextPattern;
-        if (_currentPattern == NULL) {
-            return -2;
-        }
+      _currentPattern = _currentPattern->nextPattern;
+      if (_currentPattern == NULL) {
+          return -2;
+      }
     }
 
     return runPattern(_currentPattern->patternFunc);
@@ -369,16 +369,16 @@ int OSSex::runPattern(unsigned int pos) {
 
 int OSSex::getPattern() {
 	if (!_currentPattern) {
-        return -1;
+    return -1;
+  }
+  int pos = 0;
+  for (volatile patternList *stepper = _first; stepper != _currentPattern; stepper = stepper->nextPattern) {
+	  if (stepper == NULL) {
+      return -2;
     }
-    int pos = 0;
-    for (volatile patternList *stepper = _first; stepper != _currentPattern; stepper = stepper->nextPattern) {
-        if (stepper == NULL) {
-            return -2;
-        }
-        pos++;
-    }
-    return pos;
+    pos++;
+  }
+  return pos;
 }
 
 // Set power scaling step value -- power scaling factor will change by step
@@ -436,17 +436,17 @@ float OSSex::getTimeScaleFactor() {
 }
 
 int OSSex::cyclePattern() {
-    if (!_currentPattern) {
-        return -1;
-    }
+  if (!_currentPattern) {
+    return -1;
+  }
 
-    if (_currentPattern->nextPattern == NULL) {
-        _currentPattern = _first;
-    } else {
-        _currentPattern = _currentPattern->nextPattern;
-    }
-    runPattern(_currentPattern->patternFunc);
-    return 1;
+  if (_currentPattern->nextPattern == NULL) {
+    _currentPattern = _first;
+  } else {
+    _currentPattern = _currentPattern->nextPattern;
+  }
+  runPattern(_currentPattern->patternFunc);
+  return 1;
 }
 
 // Add a pattern function to the queue of vibration patterns
@@ -528,7 +528,6 @@ int OSSex::setHackerPort(unsigned int flag) {
 			break;
 		default:
 			return -1;
-
 	}
 
 	digitalWrite(device.muxPins[0], pin0);

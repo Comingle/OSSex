@@ -1,5 +1,6 @@
 OSSex	KEYWORD1
 Toy	KEYWORD1
+WiiChuck  KEYWORD1
 setOutput	KEYWORD2
 setLED	KEYWORD2
 setID	KEYWORD2
@@ -15,8 +16,10 @@ attachLongPressStart	KEYWORD2
 attachLongPressStop	KEYWORD2
 attachDuringLongPress	KEYWORD2
 setPowerScaleFactor	KEYWORD2
+getPowerScaleFactor KEYWORD2
 setPowerScaleStep	KEYWORD2
 setTimeScaleFactor	KEYWORD2
+getTimeScaleFactor	KEYWORD2
 setTimeScaleStep	KEYWORD2
 increasePower	KEYWORD2
 decreasePower	KEYWORD2
