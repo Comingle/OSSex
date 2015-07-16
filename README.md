@@ -4,7 +4,7 @@ This is an Arduino library for interacting with Comingle open-source sex toys.
 
 # Installation
 
-Head to the <a href="https://github.com/Comingle/OSSex/releases/latest">latest release</a> page and download the source in zip format. 
+Head to the <a href="https://github.com/Comingle/OSSex/releases/latest">latest release</a> page and download the source in zip format.
 
 Open the Arduino software, and select the "Sketch" menu, then "Import Library...", and finally "Add Library...". Choose the OSSex zip file that you just downloaded. More information is available at the <a href="http://arduino.cc/en/Guide/Libraries">Arduino Libraries</a> page.
 
@@ -22,7 +22,7 @@ On a Windows machine, your toy will show up as an additional **COM** port.
 
 # Basics
 
-Once the library is added, import the **OSSex.h** file to make use of it. 
+Once the library is added, import the **OSSex.h** file to make use of it.
 
 ```arduino
 #include <OSSex.h>
@@ -54,7 +54,7 @@ All interaction with your toy happens through the `Toy` object:
 Toy.setOutput(int outNumber, int powerLevel);
 ```
 
-**-1** can be given as an `outNumber` as shorthand for "set all outputs to `powerLevel`". Otherwise, the output will be set according to the following formula: 
+**-1** can be given as an `outNumber` as shorthand for "set all outputs to `powerLevel`". Otherwise, the output will be set according to the following formula:
 ```arduino
 outNumber = abs(outNumber) % dev.outCount;
 ```
@@ -147,10 +147,10 @@ Toy.attachClick(function);
 Toy.attachDoubleClick(function);
 Toy.attachLongPressStart(function);
 Toy.attachLongPressStop(function);
-Toy.duringLongPress(function);
+Toy.attachDuringLongPress(function);
 ```
 
-`attachClick()` will execute `function` whenever the button is pressed. On LilyPad-based devices, the button is attached to digital pin 2 and will read LOW when the button is pressed. 
+`attachClick()` will execute `function` whenever the button is pressed. On LilyPad-based devices, the button is attached to digital pin 2 and will read LOW when the button is pressed.
 
 ```arduino
 #include <OSSex.h>
@@ -176,7 +176,7 @@ void loop() {
 ```
 This example will turn the LED on when the button is pressed, and turn it off when the button is released.
 
-`delay()` and `millis()` will not work properly in double-click, single-click or long-press functions since those functions are triggered by an interrupt, and time stops during interrupts. 
+`delay()` and `millis()` will not work properly in double-click, single-click or long-press functions since those functions are triggered by an interrupt, and time stops during interrupts.
 
 ## Adjusting the power
 
@@ -187,7 +187,7 @@ You can increase or decrease the power of a pattern while it's running to tune i
 * `increasePower()`
 * `decreasePower()`
 
-`setPowerScaleFactor()` lets you define a power scaling factor: a power scale of 0.5 will run all patterns at 50% power. 
+`setPowerScaleFactor()` lets you define a power scaling factor: a power scale of 0.5 will run all patterns at 50% power.
 
 On a Mod you can double-click the button to increase the power, or hold and release the button to decrease the power. `setPowerScaleStep()` lets you define how much the power changes with each call to `increasePower()` (double-click) or `decreasePower()` (click-hold).
 
@@ -224,9 +224,9 @@ The OSSex library includes several functions for adjusting how fast or slow vibr
 * `increaseTime()`
 * `decreaseTime()`
 
-`setPowerScaleFactor()` lets you define a time scaling factor: a time scale of 0.5 will run all patterns at 50% speed (twice as fast as normal). 
+`setPowerScaleFactor()` lets you define a time scaling factor: a time scale of 0.5 will run all patterns at 50% speed (twice as fast as normal).
 
-`setTimeScaleStep()` sets the how much `increaseTime()` and `decreaseTime()` will increase or decrease whenever called. For example, `setTimeScaleStep(0.2)` will cause `increaseTime()` slow everything down by 20%, and `decreaseTime()` to speed everything up by 20%. 
+`setTimeScaleStep()` sets the how much `increaseTime()` and `decreaseTime()` will increase or decrease whenever called. For example, `setTimeScaleStep(0.2)` will cause `increaseTime()` slow everything down by 20%, and `decreaseTime()` to speed everything up by 20%.
 
 # Getting creative
 
@@ -267,7 +267,7 @@ This way requires you to come up with your patterns by hand, and is not practica
 
 ```arduino
 int blip(int seq) {
-  
+
   if (seq % 2) {
     Toy.step[0] = 0;
   } else {
@@ -275,11 +275,11 @@ int blip(int seq) {
   }
 
   Toy.step[1] = Toy.step[2] = Toy.step[0];
-  
+
   Toy.step[3] = 1000;
-  
+
   return 1;
-  
+
 }
 
 void setup() {
@@ -317,7 +317,7 @@ int fade(int seq) {
   // 0 -> 255: 255/5 = 51 steps
   // 255 -> 0: 255/5 = 51 steps
   // --------- 102 steps total
- 
+
   // normalize sequence
   seq %= 102;
 
@@ -340,7 +340,7 @@ int fadeCos(int seq) {
   Toy.step[0] = round(127 * cos((seq / (8*PI))-PI) + 127);
   Toy.step[1] = Toy.step[2] = Toy.step[0];
   Toy.step[3] = 50;
-  return 1; 
+  return 1;
 }
 ```
 
@@ -375,8 +375,8 @@ We can modify the `blip()` function to terminate after running the on-off sequen
 ```arduino
 int blip(int seq) {
   /* NEW */
-  seq %= 5; 
- 
+  seq %= 5;
+
   if (seq % 2) {
     Toy.step[0] = 0;
   } else {
@@ -384,7 +384,7 @@ int blip(int seq) {
   }
 
   Toy.step[1] = Toy.step[2] = Toy.step[0];
- 
+
   Toy.step[3] = 1000;
 
   /* NEW */
@@ -393,7 +393,7 @@ int blip(int seq) {
   } else {
     return 1;
   }
- 
+
 }
 ```
 
@@ -424,7 +424,7 @@ void click() {
 }
 
 int blip(int seq) {
- 
+
   if (seq % 2) {
     Toy.step[0] = 0;
   } else {
@@ -432,11 +432,11 @@ int blip(int seq) {
   }
 
   Toy.step[1] = Toy.step[2] = Toy.step[0];
- 
+
   Toy.step[3] = 1000;
- 
+
   return 1;
- 
+
 }
 
 int fade(int seq) {
@@ -446,7 +446,7 @@ int fade(int seq) {
   // 0 -> 255: 51 steps
   // 255 -> 0: 51 steps
   // --------- 102 steps total
- 
+
   // normalize sequence
   seq %= 102;
 
