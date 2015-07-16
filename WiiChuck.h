@@ -87,9 +87,13 @@ class WiiChuck {
 
     void attachZClick(void (*callback)(void));
     void attachZDoubleClick(void (*callback)(void));
+	void attachZLongPressStart(void (*callback)(void));
+
     void attachZUpdate(bool (*callback)(void));
     void attachCClick(void (*callback)(void));
     void attachCDoubleClick(void (*callback)(void));
+	void attachCLongPressStart(void (*callback)(void));
+
     void attachCUpdate(bool (*callback)(void));
 
     uint8_t joyX;

@@ -166,12 +166,19 @@ void WiiChuck::attachZUpdate(bool (*callback)(void)) {
   buttonZ.button.setPseudo(callback);
 }
 
+void WiiChuck::attachZLongPressStart(void (*callback)()) {
+	buttonZ.button.attachLongPressStart(callback);
+}
+
 void WiiChuck::attachCClick(void (*callback)(void)) {
   buttonC.button.attachClick(callback);
 }
 
 void WiiChuck::attachCDoubleClick(void (*callback)(void)) {
   buttonC.button.attachDoubleClick(callback);
+}
+void WiiChuck::attachCLongPressStart(void (*callback)()) {
+	buttonC.button.attachLongPressStart(callback);
 }
 
 void WiiChuck::attachCUpdate(bool (*callback)(void)) {
