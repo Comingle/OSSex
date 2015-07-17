@@ -36,6 +36,7 @@ class OSSex {
     int runPattern(unsigned int);
     int runPattern(int (*callback)(int));
     int cyclePattern();
+    int reverseCyclePattern();
     int addPattern(int (*callback)(int));
     unsigned int getInput(int);
     int getPattern();

@@ -449,6 +449,19 @@ int OSSex::cyclePattern() {
   return 1;
 }
 
+int OSSex::reverseCyclePattern() {
+	volatile patternList *prev = _first;
+
+	if (!_currentPattern) return -1;
+
+	while (prev->nextPattern != _currentPattern && prev->nextPattern != NULL) {
+		prev = prev->nextPattern;
+	}
+	_currentPattern = prev;
+	runPattern(_currentPattern->patternFunc);
+	return 1;
+}
+
 // Add a pattern function to the queue of vibration patterns
 // Create queue if necessary
 int OSSex::addPattern(int (*patternFunc)(int)) {
