@@ -7,6 +7,8 @@ setID	KEYWORD2
 runPattern	KEYWORD2
 runShortPattern	KEYWORD2
 cyclePattern	KEYWORD2
+nextPattern KEYWORD2
+previousPattern	KEYWORD2
 addPattern	KEYWORD2
 getPattern	KEYWORD2
 getInput	KEYWORD2

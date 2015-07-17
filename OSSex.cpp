@@ -167,6 +167,7 @@ void OSSex::update() {
 			}
 		}
 	}
+
 	// Hack alert -- start mask only needs to be initialized once, but wiring.c of the Arduino core
 	// changes the mask back to 0x07 before setup() runs
 	// So if running Toy.setID() from setup() - no problem, if preinsantiating as a Mod, problem.
@@ -435,7 +436,7 @@ float OSSex::getTimeScaleFactor() {
 	return _timeScale;
 }
 
-int OSSex::cyclePattern() {
+int OSSex::nextPattern() {
   if (!_currentPattern) {
     return -1;
   }
@@ -449,7 +450,11 @@ int OSSex::cyclePattern() {
   return 1;
 }
 
-int OSSex::reverseCyclePattern() {
+int OSSex::cyclePattern() {
+	return nextPattern();
+}
+
+int OSSex::previousPattern() {
 	volatile patternList *prev = _first;
 
 	if (!_currentPattern) return -1;

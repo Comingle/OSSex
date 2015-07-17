@@ -1,4 +1,4 @@
-# OSSex v0.4
+# OSSex
 
 This is an Arduino library for interacting with Comingle open-source sex toys.
 
@@ -167,7 +167,6 @@ void led() {
 }
 
 void setup() {
-  Toy.setID(0);
   Toy.attachClick(led);
 }
 
@@ -176,7 +175,7 @@ void loop() {
 ```
 This example will turn the LED on when the button is pressed, and turn it off when the button is released.
 
-`delay()` and `millis()` will not work properly in double-click, single-click or long-press functions since those functions are triggered by an interrupt, and time stops during interrupts.
+`delay()` and `millis()` will not work properly in double-click, single-click or long-press functions since click functions are triggered by an interrupt, and normal time stops during interrupts.
 
 ## Adjusting the power
 
@@ -195,7 +194,6 @@ On a Mod you can double-click the button to increase the power, or hold and rele
 #include <OSSex.h>
 
 void setup() {
-  Toy.setID(0);
   Toy.setPowerScaleStep(0.2);
   Toy.attachDoubleClick(doubleClick);
   Toy.attachLongPressStart(longPress);
@@ -251,7 +249,6 @@ int pattern[][4] = {
 unsigned int patternSize = sizeof(pattern) / sizeof(int) / 4;
 
 void setup() {
-  Toy.setID(0);
 }
 
 void loop() {
@@ -401,15 +398,14 @@ We now have 5 steps: on, off, on, off, and then NULL to terminate. Since `seq` s
 
 ## Queuing patterns
 
-If you wish to store various patterns and switch between them, there are three functions provided to assist with that: `addPattern()`, `cyclePattern()`, and `runPattern()`.
+If you wish to store various patterns and switch between them, there are a few functions provided to assist with that: `addPattern()`, `nextPattern()` (and `previousPattern()`), and `runPattern()`.
 
-`addPattern()` will add your function to an internal queue of available pattern functions. `cyclePattern()` will then switch to the next pattern in the queue;
+`addPattern()` will add your function to an internal queue of available pattern functions. `nextPattern()` will then switch to the next pattern in the queue (and `previousPattern()` will switch to the previous pattern):
 
 ```arduino
 #include <OSSex.h>
 
 void setup() {
-  Toy.setID(0);
   Toy.addPattern(fade);
   Toy.addPattern(blip);
 
@@ -420,7 +416,7 @@ void loop() {
 }
 
 void click() {
-  Toy.cyclePattern();
+  Toy.nextPattern();
 }
 
 int blip(int seq) {
