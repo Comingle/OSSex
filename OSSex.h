@@ -95,10 +95,11 @@ class OSSex {
     struct pattern {
       int power[3];
       unsigned int duration;
-      pattern *nextStep;
+      volatile pattern *nextStep;
     };
     pattern *_singlePattern;
     volatile pattern *_currentStep;
+    volatile pattern *_memQueue[3];
 
     struct patternList {
       int (*patternFunc)(int);
@@ -120,7 +121,6 @@ class OSSex {
     volatile uint16_t *_timer_count;
     volatile unsigned char *_timer_interrupt_flag;
     volatile bool _running;
-    volatile pattern* _memQueue[2];
     volatile unsigned int _seq;
 };
 

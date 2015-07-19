@@ -10,7 +10,8 @@
 #include <avr/io.h>
 #include "OneButton.h"
 
-// Pre-instantiate as a Mod. Pre-instantiation is necessary for the timer2/timer4 interrupt to work. IF using a different toy,
+// Pre-instantiate as a Mod. Pre-instantiation is necessary for the
+// timer2/timer4 interrupt to work. If using a different toy,
 // call Toy.setID(<toy model>) in setup() of your sketch.
 OSSex::OSSex() {
 	setID(MOD);
@@ -24,7 +25,7 @@ ISR(TIMER4_OVF_vect) {
 };
 #endif
 
-// the real constructor. give it a device ID and it will set up your device's pins and timers.
+// the real constructor. give it a device ID and it will set up your toy's pins and timers.
 void OSSex::setID(int deviceId) {
 	if (deviceId == 1) {
 		// Mod
@@ -117,6 +118,14 @@ void OSSex::setID(int deviceId) {
  	_timeScale = 1.0;
  	_timeScaleStep = 0.1;
 
+	// set up pattern step queue as a 3 member ring buffer.
+	for (int i = 0; i < 3; i++) {
+		_memQueue[i] = new struct pattern;
+	}
+
+	_memQueue[0]->nextStep = _memQueue[1];
+	_memQueue[1]->nextStep = _memQueue[2];
+	_memQueue[2]->nextStep = _memQueue[0];
 }
 
 // Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status.
@@ -126,42 +135,29 @@ void OSSex::update() {
 	if (_running) {
 		_tickCount++;
 		if (_tickCount > (_currentStep->duration * _timeScale)) {
-  		if (_currentStep->nextStep == NULL) {
-  			// stop the pattern if at last step
+  		if (_currentStep->nextStep == NULL || _currentStep->nextStep->duration == NULL) {
     		_running = false;
   		} else {
-  			// run the next step
+  			// set duration to NULL to flag current step as out-of-date and
+				// then run the next step
+				_currentStep->duration = NULL;
   			_currentStep = _currentStep->nextStep;
 
-  			// if we're running a large pre-set pattern, we're supplied all the steps at once so we can't store
-  			// all our allocated memory in _memQueue (since it only holds 2 elements). this !_patternCallback
-  			// check ensures that memory still gets freed eventually in those situations.
-  			if (!_patternCallback) {
-  				_memQueue[1] = _currentStep;
-  			}
   			for (int i = 0; i < device.outCount; i++) {
   				if (_currentStep->power[i] >= 0) { // -1 value is "leave this motor alone"
 	  					setOutput(i, _currentStep->power[i]);
 	  				}
   			}
   		}
-			// XXX Possibly dangerous to free/malloc memory in an interrupt
-  		free((void*)_memQueue[0]);
-  		_memQueue[0] = _memQueue[1];
-  		_memQueue[1] = NULL;
   		_tickCount = 0;
-		} else if (_currentStep->nextStep == NULL && _patternCallback) {
+		} else if (!_currentStep->nextStep->duration && _patternCallback) {
 			// if it's not time for the next step, go ahead and queue it up
 			if (_patternCallback(_seq)) {
 				_seq++;
-				// XXX Possibly dangerous to free/malloc memory in an interrupt
-				_currentStep->nextStep = new struct pattern;
-				_memQueue[1] = _currentStep->nextStep;
 				_currentStep->nextStep->power[0] = step[0];
 				_currentStep->nextStep->power[1] = step[1];
 				_currentStep->nextStep->power[2] = step[2];
 				_currentStep->nextStep->duration = step[3];
-				_currentStep->nextStep->nextStep = NULL;
 			} else {
 				_running = false;
 			}
@@ -170,7 +166,7 @@ void OSSex::update() {
 
 	// Hack alert -- start mask only needs to be initialized once, but wiring.c of the Arduino core
 	// changes the mask back to 0x07 before setup() runs
-	// So if running Toy.setID() from setup() - no problem, if preinsantiating as a Mod, problem.
+	// So if running Toy.setID() from setup(), no problem. If preinsantiating as a Mod, problem.
 	*_timer_start_mask = 0x05;
 	*_timer_count = _timer_init;		//Reset timer after interrupt triggered
 	*_timer_interrupt_flag = 0x00;		//Clear timer overflow flag
@@ -220,7 +216,6 @@ int OSSex::setOutput(int outNumber, int powerLevel) {
 	}
 
 	return 1;
-
 }
 
 
@@ -239,107 +234,85 @@ int OSSex::setLED(int ledNumber, int powerLevel) {
 	analogWrite(device.ledPins[ledNumber], constrainedPower);
 
 	return 1;
-
 }
 
-// Run preset pattern from an array of {outputNumber, powerLevel, duration} steps
+// Run preset pattern from an array of pattern steps. Supply runShortPattern()
+// with an array of [motor0 power, motor1 power, motor2 power, duration] arrays
+// and the number of steps in the pattern.
 // This function will not return until the pattern is finished running.
 int OSSex::runShortPattern(int* patSteps, size_t patternLength) {
 	stop();
 
-	if (patternLength) {
+	if (!patternLength) return -1;
 
-		_singlePattern = new struct pattern;
-
-		if (!_singlePattern) {
-			return -1;
-		}
-		_memQueue[0] = _singlePattern;
-
-		_singlePattern->nextStep = NULL;
-		pattern* patIndex = _singlePattern;
-
-		for (int i = 0; i < patternLength; i++) {
-			patIndex->power[0] = *(patSteps++);
-			patIndex->power[1] = *(patSteps++);
-			patIndex->power[2] = *(patSteps++);
-			patIndex->duration = *(patSteps++);
-			if (i < patternLength-1) {
-
-				patIndex->nextStep = new struct pattern;
-
-				if (!patIndex->nextStep) {
-					return -1;
-				}
-				patIndex = patIndex->nextStep;
-			} else {
-				patIndex->nextStep = NULL;
-			}
-		}
-
-		// position _currentStep at start of pattern, start the first step, and set things in motion
-		_currentStep = _singlePattern;
-		for (int i = 0; i < device.outCount; i++) {
-			if (_currentStep->power[i] >= 0) {
-				setOutput(i, _currentStep->power[i]);
-			}
-		}
-		_running = true;
-
-		// Wait until pattern is finished to return
-		while (_running) {}
-		return 1;
-	} else {
-		return 0;
+	// pull two steps at most
+  int limit = 2 > patternLength ? patternLength : 2;
+	for (int i = 0; i < limit; i++) {
+		_memQueue[i]->power[0] = *(patSteps++);
+		_memQueue[i]->power[1] = *(patSteps++);
+		_memQueue[i]->power[2] = *(patSteps++);
+		_memQueue[i]->duration = *(patSteps++);
 	}
 
+	patternLength -= limit;
+	// _memQueue has old pattern steps in it that we're overwriting with this
+	// new pattern. since we're only fetching two steps at most, we set duration
+	//  of the the next step after that to NULL to flag it as out-of-date.
+	_memQueue[limit]->duration = NULL;
+
+	// position _currentStep at start of pattern, start the first step, and set things in motion
+	_currentStep = _memQueue[0];
+	for (int i = 0; i < device.outCount; i++) {
+		if (_currentStep->power[i] >= 0) {
+			setOutput(i, _currentStep->power[i]);
+		}
+	}
+	_running = true;
+	// Feed the pattern its next steps until it's done.
+	while (_running) {
+		if (_currentStep->nextStep->duration == NULL && patternLength) {
+			// if our next step is out-of-date then queue it up
+			patternLength--;
+			_currentStep->nextStep->power[0] = *(patSteps++);
+			_currentStep->nextStep->power[1] = *(patSteps++);
+			_currentStep->nextStep->power[2] = *(patSteps++);
+			_currentStep->nextStep->duration = *(patSteps++);
+		}
+	}
+	return 1;
 }
 
 
-// Run a pattern from a callback function. The callback should return a pointer to a 3-item array: [outputNumber, powerLevel, duration]
-// This function will return before the pattern is finished running since many functions will run indefinitely and block all other processing.
+// Run a pattern from a callback function.
+// The callback should set the Toy.step array with the appropriate values.
+// Toy.step looks like: [motor0 power, motor1 power, motor2 power, duration]
+// The pattern function should return a number greater than 0.
+// runPattern() will return before the pattern is finished running.
 int OSSex::runPattern(int (*callback)(int)) {
 	stop();
 
 	// get the first two steps of the sequence.
-	// if we don't, some patterns with short first steps won't run well and will have a race condition
-	// since the next step is queued while the current one is running
+	// if we don't, some patterns with short first steps won't run well and
+	// will have a race condition since the next step is queued while the
+	// current one is running
 	_patternCallback = callback;
-	if (!_patternCallback(_seq)) {
-		return 0;
+
+	for (int i = 0; i < 2; i++) {
+		if (!_patternCallback(i)) {
+			return 0;
+		}
+		_memQueue[i]->power[0] = step[0];
+		_memQueue[i]->power[1] = step[1];
+		_memQueue[i]->power[2] = step[2];
+	  _memQueue[i]->duration = step[3];
 	}
-	_seq++;
-	_singlePattern = new struct pattern;
+	// since we already fetched steps 0 and 1
+	_seq = 2;
 
-	if (!_singlePattern) {
-		return -1;
-	}
-	_memQueue[0] = _singlePattern;
+	// flag the third step as out-of-date / needing to be fetched.
+	_memQueue[2]->duration = NULL;
 
-	_singlePattern->power[0] = step[0];
-	_singlePattern->power[1] = step[1];
-	_singlePattern->power[2] = step[2];
-	_singlePattern->duration = step[3];
-
-	// get second step
-  if (!_patternCallback(_seq)) {
-      return 0;
-  }
-  _seq++;
-  _singlePattern->nextStep = new struct pattern;
-
-  if (!_singlePattern->nextStep) {
-      return -1;
-  }
-  _memQueue[1] = _singlePattern->nextStep;
-
-	_singlePattern->nextStep->power[0] = step[0];
-	_singlePattern->nextStep->power[1] = step[1];
-	_singlePattern->nextStep->power[2] = step[2];
-	_singlePattern->nextStep->duration = step[3];
-    _singlePattern->nextStep->nextStep = NULL;
-
-	_currentStep = _singlePattern;
+	_currentStep = _memQueue[0];
 	for (int i = 0; i < device.outCount; i++) {
 		if (_currentStep->power[i] >= 0) {
 			setOutput(i, _currentStep->power[i]);
@@ -348,26 +321,26 @@ int OSSex::runPattern(int (*callback)(int)) {
 
 	_running = true;
 	return 1;
-
 }
 
 // run a specific pattern from the queue
 int OSSex::runPattern(unsigned int pos) {
-    if (!_currentPattern) {
-      return -1;
+  if (!_currentPattern) {
+    return -1;
+  }
+  _currentPattern = _first;
+  for (int i = 0; i < pos; i++) {
+    _currentPattern = _currentPattern->nextPattern;
+    if (_currentPattern == NULL) {
+        return -2;
     }
-
-    _currentPattern = _first;
-    for (int i = 0; i < pos; i++) {
-      _currentPattern = _currentPattern->nextPattern;
-      if (_currentPattern == NULL) {
-          return -2;
-      }
-    }
-
-    return runPattern(_currentPattern->patternFunc);
+  }
+  return runPattern(_currentPattern->patternFunc);
 }
 
+
+// Return the queue number of the currently running pattern
+// First pattern is 0, second is 1, etc.
 int OSSex::getPattern() {
 	if (!_currentPattern) {
     return -1;
@@ -507,17 +480,11 @@ void OSSex::stop() {
 	_patternCallback = NULL;
 	step[0] = step[1] = step[2] = -1;
 	step[3] = 0;
-	volatile pattern* current = _memQueue[0];
-	pattern* future = current->nextStep;
-	while (current != NULL) {
-		free((void *)current);
-		current = future;
-		future = future->nextStep;
-	}
-	_memQueue[0] = _memQueue[1] = NULL;
 }
 
-// Set hacker port multiplexer for reading certain types of inputs. Accepts any of the above #defines as an option.
+// Set hacker port multiplexer for reading certain types of inputs.
+// Options are the HACKER_PORT_XXX cases in OSSex.h
+// or below in the 'case' statements
 int OSSex::setHackerPort(unsigned int flag) {
 	byte pin0, pin1;
 
@@ -526,18 +493,21 @@ int OSSex::setHackerPort(unsigned int flag) {
 	}
 
 	switch (flag) {
+		// Hacker Port analog in / PWM out
 		case HACKER_PORT_AIN:
 			pin0 = LOW;
 			pin1 = LOW;
 			device.HP0 = A7;
 			device.HP1 = A9;
 			break;
+		// Hacker Port I2C host
 		case HACKER_PORT_I2C:
 			pin0 = HIGH;
 			pin1 = LOW;
 			device.HP0 = 2;
 			device.HP1 = 3;
 			break;
+		// Hacker Port software serial
 		case HACKER_PORT_SERIAL:
 			pin0 = LOW;
 			pin1 = HIGH;
@@ -552,7 +522,6 @@ int OSSex::setHackerPort(unsigned int flag) {
 	digitalWrite(device.muxPins[1], pin1);
 
 	return 0;
-
 }
 
 // Read input channel
