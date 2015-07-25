@@ -1,8 +1,11 @@
 #include <WiiChuck.h>
 
+WiiChuck Nunchuck = WiiChuck();
+
 WiiChuck::WiiChuck() {
   buttonZ.button.setActiveLow(false);
   buttonC.button.setActiveLow(false);
+  begin();
 }
 
 WiiChuck::WiiChuck(bool (*c_update)(void), bool (*z_update)(void)) {

@@ -132,6 +132,7 @@ void OSSex::setID(int deviceId) {
 // If a pattern is running, the _running flag will be true
 void OSSex::update() {
 	device.buttons[0].button.tick();
+	if (getHackerPort() == HACKER_PORT_I2C) Nunchuck.update();
 	if (_running) {
 		_tickCount++;
 		if (_tickCount > (_currentStep->duration * _timeScale)) {
@@ -522,6 +523,20 @@ int OSSex::setHackerPort(unsigned int flag) {
 	digitalWrite(device.muxPins[1], pin1);
 
 	return 0;
+}
+
+unsigned int OSSex::getHackerPort() {
+	uint8_t pin0 = digitalRead(device.muxPins[0]);
+	uint8_t pin1 = digitalRead(device.muxPins[1]);
+	if (pin0 == HIGH) {
+		return HACKER_PORT_I2C;
+	} else {
+		if (pin1 == HIGH) {
+			return HACKER_PORT_SERIAL;
+		} else {
+			return HACKER_PORT_AIN;
+		}
+	}
 }
 
 // Read input channel

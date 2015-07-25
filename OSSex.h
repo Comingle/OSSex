@@ -11,6 +11,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include "OneButton.h"
+#include <WiiChuck.h>
 
 // Timer4 is for ATmega32U4/Lilypad usb and should interrupt every ~1ms. Timer2 is for ATmega328P/Arduino Uno and should interrupt ~1ms.
 #define TIMER4_INIT 16;
@@ -64,6 +65,7 @@ class OSSex {
     void stop();
 
     int setHackerPort(unsigned int);
+    unsigned int getHackerPort();
 
     static const int _max_outputs = 8;
     static const int _max_leds = 8;
@@ -125,5 +127,6 @@ class OSSex {
 };
 
 extern OSSex Toy;
+extern WiiChuck Nunchuck;
 
 #endif
