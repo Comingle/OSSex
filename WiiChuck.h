@@ -118,6 +118,6 @@ class WiiChuck {
 
 };
 
-extern WiiChuck Nunchuck;
+//extern WiiChuck Nunchuck;
 
 #endif

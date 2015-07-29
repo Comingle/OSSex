@@ -128,6 +128,7 @@ void OSSex::setID(int deviceId) {
 	_memQueue[2]->nextStep = _memQueue[0];
 }
 
+
 // Called by the timer interrupt to check if a change needs to be made to the pattern or update the button status.
 // If a pattern is running, the _running flag will be true
 void OSSex::update() {

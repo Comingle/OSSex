@@ -127,6 +127,5 @@ class OSSex {
 };
 
 extern OSSex Toy;
-extern WiiChuck Nunchuck;
 
 #endif
