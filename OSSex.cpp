@@ -133,7 +133,6 @@ void OSSex::setID(int deviceId) {
 // If a pattern is running, the _running flag will be true
 void OSSex::update() {
 	device.buttons[0].button.tick();
-	if (getHackerPort() == HACKER_PORT_I2C) Nunchuck.update();
 	if (_running) {
 		_tickCount++;
 		if (_tickCount > (_currentStep->duration * _timeScale)) {
