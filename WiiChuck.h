@@ -1,3 +1,5 @@
+//
+// June 2015 - modified by Craig Durkin / Comingle. v0.1.
 /*
  * Nunchuck -- Use a Wii Nunchuck
  * Tim Hirzel http://www.growdown.com
@@ -87,13 +89,16 @@ class WiiChuck {
 
     void attachZClick(void (*callback)(void));
     void attachZDoubleClick(void (*callback)(void));
-	void attachZLongPressStart(void (*callback)(void));
-
+  	void attachZLongPressStart(void (*callback)(void));
+    void attachZDuringLongPress(void (*callback)(void));
+    void attachZLongPressStop(void (*callback)(void));
     void attachZUpdate(bool (*callback)(void));
+
     void attachCClick(void (*callback)(void));
     void attachCDoubleClick(void (*callback)(void));
-	void attachCLongPressStart(void (*callback)(void));
-
+  	void attachCLongPressStart(void (*callback)(void));
+    void attachCDuringLongPress(void (*callback)(void));
+    void attachCLongPressStop(void (*callback)(void));
     void attachCUpdate(bool (*callback)(void));
 
     uint8_t joyX;

@@ -1,9 +1,13 @@
+// WiiChuck library -- originally by Tim Hirzel, building off of Tod Kurt,
+// building off of Windmeadow Labs
+// June 2015 - modified by Craig Durkin / Comingle. v0.1.
+
 #include <WiiChuck.h>
 
 
 WiiChuck::WiiChuck() {
   buttonZ.button.setActiveLow(false);
-  buttonC.button.setActiveLow(false);  
+  buttonC.button.setActiveLow(false);
 }
 
 WiiChuck::WiiChuck(bool (*c_update)(void), bool (*z_update)(void)) {
@@ -171,6 +175,14 @@ void WiiChuck::attachZLongPressStart(void (*callback)()) {
 	buttonZ.button.attachLongPressStart(callback);
 }
 
+void WiiChuck::attachZDuringLongPress(void (*callback)()) {
+	buttonZ.button.attachDuringLongPress(callback);
+}
+
+void WiiChuck::attachZLongPressStop(void (*callback)()) {
+	buttonZ.button.attachLongPressStop(callback);
+}
+
 void WiiChuck::attachCClick(void (*callback)(void)) {
   buttonC.button.attachClick(callback);
 }
@@ -180,6 +192,14 @@ void WiiChuck::attachCDoubleClick(void (*callback)(void)) {
 }
 void WiiChuck::attachCLongPressStart(void (*callback)()) {
 	buttonC.button.attachLongPressStart(callback);
+}
+
+void WiiChuck::attachCDuringLongPress(void (*callback)()) {
+	buttonC.button.attachDuringLongPress(callback);
+}
+
+void WiiChuck::attachCLongPressStop(void (*callback)()) {
+	buttonC.button.attachLongPressStop(callback);
 }
 
 void WiiChuck::attachCUpdate(bool (*callback)(void)) {
