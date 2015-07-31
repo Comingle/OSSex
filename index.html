@@ -194,7 +194,7 @@ If you include the OSSex library in your sketch via Arduino&rsquo;s &ldquo;Impor
 <pre class="highlight cpp"><code><span class="n">Toy</span><span class="p">.</span><span class="n">runPattern</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">function</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">));</span>
 </code></pre>
 
-<p><code class="prettyprint">runShortPattern()</code> and <code class="prettyprint">runPattern()</code> allow you to create and run vibration patterns so that you can turn the motors on and off in whatever sequence you can conceive. See the <a href="/#vibration-patterns"><strong>Vibration Patterns</strong></a> section for more in-depth information on how to create your own vibration patterns.</p>
+<p><code class="prettyprint">runShortPattern()</code> and <code class="prettyprint">runPattern()</code> allow you to create and run vibration patterns so that you can turn the motors on and off in whatever sequence you can conceive. See the <a href="#vibration-patterns"><strong>Vibration Patterns</strong></a> section for more in-depth information on how to create your own vibration patterns.</p>
 
 <p><code class="prettyprint">runShortPattern()</code> will not return until the pattern has completed. That means the rest of your code will not run until the pattern is finished.</p>
 
@@ -560,7 +560,7 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 
 <p>OSSex includes a library called WiiChuck that can be used to interface a Wii Nunchuck with your toy. The Nunchuck communicates over I2C, includes a 3-axis accelerometer, X/Y joystick, and two buttons for only a few dollars. There&rsquo;s lots of potential!</p>
 
-<p>The <code class="prettyprint">begin()</code> function initiates the I2C connection, and this can hang if you don&rsquo;t actually have a nunchuck connected at the time. See the <a href="/#workarounds">Workarounds</a> section below for a way to fix this.</p>
+<p>The <code class="prettyprint">begin()</code> function initiates the I2C connection, and this can hang if you don&rsquo;t actually have a nunchuck connected at the time. See the <a href="#workarounds">Workarounds</a> section below for a way to fix this.</p>
 
 <p>Once the connection is</p>
 
