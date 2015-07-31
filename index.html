@@ -81,8 +81,7 @@
 
 <h3 id="pin-setup">Pin setup</h3>
 
-<p>The motors and buttons and sensors attached to a Mod or Dilduino
-The various digital and analog pins used in the Mod and Dilduino are all listed in the <code class="prettyprint">setID()</code> function of OSSex.cpp in the OSSex library. Simply including the library will automatically create a <code class="prettyprint">Toy</code> object that is configured as a Mod/Dilduino, so you don&rsquo;t have to do anything else to get all of your pins set up. The Hacker Port in particular becomes far more convenient: it requires a high or low signal on two separate pins to set its state, and that state then exposes 2 of 6 possible different pins.</p>
+<p>The motors and buttons and sensors attached to a Mod or Dilduino are not referenced to pins that are in any sort of order, so remembering what it attached to what can be tedious. The various digital and analog pins used in the Mod and Dilduino are all listed in the <code class="prettyprint">setID()</code> function of OSSex.cpp in the OSSex library. Simply including the library will automatically create a <code class="prettyprint">Toy</code> object that is configured as a Mod/Dilduino, so you don&rsquo;t have to do anything else to get all of your pins set up. The Hacker Port in particular becomes far more convenient: it requires a high or low signal on two separate pins to set its state, and that state then exposes 2 of 6 possible different pins.</p>
 
 <h3 id="unobtrusive-pattern-functions">Unobtrusive pattern functions</h3>
 
