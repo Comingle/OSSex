@@ -257,7 +257,9 @@ Each of the handlers will execute <code class="prettyprint">function</code> when
 
 <h2 id="runshortpattern"><code class="prettyprint">runShortPattern()</code></h2>
 
+<blockquote>
 <p>Turn all motors on to a power of 200 for half a second (500 milliseconds), then turn them off for 500 milliseconds. Since <code class="prettyprint">runShortPattern()</code> is being called from <code class="prettyprint">loop()</code>, the pattern will run both of its steps and finish, but then start again.</p>
+</blockquote>
 <pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">pattern</span><span class="p">[][</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
     <span class="p">{</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">500</span><span class="p">},</span>
     <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">},</span>
