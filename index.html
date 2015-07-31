@@ -1,0 +1,606 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>API Reference</title>
+
+    <link href="stylesheets/screen.css" rel="stylesheet" type="text/css" media="screen" />
+    <link href="stylesheets/print.css" rel="stylesheet" type="text/css" media="print" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+      <script src="javascripts/all.js" type="text/javascript"></script>
+
+      <script>
+        $(function() {
+          setupLanguages(["arduino"]);
+        });
+      </script>
+  </head>
+
+  <body class="index">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="images/navbar.png" />
+      </span>
+    </a>
+    <div class="tocify-wrapper">
+      <img src="images/logo.png" />
+        <div class="lang-selector">
+              <a href="#" data-language-name="arduino">arduino</a>
+        </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <div id="toc">
+      </div>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id="introduction">Introduction</h1>
+
+<p>OSSex is an Arduino library for interacting with Comingle open-source sex toys. If you have a Mod dildo or a Dilduino circuit board, OSSex can make it easier for you to reprogram your toy as you desire.</p>
+
+<h2 id="installation">Installation</h2>
+
+<blockquote>
+<p>Once you have OSSex installed, include it in your sketch to use it:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="cp">#include &lt;OSSex.h&gt;
+#include &lt;Wire.h&gt;
+</span>
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+ <span class="p">...</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>Head to the <a href="https://github.com/Comingle/OSSex/releases/latest">latest release</a> page and download the source in zip format.</p>
+
+<p>Open the Arduino software, and select the &ldquo;Sketch&rdquo; menu, then &ldquo;Import Library&hellip;&rdquo;, and finally &ldquo;Add Library&hellip;&rdquo;. Choose the OSSex zip file that you just downloaded. More information is available at the <a href="http://arduino.cc/en/Guide/Libraries">Arduino Libraries</a> page.</p>
+
+<p><img src="https://www.comingle.io/wp-content/images/addlibrary.png"></p>
+
+<p>In the Arduino application, make sure to set your board type as a &ldquo;Lilypad Arduino USB&rdquo;:</p>
+
+<p><img src="https://www.comingle.io/wp-content/images/selectboard.png"></p>
+
+<p>Finally, plug in your toy and turn it on. In the Tools menu, choose Port, and then you can select the port to which your toy is connected. On a Mac, this will show up as a <strong>usbmodem</strong> port, often as something like <code class="prettyprint">/dev/tty.usbmodem621</code> or <code class="prettyprint">/dev/cu.usbmodem621</code> &ndash; you can select either the <code class="prettyprint">tty.usbmodem</code> port or the <code class="prettyprint">cu.usbmodem</code> port and either will work.</p>
+
+<p>On a Windows machine, your toy will show up as an additional <strong>COM</strong> port.</p>
+
+<p><img src="https://www.comingle.io/wp-content/images/selectport.png"></p>
+
+<h2 id="ossex-advantages">OSSex advantages</h2>
+
+<h3 id="pin-setup">Pin setup</h3>
+
+<p>The motors and buttons and sensors attached to a Mod or Dilduino
+The various digital and analog pins used in the Mod and Dilduino are all listed in the <code class="prettyprint">setID()</code> function of OSSex.cpp in the OSSex library. Simply including the library will automatically create a <code class="prettyprint">Toy</code> object that is configured as a Mod/Dilduino, so you don&rsquo;t have to do anything else to get all of your pins set up. The Hacker Port in particular becomes far more convenient: it requires a high or low signal on two separate pins to set its state, and that state then exposes 2 of 6 possible different pins.</p>
+
+<h3 id="unobtrusive-pattern-functions">Unobtrusive pattern functions</h3>
+
+<p>OSSex creates a &ldquo;second loop&rdquo; that runs independently of (and with priority over) the Arduino&rsquo;s main <code class="prettyprint">loop()</code> function. It uses this loop to update peripherals (like the button attached to your Mod/Dilduino, and readings from an attached Nunchuck or sensor) and to run vibration patterns so that you can keep those things out of the main <code class="prettyprint">loop()</code> function. This makes your code cleaner and prevents pauses in a vibration pattern from pausing other code.</p>
+
+<p>This is what we mean by <strong>unobtrusive</strong>. The second loop runs every millisecond, and only makes changes if needed. This prevents it from unduly delaying other code, unless of course you need something with sub-millisecond resolution, in which case we&rsquo;d love to hear what you&rsquo;re up to.</p>
+
+<h2 id="ossex-caveats">OSSex caveats</h2>
+
+<h3 id="using-delay-millis-micros-or-serial-commands-in-a-button-click-handler">Using <code class="prettyprint">delay()</code>, <code class="prettyprint">millis()</code>, <code class="prettyprint">micros()</code>, or <code class="prettyprint">Serial</code> commands in a button click handler</h3>
+
+<blockquote>
+<p>Click handler setting a flag that is checked in <code class="prettyprint">loop()</code>:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="n">bool</span> <span class="n">clicked</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">attachClick</span><span class="p">(</span><span class="n">click_func</span><span class="p">);</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">click_func</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">clicked</span> <span class="o">=</span> <span class="o">!</span><span class="n">clicked</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">clicked</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">(</span><span class="k">do</span> <span class="n">something</span><span class="p">)</span>
+  <span class="p">}</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>All of the functions associated with button clicks (single click, double click, button hold) are handled by OSSex&rsquo;s second loop. The second loop runs through an Arduino interrupt routine. Interrupt routines are functions that run with priority over other code; the processor will stop whatever else is happening to run an interrupt routine.</p>
+
+<p>The problem is that time functions like <code class="prettyprint">delay()</code>, <code class="prettyprint">millis()</code>, and <code class="prettyprint">micros()</code>, all work in their own separate interrupt routine. If OSSex&rsquo;s second loop is running then the time interrupt routine isn&rsquo;t. So time, as observed by <code class="prettyprint">delay()</code>, <code class="prettyprint">millis()</code>, and <code class="prettyprint">micros()</code>, basically stops when the second loop is running: <code class="prettyprint">delay()</code> will return instantly, <code class="prettyprint">millis()</code> will report the same value over and over, and things that depend on <code class="prettyprint">delay()</code> or <code class="prettyprint">millis()</code> (such as <code class="prettyprint">Serial</code> commands) will not work correctly.</p>
+
+<p>Since OSSex updates the button state in the second loop, time-based functions (like blinking an LED in response to a button click) will not work in click handlers as intended. One work-around for this is to have the button click handler function set a flag that is observed in <code class="prettyprint">loop()</code>.</p>
+
+<p>Another potential option is to use <a href="https://www.arduino.cc/en/Reference/DelayMicroseconds"><code class="prettyprint">delayMicroseconds()</code></a>. <code class="prettyprint">delayMicroseconds()</code> runs a calibrated number of &ldquo;no operation&rdquo; instructions to achieve a delay and doesn&rsquo;t depend on interrupts. However, since <code class="prettyprint">delayMicroseconds()</code> takes an <code class="prettyprint">unsigned int</code> as an argument, the largest number of microseconds you can delay with a single call is 65,535 (or 65.535 milliseconds).</p>
+
+<h1 id="basics">Basics</h1>
+
+<blockquote>
+<p>Once the library is installed, add the <strong>OSSex.h</strong> file and the <strong>Wire.h</strong> file to your sketch:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="cp">#include &lt;OSSex.h&gt;
+#include &lt;Wire.h&gt;
+</span>
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+ <span class="p">...</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+ <span class="p">...</span>
+<span class="p">}</span>
+</code></pre>
+
+<aside class="notice">
+You need to include the Wire.h header file even if you&rsquo;re not using the Wire library. We&rsquo;re working on fixing this.
+</aside>
+
+<aside class="notice">
+If you include the OSSex library in your sketch via Arduino&rsquo;s &ldquo;Import Library&hellip;&rdquo; menu option, it will add an unnecessary include of OneButton.h to your sketch. You should delete this line or you&rsquo;ll have compilation errors.
+</aside>
+
+<p>The library will create a <code class="prettyprint">Toy</code> object that you can use to interact with your toy. <code class="prettyprint">Toy</code> defaults to being a Comingle Mod (or Dilduino), and this is currently the only option, but other types of toys can be created and used.</p>
+
+<p>All interaction with your toy happens through the <code class="prettyprint">Toy</code> object.</p>
+
+<h2 id="turning-a-motor-output-on-off">Turning a motor (output) on/off</h2>
+<pre class="highlight cpp"><code><span class="n">Toy</span><span class="p">.</span><span class="n">setOutput</span><span class="p">(</span><span class="kt">int</span> <span class="n">outNumber</span><span class="p">,</span> <span class="kt">int</span> <span class="n">powerLevel</span><span class="p">);</span>
+</code></pre>
+
+<p>The first motor would have an <code class="prettyprint">outNumber</code> of 0. <strong>-1</strong> can be given for <code class="prettyprint">outNumber</code> as shorthand for all outputs/motors.</p>
+
+<p><code class="prettyprint">powerLevel</code>s are constrained to a value from 0 to 255 inclusive. A <code class="prettyprint">powerLevel</code> of 0 will turn the output off.</p>
+
+<p><code class="prettyprint">outNumber</code>s greater than the number of available outputs will be divided by the number of available outputs and the remainder will be used, i.e. if you try to turn on motor 4 in a 3-motor toy, motor 1 will turn on, since the remainder of 4/3 is 1.</p>
+
+<p>Negative <code class="prettyprint">outNumbers</code> will be made positive, except for the <strong>-1</strong> special case.</p>
+
+<h2 id="set-the-led-to-a-particular-power-level">Set the LED to a particular power level</h2>
+<pre class="highlight cpp"><code><span class="n">Toy</span><span class="p">.</span><span class="n">setLED</span><span class="p">(</span><span class="kt">int</span> <span class="n">ledNumber</span><span class="p">,</span> <span class="kt">int</span> <span class="n">powerLevel</span><span class="p">);</span>
+</code></pre>
+
+<p><code class="prettyprint">setLED()</code> sets a given <code class="prettyprint">ledNumber</code> to a given <code class="prettyprint">powerLevel</code>. <code class="prettyprint">powerLevel</code> is constrained from 0 to 255 inclusive, with <code class="prettyprint">powerLevel</code> of 0 turning the LED off.</p>
+
+<p>This function does not yet support the <strong>-1</strong> shorthand to apply <code class="prettyprint">powerLevel</code> to all LEDs.</p>
+
+<h2 id="read-an-input">Read an input</h2>
+<pre class="highlight cpp"><code><span class="n">Toy</span><span class="p">.</span><span class="n">getInput</span><span class="p">(</span><span class="kt">int</span> <span class="n">inNumber</span><span class="p">);</span>
+</code></pre>
+
+<p><code class="prettyprint">getInput()</code> is a wrapper for <code class="prettyprint">analogRead()</code>. <code class="prettyprint">inNumber</code> on a Mod is either 0 or 1, since the Mod has two inputs through its Hacker Port. These inputs are labeled HP0 and HP1 on the Dilduino.</p>
+
+<h2 id="run-an-vibration-pattern">Run an vibration pattern</h2>
+
+<blockquote>
+<p>Running a pattern from an array:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="n">Toy</span><span class="p">.</span><span class="n">runShortPattern</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">pattern</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">patternSize</span><span class="p">);</span>
+</code></pre>
+
+<blockquote>
+<p>Running a pattern from a pattern function:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="n">Toy</span><span class="p">.</span><span class="n">runPattern</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">function</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">));</span>
+</code></pre>
+
+<p><code class="prettyprint">runShortPattern()</code> and <code class="prettyprint">runPattern()</code> allow you to create and run vibration patterns so that you can turn the motors on and off in whatever sequence you can conceive. See the <a href="/#vibration-patterns"><strong>Vibration Patterns</strong></a> section for more in-depth information on how to create your own vibration patterns.</p>
+
+<p><code class="prettyprint">runShortPattern()</code> will not return until the pattern has completed. That means the rest of your code will not run until the pattern is finished.</p>
+
+<p><code class="prettyprint">runPattern()</code> will return immediately.</p>
+
+<p><code class="prettyprint">runShortPattern()</code> and <code class="prettyprint">runPattern()</code> return 1 on success and 0 on error (<code class="prettyprint">patternLength</code> is null or if the first two steps of the pattern function are unavailable).</p>
+
+<h2 id="control-the-button-behavior">Control the button behavior</h2>
+
+<blockquote>
+<p>Button click handlers:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="n">Toy</span><span class="p">.</span><span class="n">attachClick</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">function</span><span class="p">());</span>
+<span class="n">Toy</span><span class="p">.</span><span class="n">attachDoubleClick</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">function</span><span class="p">());</span>
+<span class="n">Toy</span><span class="p">.</span><span class="n">attachLongPressStart</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">function</span><span class="p">());</span>
+<span class="n">Toy</span><span class="p">.</span><span class="n">attachLongPressStop</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">function</span><span class="p">());</span>
+<span class="n">Toy</span><span class="p">.</span><span class="n">attachDuringLongPress</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">function</span><span class="p">());</span>
+</code></pre>
+
+<blockquote>
+<p>Example to turn the LED on or off with a button click:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">m</span> <span class="o">=</span> <span class="mi">255</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">led</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">setLED</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">==</span> <span class="mi">255</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="mi">255</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">attachClick</span><span class="p">(</span><span class="n">led</span><span class="p">);</span>
+<span class="p">}</span>
+
+</code></pre>
+
+<p>OSSex uses the OneButton Arduino library to allow single click, double click, and long press events on the device&rsquo;s button(s).
+Each of the handlers will execute <code class="prettyprint">function</code> when the corresponding action happens (click, double-click, click-and-hold, etc.). <code class="prettyprint">attachClick()</code>, for instance, will execute <code class="prettyprint">function</code> whenever it detects a single click.
+<aside class="warning">
+<code class="prettyprint">delay()</code>, <code class="prettyprint">millis()</code>, and <code class="prettyprint">micros()</code> will not work properly in a click handler function.
+</aside></p>
+
+<h1 id="vibration-patterns">Vibration patterns</h1>
+
+<p>You can make your toy run all kinds of vibration patterns: make them fade in and out, respond to a sensor, jump around randomly, be on full-blast, however you want.</p>
+
+<p>A vibration pattern is a sequence of <strong>steps</strong>. Each step has 4 parts:</p>
+
+<ol>
+<li>The power for motor 0</li>
+<li>The power for motor 1</li>
+<li>The power for motor 2</li>
+<li>How long the step should run (in milliseconds)</li>
+</ol>
+
+<p>The step <code class="prettyprint">{40, 0, 0, 5000}</code> would turn motor 0 on to a power level of 40 for 5 seconds before the next step would run.</p>
+
+<h2 id="runshortpattern"><code class="prettyprint">runShortPattern()</code></h2>
+
+<p>Turn all motors on to a power of 200 for half a second (500 milliseconds), then turn them off for 500 milliseconds. Since <code class="prettyprint">runShortPattern()</code> is being called from <code class="prettyprint">loop()</code>, the pattern will run both of its steps and finish, but then start again.</p>
+<pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">pattern</span><span class="p">[][</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">{</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">500</span><span class="p">},</span>
+    <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">},</span>
+<span class="p">};</span>
+<span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">patternSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">runShortPattern</span><span class="p">(</span><span class="o">*</span><span class="n">pattern</span><span class="p">,</span> <span class="n">patternSize</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+
+<blockquote>
+<p>Pattern functions become necessary for more complicated patterns. Suppose we wanted to turn all the motors on and ramp their intensity up to max (255), then ramp back down to 0, all in steps of 5. Making an array is tedious, and makes it difficult to modify the pattern in the future:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">pattern</span><span class="p">[][</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">},</span> <span class="p">{</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">50</span><span class="p">},</span> <span class="p">{</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">},</span> <span class="p">{</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">50</span><span class="p">},</span> <span class="p">{</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">50</span><span class="p">},</span> <span class="p">{</span><span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">},</span> <span class="p">...</span>
+<span class="p">};</span>
+</code></pre>
+
+<p>You can make a pattern <strong>array</strong> and run it with <code class="prettyprint">runShortPattern()</code>. This way requires you to come up with your patterns by hand, and is not practical for large patterns, but perfectly fine for simple ones.</p>
+
+<p><code class="prettyprint">runShortPattern()</code> will not return until the pattern has finished running. That means the rest of your code will not run until the pattern is finished.</p>
+
+<p>As your patterns get larger, you will start to run in to memory limits on the toy, and the pattern will become more unwieldy if you want to make changes: suppose you want the change the duration of each step from 50ms to 70ms. This is an annoying task if you have to change 200 steps.</p>
+
+<h2 id="runpattern"><code class="prettyprint">runPattern()</code></h2>
+
+<blockquote>
+<p>The pattern function <code class="prettyprint">blip()</code> sets <code class="prettyprint">Toy.step</code> and returns 1. In this example, <code class="prettyprint">blip()</code> will run endlessly since it&rsquo;s started from <code class="prettyprint">setup()</code> and there&rsquo;s no code in place to stop it.</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">int</span> <span class="nf">blip</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">seq</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">runPattern</span><span class="p">(</span><span class="n">blip</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+
+<blockquote>
+<p>Revisiting our idea to ramp power from 0 to 255 in steps of 5, and then back down to 0:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">int</span> <span class="nf">fade</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// set step timing
+</span>  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>
+
+  <span class="c1">// Our sequence runs from 0 to 255 and back to 0 in increments of 5
+</span>  <span class="c1">// 0 -&gt; 255: 255/5 = 51 steps
+</span>  <span class="c1">// 255 -&gt; 0: 255/5 = 51 steps
+</span>  <span class="c1">// ----------------- 102 steps total
+</span>
+  <span class="c1">// normalize sequence
+</span>  <span class="n">seq</span> <span class="o">%=</span> <span class="mi">102</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">seq</span> <span class="o">&lt;=</span> <span class="mi">51</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// ascending
+</span>    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">seq</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="c1">// descending
+</span>    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span> <span class="o">-</span> <span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="n">seq</span><span class="o">-</span><span class="mi">51</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+
+<blockquote>
+<p>You could also get even simpler, and use a periodic function like <code class="prettyprint">sin()</code>, <code class="prettyprint">cos()</code>, <code class="prettyprint">tan()</code>, etc. Changing parameters for the whole pattern becomes very easy:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">int</span> <span class="nf">fadeCos</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">round</span><span class="p">(</span><span class="mi">127</span> <span class="o">*</span> <span class="n">cos</span><span class="p">((</span><span class="n">seq</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">PI</span><span class="p">))</span><span class="o">-</span><span class="n">PI</span><span class="p">)</span> <span class="o">+</span> <span class="mi">127</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+
+<blockquote>
+<p>You could also print the output of your function to the serial console to make sure it&rsquo;s behaving appropriately:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">9600</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="n">m</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">fade</span><span class="p">(</span><span class="n">m</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"step[0]: "</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">" step[1]: "</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">" step[2]: "</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">" step[3]: "</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]);</span>
+  <span class="n">m</span><span class="o">++</span><span class="p">;</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">300</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+
+<p><code class="prettyprint">runPattern()</code> is used with pattern functions. Pattern functions calculate the next step in a pattern as needed rather than storing every step of the pattern. Pattern functions take up a lot less memory, and are more versatile because you can do almost anything inside of them that you could do in a normal function (call other functions, chain functions together, read a sensor, add random noise, etc.)</p>
+
+<p><code class="prettyprint">runPattern()</code> will run your pattern function every time it needs the next step in the pattern. It provides an increasing sequence number as an argument to the pattern function.</p>
+
+<p>A step-by-step run-through of the example with the <code class="prettyprint">blip()</code> function is:</p>
+
+<ol>
+<li>Run <code class="prettyprint">blip(0)</code></li>
+<li>Read <code class="prettyprint">{200, 200, 200, 1000}</code> from <code class="prettyprint">Toy.step</code></li>
+<li>Run it (turn all motors on to 200 for 1 second)</li>
+<li>After 1 second, run <code class="prettyprint">blip(1)</code></li>
+<li>Read <code class="prettyprint">{0, 0, 0, 1000}</code> from <code class="prettyprint">Toy.step</code></li>
+<li>Run it (turn all motors off for 1 second)</li>
+<li>After 1 second, run <code class="prettyprint">blip(2)</code></li>
+<li>Read <code class="prettyprint">{200, 200, 200, 1000}</code> from <code class="prettyprint">Toy.step</code></li>
+<li>Run it (turn all motors on to 200 for 1 second)</li>
+<li>After 1 second, run <code class="prettyprint">blip(3)</code></li>
+</ol>
+
+<p>&hellip; (run forever, or until <code class="prettyprint">blip()</code> returns 0 or NULL, or something else stops the pattern)</p>
+
+<aside class="notice">
+In short: When `runPattern()` calls your pattern function to get the next step in the pattern, your function only needs to update the `Toy.step` array and return 1. You also have access to the previous step and can use it to influence the upcoming step.
+</aside>
+
+<p><code class="prettyprint">runPattern()</code> will return immediately, even while your pattern continues to run, because pattern functions lend themselves to running for a very long time. This way you can create functions that are 5, 500, or infinite steps in duration without your pattern function delaying other code from running.</p>
+
+<p>In the <code class="prettyprint">fadeCos()</code> example, you might wonder where <code class="prettyprint">127 * cos((seq / (8*PI))-PI) + 127</code> came from. It&rsquo;s basically the result of progressively changing <code class="prettyprint">cos(x)</code> until it gave the right behavior. One of the easiest ways to do this is by typing &ldquo;cos(x)&rdquo; in to Google, viewing the graph of the function and modifying it until it looks right (starts at 0, peaks at near 255, has a long enough period that it smoothly transitions power levels). The steps for doing this are laid out in our <a href="https://www.comingle.io/howto/advanced-programming-patterns#pattern_functions">patterns howto</a>.</p>
+
+<h2 id="stopping-patterns">Stopping patterns</h2>
+
+<blockquote>
+<p>We can modify the <code class="prettyprint">blip()</code> function to terminate after running the on-off sequence twice:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">int</span> <span class="nf">blip</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="cm">/* NEW */</span>
+  <span class="n">seq</span> <span class="o">%=</span> <span class="mi">5</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">seq</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+  <span class="cm">/* NEW */</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">seq</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>There are 2 easy ways to stop a pattern. You can:</p>
+
+<ul>
+<li>Have the pattern function return 0 or NULL upon certain conditions being met (sequence number greater than some value, sensor reading below a certain threshold, etc.)</li>
+<li>Use the <code class="prettyprint">stop()</code> function, attached to a click handler for instance.</li>
+</ul>
+
+<h2 id="queuing-patterns">Queuing patterns</h2>
+
+<blockquote>
+<p>Adding a pattern to the queue:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">int</span> <span class="nf">pat_function</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="p">(</span><span class="n">some</span> <span class="n">crazy</span> <span class="n">code</span><span class="p">)</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">addPattern</span><span class="p">(</span><span class="n">pat_function</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+
+<blockquote>
+<p>Cycling through the queue:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">void</span> <span class="nf">click</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">nextPattern</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">double_click</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">previousPattern</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">attachClick</span><span class="p">(</span><span class="n">click</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">attachDoubleClick</span><span class="p">(</span><span class="n">double_click</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>If you have multiple pattern functions on your device — and why not? — then you need a way of selecting between them. OSSex has an internal queue to which patterns can be added, and then cycled through forwards/backwards.</p>
+
+<p><code class="prettyprint">addPattern()</code> is used to add pattern functions to the queue:
+<code class="prettyprint">int addPattern(int *function(int));</code></p>
+
+<p><code class="prettyprint">nextPattern()</code> advances the queue to the next pattern and starts it:
+<code class="prettyprint">int nextPattern();</code></p>
+
+<p><code class="prettyprint">previousPattern()</code> moves the queue to the previous pattern and starts it:
+<code class="prettyprint">int previousPattern();</code></p>
+
+<p><code class="prettyprint">getPattern()</code> returns the index number of the current pattern (starting at 0):
+<code class="prettyprint">int getPattern();</code></p>
+
+<h2 id="modifying-running-patterns">Modifying running patterns</h2>
+
+<blockquote>
+<p>Setting a button click to increase power by 10%, and a button double-click to decrease power by 10%:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="kt">void</span> <span class="nf">click</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">increasePower</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">doubleClick</span><span class="p">()</span> <span class="p">{</span>
+ <span class="n">Toy</span><span class="p">.</span><span class="n">decreasePower</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">setPowerScaleStep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">attachClick</span><span class="p">(</span><span class="n">click</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">attachDoubleClick</span><span class="p">(</span><span class="n">doubleClick</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>Vibration patterns can be modified while running to be faster/slower or more/less powerful. The quickest way to do this is via either <code class="prettyprint">setPowerScaleFactor(float scale)</code> or <code class="prettyprint">setTimeScaleFactor(float scale)</code>. These will set the power and time <strong>scaling factors</strong> respectively.</p>
+
+<p>The time and power scaling factor defaults to 1.0, and this means that all motor powers / step durations should be multiplied by 1.0, or run as-is. Setting the power scaling factor to 1.5 would run all patterns at 50% higher power (if possible), and setting the time scaling factor to 2.0 would run everything twice as <strong>slow</strong> (you&rsquo;re increasing the time that each step takes).</p>
+
+<p>You can also set a <strong>scaling step</strong> via <code class="prettyprint">setTimeScaleFactor(float step)</code> or <code class="prettyprint">setPowerScaleFactor(float step)</code>. Once a step size is defined, you can call <code class="prettyprint">increaseTime()</code>, <code class="prettyprint">decreaseTime()</code>, <code class="prettyprint">increasePower()</code>, or <code class="prettyprint">decreasePower()</code> and it will increment/decrement the <strong>scaling factor</strong> by the <strong>scaling step</strong>: setting a time scaling step of 0.2 will cause the time scaling factor to decrease by 20% with each call to <code class="prettyprint">decreaseTime()</code>, and increase by 20% with each call to <code class="prettyprint">increaseTime();</code> (and likewise for the power scaling step).</p>
+
+<h1 id="hacker-port">Hacker Port</h1>
+
+<p>The Hacker Port is a multiplexer that let you access analog inputs, PWM outputs, software serial lines, and the I2C interface through the same two pins. On a Mod, the Hacker Port is accessible through the large USB port at the base of the toy, along with 3.3V power (350 mA max).</p>
+
+<p>The Hacker Port mode is set via <code class="prettyprint">setHackerPort(STATE)</code>. There are 4 possible options for <code class="prettyprint">STATE</code>:</p>
+
+<ul>
+<li><code class="prettyprint">HACKER_PORT_AIN</code> for analog input readings (pins A7, A9)</li>
+<li><code class="prettyprint">HACKER_PORT_PWM</code> for PWM output (technically the same pins as <code class="prettyprint">HACKER_PORT_AIN</code>: pins A7, A9, but they function as PWM-capable outputs too.)</li>
+<li><code class="prettyprint">HACKER_PORT_I2C</code> for I2C communication (pins 2 (SDA), 3 (SCL))</li>
+<li><code class="prettyprint">HACKER_PORT_SERIAL</code> for software serial connections pins (15, 14)</li>
+</ul>
+
+<p>Any time <code class="prettyprint">setHackerPort()</code> is called, Toy.device.HP0 and Toy.device.HP1 are set to the appropriate values. Toy.setHackerPort(HACKER_PORT_AIN) would set Toy.device.HP0 to A7, and Toy.device.HP1 to A9. This behavior is still being worked out.</p>
+
+<p>The Hacker Port state can be retrieved with <code class="prettyprint">getHackerPort()</code>.</p>
+
+<h2 id="quirks">Quirks</h2>
+
+<p>Using the Hacker Port with capacitive touch applications is limited because the multiplexer has some built-in capacitance that can reduce the sensitivity of the capacitive touch readings. The resolution is generally low enough that it is fine for on/off touch applications, but will not work well for sensing proximity or touch pressure.</p>
+
+<p>In software serial applications (<code class="prettyprint">Toy.setHackerPort(HACKER_PORT_SERIAL)</code>), <code class="prettyprint">HP0</code> / pin 15 needs to be RX and <code class="prettyprint">HP1</code> / pin 14 needs to be TX.</p>
+
+<h1 id="nunchuck">Nunchuck</h1>
+
+<blockquote>
+<p>Setting up a Nunchuck:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="n">WiiChuck</span> <span class="n">nunchuck</span> <span class="o">=</span> <span class="n">WiiChuck</span><span class="p">(</span><span class="n">c_update</span><span class="p">,</span> <span class="n">z_update</span><span class="p">);</span>
+
+<span class="n">bool</span> <span class="nf">c_update</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">nunchuck</span><span class="p">.</span><span class="n">cPressed</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="n">bool</span> <span class="nf">z_update</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">nunchuck</span><span class="p">.</span><span class="n">zPressed</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">setHackerPort</span><span class="p">(</span><span class="n">HACKER_PORT_I2C</span><span class="p">);</span>
+  <span class="n">nunchuck</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">nunchuck</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre>
+
+<blockquote>
+<p>Nunchuck without buttons:</p>
+</blockquote>
+<pre class="highlight cpp"><code><span class="n">WiiChuck</span> <span class="n">nunchuck</span> <span class="o">=</span> <span class="n">WiiChuck</span><span class="p">();</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">setHackerPort</span><span class="p">(</span><span class="n">HACKER_PORT_I2C</span><span class="p">);</span>
+  <span class="n">nunchuck</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">nunchuck</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>OSSex includes a library called WiiChuck that can be used to interface a Wii Nunchuck with your toy. The Nunchuck communicates over I2C, includes a 3-axis accelerometer, X/Y joystick, and two buttons for only a few dollars. There&rsquo;s lots of potential!</p>
+
+<p>The <code class="prettyprint">begin()</code> function initiates the I2C connection, and this can hang if you don&rsquo;t actually have a nunchuck connected at the time. See the <a href="/#workarounds">Workarounds</a> section below for a way to fix this.</p>
+
+<p>Once the connection is</p>
+
+<p>The <code class="prettyprint">c_update()</code> and <code class="prettyprint">z_update()</code> functions are button status functions. The WiiChuck library uses the same OneButton click-handling library as OSSex, so you can attach click, double-click and long-press click handlers to the Nunchuck&rsquo;s C and Z buttons. However, since the C and Z buttons aren&rsquo;t &ldquo;real&rdquo; buttons that can be read HIGH/LOW with <code class="prettyprint">digitalRead()</code>, the OneButton library needs a function it can call to check the button click status, and that&rsquo;s what <code class="prettyprint">c_update()</code> and <code class="prettyprint">z_update()</code> provide.</p>
+
+<h2 id="available-functions">Available Functions</h2>
+
+<ul>
+<li><code class="prettyprint">begin()</code> &ndash; initiates the I2C connection with the nunchuck. Usually performed in <code class="prettyprint">setup()</code>` of the sketch.</li>
+<li><code class="prettyprint">update()</code> &ndash; reads the nunchuck&rsquo;s status and updates various internal variables. Usually performed in <code class="prettyprint">loop()</code> to keep the status up-to-date.</li>
+<li><code class="prettyprint">readJoyX()</code>, <code class="prettyprint">readJoyY()</code> &ndash; returns the X and Y position of the nunchuck joystick.</li>
+<li><code class="prettyprint">readAccelX()</code>, <code class="prettyprint">readAccelY()</code>, <code class="prettyprint">readAccelZ()</code> &ndash; returns the X, Y, or Z acceleration.</li>
+<li><code class="prettyprint">readRoll()</code>, <code class="prettyprint">readPitch()</code> — returns the roll and pitch.</li>
+<li><code class="prettyprint">attachCUpdate()</code>, <code class="prettyprint">attachZUpdate()</code> — set the update function for the C, Z buttons</li>
+<li><code class="prettyprint">cPressed()</code>, <code class="prettyprint">zPressed()</code> — returns the C or Z button click status</li>
+<li><code class="prettyprint">attachCClick()</code>, <code class="prettyprint">attachCDoubleClick()</code>, <code class="prettyprint">attachCLongPressStart()</code>, <code class="prettyprint">attachCDuringLongPress()</code>, <code class="prettyprint">attachCLongPressEnd()</code> — click handlers for the C button</li>
+<li><code class="prettyprint">attachZClick()</code>, <code class="prettyprint">attachZDoubleClick()</code>, <code class="prettyprint">attachZLongPressStart()</code>, <code class="prettyprint">attachZDuringLongPress()</code>, <code class="prettyprint">attachZLongPressEnd()</code> — click handlers for the Z button</li>
+</ul>
+
+<h1 id="workarounds">Workarounds</h1>
+
+<h2 id="i2c-polling">I2C Polling</h2>
+
+<p>Arduino&rsquo;s included Wire library is missing some logic to deal with unresponsive I2C connections. If it tries to talk to an I2C device, it will wait indefinitely until it gets an answer, even if the device isn&rsquo;t connected. From the <a href="https://github.com/arduino/Arduino/issues/1476">github issue</a>:</p>
+
+<p>The Wire library has while loops that could go on forever. Although this will not happen in a normal situation, if it happens, the blocking stops the Arduino from working and that could be a safety issue.</p>
+
+<p>The fix is <a href="https://github.com/arduino/Arduino/pull/1842/files">here</a>, but it needs to be made to the Wire library that comes with Arduino, so we can&rsquo;t compensate for it in OSSex. It prevents everything on your Dilduino/Mod from freezing up if it&rsquo;s trying to talk to a Nunchuck (or anything on the I2C bus) but there isn&rsquo;t one connected.</p>
+
+<h2 id="disabling-usb-hid">Disabling USB HID</h2>
+
+<p>The Dilduino uses the ATmega32U4 microprocessor, which has a built-in USB interface. Arduino automatically includes code necessary for the ATmega32U4 to act as a USB keyboard or mouse (HID stands for Human Interface Device), and this code is included in your sketch even if you aren&rsquo;t using it. It takes up about 1 KB of sketch space. It can be useful to disable if you need a bit of extra space for your sketch, or if you want to connect to your Mod from a USB OTG device (like a phone or tablet). Instructions for disabling HID are <a href="https://www.comingle.io/howto/communicating-with-your-mod-with-android">here</a>.</p>
+
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+                <a href="#" data-language-name="arduino">arduino</a>
+          </div>
+      </div>
+    </div>
+  </body>
+</html>
