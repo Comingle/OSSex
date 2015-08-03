@@ -518,9 +518,9 @@ void loop() {
 
 OSSex includes a library called WiiChuck that can be used to interface a Wii Nunchuck with your toy. The Nunchuck communicates over I2C, includes a 3-axis accelerometer, X/Y joystick, and two buttons for only a few dollars. There's lots of potential!
 
-The `begin()` function initiates the I2C connection, and this can hang if you don't actually have a nunchuck connected at the time. See the <a href="#workarounds">Workarounds</a> section below for a way to fix this.
+The `begin()` function initiates the I2C connection, and this can hang if you don't have a nunchuck connected at the time. See the <a href="#workarounds">Workarounds</a> section below for a way to fix this.
 
-Once the connection is
+Once the connection is made, the `update()` function is used to read the the nunchuck status and do calculations like roll and pitch.
 
 The `c_update()` and `z_update()` functions are button status functions. The WiiChuck library uses the same OneButton click-handling library as OSSex, so you can attach click, double-click and long-press click handlers to the Nunchuck's C and Z buttons. However, since the C and Z buttons aren't "real" buttons that can be read HIGH/LOW with `digitalRead()`, the OneButton library needs a function it can call to check the button click status, and that's what `c_update()` and `z_update()` provide.
 
@@ -540,7 +540,7 @@ The `c_update()` and `z_update()` functions are button status functions. The Wii
 ## I2C Polling
 Arduino's included Wire library is missing some logic to deal with unresponsive I2C connections. If it tries to talk to an I2C device, it will wait indefinitely until it gets an answer, even if the device isn't connected. From the <a href="https://github.com/arduino/Arduino/issues/1476">github issue</a>:
 
-The Wire library has while loops that could go on forever. Although this will not happen in a normal situation, if it happens, the blocking stops the Arduino from working and that could be a safety issue.
+*The Wire library has while loops that could go on forever. Although this will not happen in a normal situation, if it happens, the blocking stops the Arduino from working and that could be a safety issue.*
 
 The fix is <a href="https://github.com/arduino/Arduino/pull/1842/files">here</a>, but it needs to be made to the Wire library that comes with Arduino, so we can't compensate for it in OSSex. It prevents everything on your Dilduino/Mod from freezing up if it's trying to talk to a Nunchuck (or anything on the I2C bus) but there isn't one connected.
 
