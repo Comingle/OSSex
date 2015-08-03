@@ -606,7 +606,7 @@ void loop() {
 }
 ```
 
-The class for interfacing with a Wii Nunchuck. See the <a href="/#nunchuck">WiiChuck section</a> for more details.
+The class for interfacing with a Wii Nunchuck. See the <a href="#nunchuck">WiiChuck section</a> for more details.
 
 ## `setOutput`
 
@@ -620,7 +620,7 @@ int OSSex::setOutput(int outNumber, int powerLevel);
 Toy.setOutput(2, 122);
 ```
 
-`setOutput()` turns a motor (an output) on or off on your toy. Range is from 0-255 inclusive. `powerLevel` of 0 turns the output off. `outNumber` of -1 sets all outputs to that `powerLevel`. More info <a href="/#turning-a-motor-output-on-off">here</a>.
+`setOutput()` turns a motor (an output) on or off on your toy. Range is from 0-255 inclusive. `powerLevel` of 0 turns the output off. `outNumber` of -1 sets all outputs to that `powerLevel`. More info <a href="#turning-a-motor-output-on-off">here</a>.
 
 ## `setLED`
 
@@ -647,7 +647,7 @@ int OSSex::runPattern(int (*callback)(int));
 int OSSex::runPattern(unsigned int pos);
 ```
 
-`runPattern()` will run a vibration pattern. If the argument is a function, it will start the motors vibrating however function directs. If the argument is an integer, it will start the pattern located at position `pos` in the pattern queue. (See also <a href="/#queuing-patterns">Queuing Patterns</a>.)
+`runPattern()` will run a vibration pattern. If the argument is a function, it will start the motors vibrating however function directs. If the argument is an integer, it will start the pattern located at position `pos` in the pattern queue. (See also <a href="#queuing-patterns">Queuing Patterns</a>.)
 
 ## `runShortPattern`
 
@@ -667,7 +667,7 @@ void loop() {
 }
 ```
 
-`runShortPattern()` runs the vibration pattern provided in the `patSteps` array. Since ararys are passed by reference in C, the array size must also be provided. See the <a href="/#runshortpattern">`runShortPattern()`</a> section.
+`runShortPattern()` runs the vibration pattern provided in the `patSteps` array. Since ararys are passed by reference in C, the array size must also be provided. See the <a href="#runshortpattern">`runShortPattern()`</a> section.
 
 ## `nextPattern`
 
@@ -675,7 +675,7 @@ void loop() {
 int OSSex::nextPattern();
 ```
 
-Move to the next pattern in the queue. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.
+Move to the next pattern in the queue. See the <a href="#queuing-patterns">Queuing Patterns</a> section.
 
 ## `previousPattern`
 
@@ -683,7 +683,7 @@ Move to the next pattern in the queue. See the <a href="/#queuing-patterns">Queu
 int OSSex::previousPattern();
 ```
 
-Move to the previous pattern in the queue. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.
+Move to the previous pattern in the queue. See the <a href="#queuing-patterns">Queuing Patterns</a> section.
 
 ## `addPattern`
 
@@ -691,7 +691,7 @@ Move to the previous pattern in the queue. See the <a href="/#queuing-patterns">
 int OSSex::addPattern(int (*patternFunc)(int));
 ```
 
-Add a pattern function `patternFunc` to the pattern queue. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.
+Add a pattern function `patternFunc` to the pattern queue. See the <a href="#queuing-patterns">Queuing Patterns</a> section.
 
 ## `getPattern`
 
@@ -699,7 +699,7 @@ Add a pattern function `patternFunc` to the pattern queue. See the <a href="/#qu
 int OSSex::getPattern();
 ```
 
-Returns the current pattern's position in the queue, starting at 0. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.
+Returns the current pattern's position in the queue, starting at 0. See the <a href="#queuing-patterns">Queuing Patterns</a> section.
 
 ## `getInput`
 
@@ -707,7 +707,7 @@ Returns the current pattern's position in the queue, starting at 0. See the <a h
 unsigned int OSSex::getInput(int inNumber);
 ```
 
-This is a wrapper for `analogRead()`. On a Mod, you can read from either input 0 or input 1, and this corresponds to the inputs available on the Hacker Port. See the <a href="/#hacker-port">Hacker Port</a> section for more info.
+This is a wrapper for `analogRead()`. On a Mod, you can read from either input 0 or input 1, and this corresponds to the inputs available on the Hacker Port. See the <a href="#hacker-port">Hacker Port</a> section for more info.
 
 ## `attachClick`, `attachDoubleClick`, `attachLongPressStart`, `attachLongPressStop`, `attachDuringLongPress`
 
@@ -719,7 +719,7 @@ void OSSex::attachLongPressStop(void (*callback)());
 void OSSex::attachDuringLongPress(void (*callback)());
 ```
 
-These functions attach a function `callback` to execute in response to a button click, double-click, or click-and-hold action. Time-based functions like `delay()`, `millis()`, or `Serial` commands will not work properly in `callback` See the <a href="/#control-the-button-behavior">Button Behavior</a> section and the <a href="/#ossex-caveats">Caveats</a> section.
+These functions attach a function `callback` to execute in response to a button click, double-click, or click-and-hold action. Time-based functions like `delay()`, `millis()`, or `Serial` commands will not work properly in `callback` See the <a href="#control-the-button-behavior">Button Behavior</a> section and the <a href="#ossex-caveats">Caveats</a> section.
 
 ## `setPowerScaleFactor`
 
@@ -727,7 +727,7 @@ These functions attach a function `callback` to execute in response to a button 
 float OSSex::setPowerScaleFactor(float powerScale);
 ```
 
-Sets the power scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at 100% of normal power. Changing the scaling factor to 0.5 would reduce all vibration patterns power to 50%, for example. See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+Sets the power scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at 100% of normal power. Changing the scaling factor to 0.5 would reduce all vibration patterns power to 50%, for example. See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.
 
 ## `getPowerScaleFactor`
 
@@ -735,7 +735,7 @@ Sets the power scaling factor for vibration patterns. The scaling factor starts 
 float OSSex::getPowerScaleFactor();
 ```
 
-Returns the current power scaling factor. See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+Returns the current power scaling factor. See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.
 
 ## `setPowerScaleStep`
 
@@ -743,7 +743,7 @@ Returns the current power scaling factor. See also the <a href="/#modifying-runn
 void OSSex::setPowerScaleStep(float step);
 ```
 
-Sets the step by which the power scaling factor will be increased (or decreased) with each call to `increasePower()` (or `decreasePower()`). See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+Sets the step by which the power scaling factor will be increased (or decreased) with each call to `increasePower()` (or `decreasePower()`). See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.
 
 ## `setTimeScaleFactor`
 
@@ -751,7 +751,7 @@ Sets the step by which the power scaling factor will be increased (or decreased)
 float OSSex::setTimeScaleFactor(float timeScale);
 ```
 
-Sets the time scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at normal speed. Changing the scaling factor to 0.5 would cause all patterns to run twice as fast (since each step is half as long). See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+Sets the time scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at normal speed. Changing the scaling factor to 0.5 would cause all patterns to run twice as fast (since each step is half as long). See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.
 
 ## `getTimeScaleFactor`
 
@@ -759,7 +759,7 @@ Sets the time scaling factor for vibration patterns. The scaling factor starts a
 float OSSex::getTimeScaleFactor();
 ```
 
-Returns the current time scaling factor. See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+Returns the current time scaling factor. See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.
 
 ## `setTimeScaleStep`
 
@@ -767,7 +767,7 @@ Returns the current time scaling factor. See also the <a href="/#modifying-runni
 void OSSex::setTimeScaleStep(float step);
 ```
 
-Sets the step by which the time scaling factor will be increased (or decreased) with each call to `increaseTime()` (or `decreaseTime()`). See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+Sets the step by which the time scaling factor will be increased (or decreased) with each call to `increaseTime()` (or `decreaseTime()`). See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.
 
 ## `increasePower`
 
@@ -815,4 +815,4 @@ Stops all motors, resets the pattern queue to the beginning, and resets power an
 int OSSex::setHackerPort(unsigned int flag);
 ```
 
-Set the Hacker Port mode. See the <a href="/#hacker-port">Hacker Port</a> section.
+Set the Hacker Port mode. See the <a href="#hacker-port">Hacker Port</a> section.

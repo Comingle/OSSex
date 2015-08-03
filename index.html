@@ -668,7 +668,7 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 <span class="p">}</span>
 </code></pre>
 
-<p>The class for interfacing with a Wii Nunchuck. See the <a href="/#nunchuck">WiiChuck section</a> for more details.</p>
+<p>The class for interfacing with a Wii Nunchuck. See the <a href="#nunchuck">WiiChuck section</a> for more details.</p>
 
 <h2 id="setoutput"><code class="prettyprint">setOutput</code></h2>
 <pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">setOutput</span><span class="p">(</span><span class="kt">int</span> <span class="n">outNumber</span><span class="p">,</span> <span class="kt">int</span> <span class="n">powerLevel</span><span class="p">);</span>
@@ -680,7 +680,7 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 <pre class="highlight cpp"><code><span class="n">Toy</span><span class="p">.</span><span class="n">setOutput</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">122</span><span class="p">);</span>
 </code></pre>
 
-<p><code class="prettyprint">setOutput()</code> turns a motor (an output) on or off on your toy. Range is from 0-255 inclusive. <code class="prettyprint">powerLevel</code> of 0 turns the output off. <code class="prettyprint">outNumber</code> of -1 sets all outputs to that <code class="prettyprint">powerLevel</code>. More info <a href="/#turning-a-motor-output-on-off">here</a>.</p>
+<p><code class="prettyprint">setOutput()</code> turns a motor (an output) on or off on your toy. Range is from 0-255 inclusive. <code class="prettyprint">powerLevel</code> of 0 turns the output off. <code class="prettyprint">outNumber</code> of -1 sets all outputs to that <code class="prettyprint">powerLevel</code>. More info <a href="#turning-a-motor-output-on-off">here</a>.</p>
 
 <h2 id="setled"><code class="prettyprint">setLED</code></h2>
 <pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">setLED</span><span class="p">(</span><span class="kt">int</span> <span class="n">ledNumber</span><span class="p">,</span> <span class="kt">int</span> <span class="n">powerLevel</span><span class="p">);</span>
@@ -701,7 +701,7 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 <span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">runPattern</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">pos</span><span class="p">);</span>
 </code></pre>
 
-<p><code class="prettyprint">runPattern()</code> will run a vibration pattern. If the argument is a function, it will start the motors vibrating however function directs. If the argument is an integer, it will start the pattern located at position <code class="prettyprint">pos</code> in the pattern queue. (See also <a href="/#queuing-patterns">Queuing Patterns</a>.)</p>
+<p><code class="prettyprint">runPattern()</code> will run a vibration pattern. If the argument is a function, it will start the motors vibrating however function directs. If the argument is an integer, it will start the pattern located at position <code class="prettyprint">pos</code> in the pattern queue. (See also <a href="#queuing-patterns">Queuing Patterns</a>.)</p>
 
 <h2 id="runshortpattern"><code class="prettyprint">runShortPattern</code></h2>
 <pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">runShortPattern</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">patSteps</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">patternLength</span><span class="p">);</span>
@@ -717,37 +717,37 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 <span class="p">}</span>
 </code></pre>
 
-<p><code class="prettyprint">runShortPattern()</code> runs the vibration pattern provided in the <code class="prettyprint">patSteps</code> array. Since ararys are passed by reference in C, the array size must also be provided. See the <a href="/#runshortpattern"><code class="prettyprint">runShortPattern()</code></a> section.</p>
+<p><code class="prettyprint">runShortPattern()</code> runs the vibration pattern provided in the <code class="prettyprint">patSteps</code> array. Since ararys are passed by reference in C, the array size must also be provided. See the <a href="#runshortpattern"><code class="prettyprint">runShortPattern()</code></a> section.</p>
 
 <h2 id="nextpattern"><code class="prettyprint">nextPattern</code></h2>
 <pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">nextPattern</span><span class="p">();</span>
 </code></pre>
 
-<p>Move to the next pattern in the queue. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.</p>
+<p>Move to the next pattern in the queue. See the <a href="#queuing-patterns">Queuing Patterns</a> section.</p>
 
 <h2 id="previouspattern"><code class="prettyprint">previousPattern</code></h2>
 <pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">previousPattern</span><span class="p">();</span>
 </code></pre>
 
-<p>Move to the previous pattern in the queue. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.</p>
+<p>Move to the previous pattern in the queue. See the <a href="#queuing-patterns">Queuing Patterns</a> section.</p>
 
 <h2 id="addpattern"><code class="prettyprint">addPattern</code></h2>
 <pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">addPattern</span><span class="p">(</span><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">patternFunc</span><span class="p">)(</span><span class="kt">int</span><span class="p">));</span>
 </code></pre>
 
-<p>Add a pattern function <code class="prettyprint">patternFunc</code> to the pattern queue. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.</p>
+<p>Add a pattern function <code class="prettyprint">patternFunc</code> to the pattern queue. See the <a href="#queuing-patterns">Queuing Patterns</a> section.</p>
 
 <h2 id="getpattern"><code class="prettyprint">getPattern</code></h2>
 <pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">getPattern</span><span class="p">();</span>
 </code></pre>
 
-<p>Returns the current pattern&rsquo;s position in the queue, starting at 0. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.</p>
+<p>Returns the current pattern&rsquo;s position in the queue, starting at 0. See the <a href="#queuing-patterns">Queuing Patterns</a> section.</p>
 
 <h2 id="getinput"><code class="prettyprint">getInput</code></h2>
 <pre class="highlight cpp"><code><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">getInput</span><span class="p">(</span><span class="kt">int</span> <span class="n">inNumber</span><span class="p">);</span>
 </code></pre>
 
-<p>This is a wrapper for <code class="prettyprint">analogRead()</code>. On a Mod, you can read from either input 0 or input 1, and this corresponds to the inputs available on the Hacker Port. See the <a href="/#hacker-port">Hacker Port</a> section for more info.</p>
+<p>This is a wrapper for <code class="prettyprint">analogRead()</code>. On a Mod, you can read from either input 0 or input 1, and this corresponds to the inputs available on the Hacker Port. See the <a href="#hacker-port">Hacker Port</a> section for more info.</p>
 
 <h2 id="attachclick-attachdoubleclick-attachlongpressstart-attachlongpressstop-attachduringlongpress"><code class="prettyprint">attachClick</code>, <code class="prettyprint">attachDoubleClick</code>, <code class="prettyprint">attachLongPressStart</code>, <code class="prettyprint">attachLongPressStop</code>, <code class="prettyprint">attachDuringLongPress</code></h2>
 <pre class="highlight cpp"><code><span class="kt">void</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">attachClick</span><span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">callback</span><span class="p">)());</span>
@@ -757,43 +757,43 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 <span class="kt">void</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">attachDuringLongPress</span><span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">callback</span><span class="p">)());</span>
 </code></pre>
 
-<p>These functions attach a function <code class="prettyprint">callback</code> to execute in response to a button click, double-click, or click-and-hold action. Time-based functions like <code class="prettyprint">delay()</code>, <code class="prettyprint">millis()</code>, or <code class="prettyprint">Serial</code> commands will not work properly in <code class="prettyprint">callback</code> See the <a href="/#control-the-button-behavior">Button Behavior</a> section and the <a href="/#ossex-caveats">Caveats</a> section.</p>
+<p>These functions attach a function <code class="prettyprint">callback</code> to execute in response to a button click, double-click, or click-and-hold action. Time-based functions like <code class="prettyprint">delay()</code>, <code class="prettyprint">millis()</code>, or <code class="prettyprint">Serial</code> commands will not work properly in <code class="prettyprint">callback</code> See the <a href="#control-the-button-behavior">Button Behavior</a> section and the <a href="#ossex-caveats">Caveats</a> section.</p>
 
 <h2 id="setpowerscalefactor"><code class="prettyprint">setPowerScaleFactor</code></h2>
 <pre class="highlight cpp"><code><span class="kt">float</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">setPowerScaleFactor</span><span class="p">(</span><span class="kt">float</span> <span class="n">powerScale</span><span class="p">);</span>
 </code></pre>
 
-<p>Sets the power scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at 100% of normal power. Changing the scaling factor to 0.5 would reduce all vibration patterns power to 50%, for example. See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
+<p>Sets the power scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at 100% of normal power. Changing the scaling factor to 0.5 would reduce all vibration patterns power to 50%, for example. See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
 
 <h2 id="getpowerscalefactor"><code class="prettyprint">getPowerScaleFactor</code></h2>
 <pre class="highlight cpp"><code><span class="kt">float</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">getPowerScaleFactor</span><span class="p">();</span>
 </code></pre>
 
-<p>Returns the current power scaling factor. See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
+<p>Returns the current power scaling factor. See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
 
 <h2 id="setpowerscalestep"><code class="prettyprint">setPowerScaleStep</code></h2>
 <pre class="highlight cpp"><code><span class="kt">void</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">setPowerScaleStep</span><span class="p">(</span><span class="kt">float</span> <span class="n">step</span><span class="p">);</span>
 </code></pre>
 
-<p>Sets the step by which the power scaling factor will be increased (or decreased) with each call to <code class="prettyprint">increasePower()</code> (or <code class="prettyprint">decreasePower()</code>). See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
+<p>Sets the step by which the power scaling factor will be increased (or decreased) with each call to <code class="prettyprint">increasePower()</code> (or <code class="prettyprint">decreasePower()</code>). See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
 
 <h2 id="settimescalefactor"><code class="prettyprint">setTimeScaleFactor</code></h2>
 <pre class="highlight cpp"><code><span class="kt">float</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">setTimeScaleFactor</span><span class="p">(</span><span class="kt">float</span> <span class="n">timeScale</span><span class="p">);</span>
 </code></pre>
 
-<p>Sets the time scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at normal speed. Changing the scaling factor to 0.5 would cause all patterns to run twice as fast (since each step is half as long). See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
+<p>Sets the time scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at normal speed. Changing the scaling factor to 0.5 would cause all patterns to run twice as fast (since each step is half as long). See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
 
 <h2 id="gettimescalefactor"><code class="prettyprint">getTimeScaleFactor</code></h2>
 <pre class="highlight cpp"><code><span class="kt">float</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">getTimeScaleFactor</span><span class="p">();</span>
 </code></pre>
 
-<p>Returns the current time scaling factor. See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
+<p>Returns the current time scaling factor. See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
 
 <h2 id="settimescalestep"><code class="prettyprint">setTimeScaleStep</code></h2>
 <pre class="highlight cpp"><code><span class="kt">void</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">setTimeScaleStep</span><span class="p">(</span><span class="kt">float</span> <span class="n">step</span><span class="p">);</span>
 </code></pre>
 
-<p>Sets the step by which the time scaling factor will be increased (or decreased) with each call to <code class="prettyprint">increaseTime()</code> (or <code class="prettyprint">decreaseTime()</code>). See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
+<p>Sets the step by which the time scaling factor will be increased (or decreased) with each call to <code class="prettyprint">increaseTime()</code> (or <code class="prettyprint">decreaseTime()</code>). See also the <a href="#modifying-running-patterns">Modifying Running Patterns</a> section.</p>
 
 <h2 id="increasepower"><code class="prettyprint">increasePower</code></h2>
 <pre class="highlight cpp"><code><span class="kt">float</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">increasePower</span><span class="p">();</span>
@@ -829,7 +829,7 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 <pre class="highlight cpp"><code><span class="kt">int</span> <span class="n">OSSex</span><span class="o">::</span><span class="n">setHackerPort</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">flag</span><span class="p">);</span>
 </code></pre>
 
-<p>Set the Hacker Port mode. See the <a href="/#hacker-port">Hacker Port</a> section.</p>
+<p>Set the Hacker Port mode. See the <a href="#hacker-port">Hacker Port</a> section.</p>
 
       </div>
       <div class="dark-box">
