@@ -430,6 +430,8 @@ If you have multiple pattern functions on your device — and why not? — then 
 `getPattern()` returns the index number of the current pattern (starting at 0):
 `int getPattern();`
 
+`runPattern(int)` will run a specific pattern in the queue.
+
 ## Modifying running patterns
 
 > Setting a button click to increase power by 10%, and a button double-click to decrease power by 10%:
@@ -499,7 +501,7 @@ void loop() {
 }
 ```
 
-> Nunchuck without buttons:
+> Nunchuck without update functions. (They can be declared later)
 
 ```cpp
 WiiChuck nunchuck = WiiChuck();
@@ -544,3 +546,273 @@ The fix is <a href="https://github.com/arduino/Arduino/pull/1842/files">here</a>
 
 ## Disabling USB HID
 The Dilduino uses the ATmega32U4 microprocessor, which has a built-in USB interface. Arduino automatically includes code necessary for the ATmega32U4 to act as a USB keyboard or mouse (HID stands for Human Interface Device), and this code is included in your sketch even if you aren't using it. It takes up about 1 KB of sketch space. It can be useful to disable if you need a bit of extra space for your sketch, or if you want to connect to your Mod from a USB OTG device (like a phone or tablet). Instructions for disabling HID are <a href="https://www.comingle.io/howto/communicating-with-your-mod-with-android">here</a>.
+
+# Pins
+
+## Motors
+
+* Motor 0: D5 (PWM capable)
+* Motor 1: D10 (PWM capable)
+* Motor 2: D11 (PWM capable)
+
+## LEDs
+
+* `LED+`: D13 (PWM capable)
+
+## Analog inputs
+
+* Battery voltage: A0
+* Input 0 (Hacker Port): A7 (PWM capable as D6)
+* Input 1 (Hacker Port): A9 (PWM capable as D9)
+* Extra analog inputs on A2 and A3
+
+## Buttons
+
+* BTN: D4
+
+## Hacker Port
+
+Selector pins: D8, D12
+
+Selection Modes:
+* LOW, LOW: Analog Input / PWM Output. A7, A9 connected to `HP0`, `HP1`.
+* HIGH, LOW: I2C mode. `SDA` (D2), `SCL` (D3, PWM capable) connected to `HP0`, `HP1`.
+* LOW, HIGH: Software serial mode. `SCK` (D15), `MISO` (D14) connected to `HP0`, `HP1`. Recommended to use `SCK` as the receive pin and `MISO` as the transmit pin.
+
+# Full function reference
+
+## Toy
+> Turn motor 2 on to a power of 122:
+
+```cpp
+Toy.setOutput(2, 122);
+```
+
+The object created by OSSex for manipulating your toy. All OSSex functions work with the `Toy` object.
+
+## WiiChuck
+> Set up a nunchuck:
+
+```cpp
+WiiChuck nunchuck = WiiChuck();
+
+void setup() {
+  Toy.setHackerPort(HACKER_PORT_I2C);
+  nunchuck.begin();
+}
+
+void loop() {
+  nunchuck.update();
+}
+```
+
+The class for interfacing with a Wii Nunchuck. See the <a href="/#nunchuck">WiiChuck section</a> for more details.
+
+## `setOutput`
+
+```cpp
+int OSSex::setOutput(int outNumber, int powerLevel);
+```
+
+> Turn motor 2 on to a power of 122:
+
+```cpp
+Toy.setOutput(2, 122);
+```
+
+`setOutput()` turns a motor (an output) on or off on your toy. Range is from 0-255 inclusive. `powerLevel` of 0 turns the output off. `outNumber` of -1 sets all outputs to that `powerLevel`. More info <a href="/#turning-a-motor-output-on-off">here</a>.
+
+## `setLED`
+
+```cpp
+int OSSex::setLED(int ledNumber, int powerLevel);
+```
+
+`setLED()` sets a given `ledNumber` to a given `powerLevel`. `powerLevel` is constrained from 0 to 255 inclusive, with `powerLevel` of 0 turning the LED off.
+
+This function does not yet support the **-1** shorthand to apply `powerLevel` to all LEDs.
+
+## `setID`
+
+```cpp
+void OSSex::setID(int deviceId);
+```
+
+`setID()` is used to declare what type of toy you're using. Currently the only real option is `1`, for a first-generation Mod/Dilduino. OSSex will create a `Toy` object and call `setID(1)` on it, so you won't need this unless you're working with another toy definition.
+
+## `runPattern`
+
+```cpp
+int OSSex::runPattern(int (*callback)(int));
+int OSSex::runPattern(unsigned int pos);
+```
+
+`runPattern()` will run a vibration pattern. If the argument is a function, it will start the motors vibrating however function directs. If the argument is an integer, it will start the pattern located at position `pos` in the pattern queue. (See also <a href="/#queuing-patterns">Queuing Patterns</a>.)
+
+## `runShortPattern`
+
+```cpp
+int OSSex::runShortPattern(int* patSteps, size_t patternLength);
+```
+
+```cpp
+int pattern[][4] = {
+    {200, 200, 200, 500},
+    {0, 0, 0, 500},
+};
+unsigned int patternSize = sizeof(pattern) / sizeof(int) / 4;
+
+void loop() {
+  Toy.runShortPattern(*pattern, patternSize);
+}
+```
+
+`runShortPattern()` runs the vibration pattern provided in the `patSteps` array. Since ararys are passed by reference in C, the array size must also be provided. See the <a href="/#runshortpattern">`runShortPattern()`</a> section.
+
+## `nextPattern`
+
+```cpp
+int OSSex::nextPattern();
+```
+
+Move to the next pattern in the queue. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.
+
+## `previousPattern`
+
+```cpp
+int OSSex::previousPattern();
+```
+
+Move to the previous pattern in the queue. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.
+
+## `addPattern`
+
+```cpp
+int OSSex::addPattern(int (*patternFunc)(int));
+```
+
+Add a pattern function `patternFunc` to the pattern queue. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.
+
+## `getPattern`
+
+```cpp
+int OSSex::getPattern();
+```
+
+Returns the current pattern's position in the queue, starting at 0. See the <a href="/#queuing-patterns">Queuing Patterns</a> section.
+
+## `getInput`
+
+```cpp
+unsigned int OSSex::getInput(int inNumber);
+```
+
+This is a wrapper for `analogRead()`. On a Mod, you can read from either input 0 or input 1, and this corresponds to the inputs available on the Hacker Port. See the <a href="/#hacker-port">Hacker Port</a> section for more info.
+
+## `attachClick`, `attachDoubleClick`, `attachLongPressStart`, `attachLongPressStop`, `attachDuringLongPress`
+
+```cpp
+void OSSex::attachClick(void (*callback)());
+void OSSex::attachDoubleClick(void (*callback)());
+void OSSex::attachLongPressStart(void (*callback)());
+void OSSex::attachLongPressStop(void (*callback)());
+void OSSex::attachDuringLongPress(void (*callback)());
+```
+
+These functions attach a function `callback` to execute in response to a button click, double-click, or click-and-hold action. Time-based functions like `delay()`, `millis()`, or `Serial` commands will not work properly in `callback` See the <a href="/#control-the-button-behavior">Button Behavior</a> section and the <a href="/#ossex-caveats">Caveats</a> section.
+
+## `setPowerScaleFactor`
+
+```cpp
+float OSSex::setPowerScaleFactor(float powerScale);
+```
+
+Sets the power scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at 100% of normal power. Changing the scaling factor to 0.5 would reduce all vibration patterns power to 50%, for example. See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+
+## `getPowerScaleFactor`
+
+```cpp
+float OSSex::getPowerScaleFactor();
+```
+
+Returns the current power scaling factor. See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+
+## `setPowerScaleStep`
+
+```cpp
+void OSSex::setPowerScaleStep(float step);
+```
+
+Sets the step by which the power scaling factor will be increased (or decreased) with each call to `increasePower()` (or `decreasePower()`). See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+
+## `setTimeScaleFactor`
+
+```cpp
+float OSSex::setTimeScaleFactor(float timeScale);
+```
+
+Sets the time scaling factor for vibration patterns. The scaling factor starts at 1.0, meaning all patterns run at normal speed. Changing the scaling factor to 0.5 would cause all patterns to run twice as fast (since each step is half as long). See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+
+## `getTimeScaleFactor`
+
+```cpp
+float OSSex::getTimeScaleFactor();
+```
+
+Returns the current time scaling factor. See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+
+## `setTimeScaleStep`
+
+```cpp
+void OSSex::setTimeScaleStep(float step);
+```
+
+Sets the step by which the time scaling factor will be increased (or decreased) with each call to `increaseTime()` (or `decreaseTime()`). See also the <a href="/#modifying-running-patterns">Modifying Running Patterns</a> section.
+
+## `increasePower`
+
+```cpp
+float OSSex::increasePower();
+```
+
+Increases the power scaling factor by the power scaling step. If the power scaling factor is 1.0 and the scaling step is 0.1, the first call to `increasePower()` will increase the scaling factor to 1.1 (1.0 * (1.0 + 0.1)), and patterns will run at 10% higher power, the second will increase it to 1.21 (1.1 * (1.0 + 0.1)), etc.
+
+## `decreasePower`
+
+```cpp
+float OSSex::decreasePower();
+```
+
+Decreases the power scaling factor by the power scaling step. If the power scaling factor is 1.0 and the scaling step is 0.1, the first call to `increasePower()` will decrease the scaling factor to 0.9 (1.0 * (1.0 - 0.1)), and patterns will run at 10% less power, the second will increase it to 0.81 (0.9 * (1.0 - 0.1)) , etc.
+
+## `increaseTime`
+
+```cpp
+float OSSex::increaseTime();
+```
+
+Increases the time scaling factor by the time scaling step. If the time scaling factor is 1.0 and the scaling step is 0.1, the first call to `increaseTime()` will increase the scaling factor to 1.1 (1.0 * (1.0 + 0.1)), and patterns will run 10% slower, the second will increase it to 1.21 (1.1 * (1.0 + 0.1)), etc.
+
+## `decreaseTime`
+
+```cpp
+float OSSex::decreaseTime();
+```
+
+Decreases the time scaling factor by the time scaling step. If the time scaling factor is 1.0 and the scaling step is 0.1, the first call to `increaseTime()` will decrease the scaling factor to 0.9 (1.0 * (1.0 - 0.1)), and patterns will run 10% faster, the second will increase it to 0.81 (0.9 * (1.0 - 0.1)) , etc.
+
+## `stop`
+
+```cpp
+void OSSex::stop();
+```
+
+Stops all motors, resets the pattern queue to the beginning, and resets power and time scales to 1.0.
+
+## `setHackerPort`
+
+```cpp
+int OSSex::setHackerPort(unsigned int flag);
+```
+
+Set the Hacker Port mode. See the <a href="/#hacker-port">Hacker Port</a> section.
