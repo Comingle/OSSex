@@ -639,6 +639,169 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 * HIGH, LOW: I2C mode. <code class="prettyprint">SDA</code> (D2), <code class="prettyprint">SCL</code> (D3, PWM capable) connected to <code class="prettyprint">HP0</code>, <code class="prettyprint">HP1</code>.
 * LOW, HIGH: Software serial mode. <code class="prettyprint">SCK</code> (D15), <code class="prettyprint">MISO</code> (D14) connected to <code class="prettyprint">HP0</code>, <code class="prettyprint">HP1</code>. Recommended to use <code class="prettyprint">SCK</code> as the receive pin and <code class="prettyprint">MISO</code> as the transmit pin.</p>
 
+<h1 id="examples">Examples</h1>
+
+<h2 id="cycle-pattern">Cycle pattern</h2>
+<pre class="highlight cpp"><code><span class="cp">#include &lt;OSSex.h&gt;
+#include &lt;Wire.h&gt;
+</span>
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">addPattern</span><span class="p">(</span><span class="n">fade_cos</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">addPattern</span><span class="p">(</span><span class="n">pulse</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">attachClick</span><span class="p">(</span><span class="n">click</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">click</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">cyclePattern</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// fade all of the motors from low to high over and over
+</span><span class="kt">int</span> <span class="nf">fade_cos</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">round</span><span class="p">(</span><span class="mi">127</span> <span class="o">*</span> <span class="n">cos</span><span class="p">((</span><span class="n">seq</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">PI</span><span class="p">))</span><span class="o">-</span><span class="n">PI</span><span class="p">)</span> <span class="o">+</span> <span class="mi">127</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Randomly blip an output on for a short burst.
+</span><span class="kt">int</span> <span class="nf">pulse</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">seq</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="n">random</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">144</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">70</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>This example cycles between vibration patterns (<code class="prettyprint">pulse</code> and <code class="prettyprint">fade_cos</code>) on button single click. We use <code class="prettyprint">addPattern</code> to put <code class="prettyprint">pulse</code> and <code class="prettyprint">fade_cos</code> on the pattern queue, we call <code class="prettyprint">Toy.attachClick(click)</code> to attach the <code class="prettyprint">click</code> function to a button single-click.</p>
+
+<h2 id="nunchuck-click">Nunchuck click</h2>
+<pre class="highlight cpp"><code><span class="cp">#include &lt;OSSex.h&gt;
+#include &lt;Wire.h&gt;
+#include &lt;WiiChuck.h&gt;
+</span>
+<span class="n">WiiChuck</span> <span class="n">nunchuck</span> <span class="o">=</span> <span class="n">WiiChuck</span><span class="p">(</span><span class="n">c_update</span><span class="p">,</span> <span class="n">z_update</span><span class="p">);</span>
+
+<span class="n">bool</span> <span class="nf">c_update</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">nunchuck</span><span class="p">.</span><span class="n">cPressed</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="n">bool</span> <span class="nf">z_update</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="n">nunchuck</span><span class="p">.</span><span class="n">zPressed</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">c_click</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">stop</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">z_click</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">increasePower</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">c_doubleclick</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">cyclePattern</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">setHackerPort</span><span class="p">(</span><span class="n">HACKER_PORT_I2C</span><span class="p">);</span>
+
+  <span class="n">nunchuck</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+
+  <span class="n">nunchuck</span><span class="p">.</span><span class="n">attachCClick</span><span class="p">(</span><span class="n">c_click</span><span class="p">);</span>
+  <span class="n">nunchuck</span><span class="p">.</span><span class="n">attachCDoubleClick</span><span class="p">(</span><span class="n">c_doubleclick</span><span class="p">);</span>
+  <span class="n">nunchuck</span><span class="p">.</span><span class="n">attachZClick</span><span class="p">(</span><span class="n">z_click</span><span class="p">);</span>
+
+  <span class="n">Toy</span><span class="p">.</span><span class="n">addPattern</span><span class="p">(</span><span class="n">sharp_ramp</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">addPattern</span><span class="p">(</span><span class="n">weird2</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">addPattern</span><span class="p">(</span><span class="n">weird3</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">addPattern</span><span class="p">(</span><span class="n">flicker</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">addPattern</span><span class="p">(</span><span class="n">second</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">nunchuck</span><span class="p">.</span><span class="n">update</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">sharp_ramp</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">fadeTable</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">104</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span> <span class="mi">149</span><span class="p">,</span> <span class="mi">178</span><span class="p">,</span> <span class="mi">213</span><span class="p">,</span> <span class="mi">255</span><span class="p">};</span>
+  <span class="n">seq</span> <span class="o">%=</span> <span class="mi">32</span><span class="p">;</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">fadeTable</span><span class="p">[</span><span class="n">seq</span><span class="p">];</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">12</span> <span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">weird2</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">round</span><span class="p">(</span><span class="mi">127</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">tan</span><span class="p">(</span><span class="n">tan</span><span class="p">(</span><span class="n">seq</span><span class="o">/</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">PI</span><span class="p">)))</span><span class="o">-</span><span class="n">PI</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">127</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">weird3</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">round</span><span class="p">(</span><span class="mi">50</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">seq</span><span class="o">/</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">PI</span><span class="p">)</span><span class="o">+</span><span class="n">PI</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">seq</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="mi">100</span><span class="p">);</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">flicker</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">seq</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">seq</span> <span class="o">%=</span> <span class="mi">3</span><span class="p">;</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="n">seq</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">second</span><span class="p">(</span><span class="kt">int</span> <span class="n">seq</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">step</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>This example creates a Nunchuck with the <code class="prettyprint">c_update</code> and <code class="prettyprint">z_update</code> functions &ndash; these functions return the button state to the OneButton library so that it can handle click events. We then create the <code class="prettyprint">c_click</code>, <code class="prettyprint">c_doubleclick</code>, and <code class="prettyprint">z_click</code> functions. These are functions that we&rsquo;ll attach to a C-click, C-double-click, and Z-click event, respectively.</p>
+
+<p>In <code class="prettyprint">setup()</code>, we start the Nunchuck connection, attach our click handlers, and then add in a few patterns to manipulate (<code class="prettyprint">sharp_ramp</code>, <code class="prettyprint">weird2</code>, <code class="prettyprint">weird3</code>, <code class="prettyprint">flicker</code>, <code class="prettyprint">second</code>).</p>
+
+<h2 id="runshortpattern"><code class="prettyprint">runShortPattern()</code></h2>
+<pre class="highlight cpp"><code><span class="cp">#include &lt;OSSex.h&gt;
+#include &lt;Wire.h&gt;
+</span>
+<span class="kt">int</span> <span class="n">pattern</span><span class="p">[][</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">{</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">500</span><span class="p">},</span>
+    <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">},</span>
+<span class="p">};</span>
+<span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">patternSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">;</span>
+
+<span class="n">bool</span> <span class="n">clicked</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Toy</span><span class="p">.</span><span class="n">attachClick</span><span class="p">(</span><span class="n">click</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">clicked</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">runShortPattern</span><span class="p">(</span><span class="o">*</span><span class="n">pattern</span><span class="p">,</span> <span class="n">patternSize</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">Toy</span><span class="p">.</span><span class="n">setOutput</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">click</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">clicked</span> <span class="o">=</span> <span class="o">!</span><span class="n">clicked</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>A short example of <code class="prettyprint">runShortPattern()</code>. We create the pattern in the two-dimensional array <code class="prettyprint">pattern</code>: turn all motors to a power level of 200 for 500 milliseconds, then turn them all off for 500 milliseconds. We also attach a click handler for a button single-click: if the button is clicked, the <code class="prettyprint">clicked</code> flag is toggled.</p>
+
+<p>In <code class="prettyprint">loop()</code>, we check the status of the <code class="prettyprint">clicked</code> flag. If it&rsquo;s true, we run the pattern, if not, we turn the motors off.</p>
+
 <h1 id="full-function-reference">Full function reference</h1>
 
 <h2 id="toy">Toy</h2>

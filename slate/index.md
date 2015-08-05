@@ -579,6 +579,175 @@ Selection Modes:
 * HIGH, LOW: I2C mode. `SDA` (D2), `SCL` (D3, PWM capable) connected to `HP0`, `HP1`.
 * LOW, HIGH: Software serial mode. `SCK` (D15), `MISO` (D14) connected to `HP0`, `HP1`. Recommended to use `SCK` as the receive pin and `MISO` as the transmit pin.
 
+# Examples
+
+## Cycle pattern
+
+```cpp
+#include <OSSex.h>
+#include <Wire.h>
+
+void setup() {
+  Toy.addPattern(fade_cos);
+  Toy.addPattern(pulse);
+  Toy.attachClick(click);
+}
+
+void loop() {
+}
+
+void click() {
+  Toy.cyclePattern();
+}
+
+// fade all of the motors from low to high over and over
+int fade_cos(int seq) {
+  Toy.step[0] = Toy.step[1] = Toy.step[2] = round(127 * cos((seq / (8*PI))-PI) + 127);
+  Toy.step[3] = 50;
+  return 1;
+}
+
+// Randomly blip an output on for a short burst.
+int pulse(int seq) {
+  if (seq % 2) {
+    Toy.step[0] = Toy.step[1] = Toy.step[2] = 0;
+  } else {
+    Toy.step[random(0,3)] = 144;
+  }
+
+  Toy.step[3] = 70;
+  return 1;
+}
+```
+
+This example cycles between vibration patterns (`pulse` and `fade_cos`) on button single click. We use `addPattern` to put `pulse` and `fade_cos` on the pattern queue, we call `Toy.attachClick(click)` to attach the `click` function to a button single-click.
+
+## Nunchuck click
+
+```cpp
+#include <OSSex.h>
+#include <Wire.h>
+#include <WiiChuck.h>
+
+WiiChuck nunchuck = WiiChuck(c_update, z_update);
+
+bool c_update() {
+  return nunchuck.cPressed();
+}
+
+bool z_update() {
+  return nunchuck.zPressed();
+}
+
+void c_click() {
+  Toy.stop();
+}
+
+void z_click() {
+  Toy.increasePower();
+}
+
+void c_doubleclick() {
+  Toy.cyclePattern();
+}
+
+void setup() {
+  Toy.setHackerPort(HACKER_PORT_I2C);
+
+  nunchuck.begin();
+
+  nunchuck.attachCClick(c_click);
+  nunchuck.attachCDoubleClick(c_doubleclick);
+  nunchuck.attachZClick(z_click);
+
+  Toy.addPattern(sharp_ramp);
+  Toy.addPattern(weird2);
+  Toy.addPattern(weird3);
+  Toy.addPattern(flicker);
+  Toy.addPattern(second);
+}
+
+void loop() {
+  nunchuck.update();
+}
+
+int sharp_ramp(int seq) {
+  const uint8_t fadeTable[32] = {0, 1, 1, 2, 2, 2, 3, 3, 4, 5, 6, 7, 9, 10, 12, 15, 17, 21, 25, 30, 36, 43, 51, 61, 73, 87, 104, 125, 149, 178, 213, 255};
+  seq %= 32;
+  Toy.step[0] = Toy.step[1] = Toy.step[2] = fadeTable[seq];
+  Toy.step[3] = 12 ;
+  return 1;
+}
+int weird2(int seq) {
+  Toy.step[2] = round(127*cos(tan(tan(seq/(8*PI)))-PI/2)+127);
+  Toy.step[3] = 30;
+  return 1;
+}
+int weird3(int seq) {
+  Toy.step[2] = round(50*(cos(seq/(8*PI)+PI/2) + sin(seq/2))+100);
+  Toy.step[3] = 30;
+  return 1;
+}
+int flicker(int seq) {
+  Toy.step[0] = Toy.step[1] = Toy.step[2] = -1;
+  if (seq > 2) {
+    Toy.step[3] = 200;
+  } else {
+    Toy.step[3] = 20;
+  }
+  seq %= 3;
+  Toy.step[seq] = 80;
+  return 1;
+}
+
+int second(int seq) {
+  Toy.step[0] = 0;
+  Toy.step[1] = 100;
+  Toy.step[2] = 0;
+  Toy.step[3] = 50;
+  return 1;
+}
+```
+
+This example creates a Nunchuck with the `c_update` and `z_update` functions -- these functions return the button state to the OneButton library so that it can handle click events. We then create the `c_click`, `c_doubleclick`, and `z_click` functions. These are functions that we'll attach to a C-click, C-double-click, and Z-click event, respectively.
+
+In `setup()`, we start the Nunchuck connection, attach our click handlers, and then add in a few patterns to manipulate (`sharp_ramp`, `weird2`, `weird3`, `flicker`, `second`).
+
+## `runShortPattern()`
+
+```cpp
+#include <OSSex.h>
+#include <Wire.h>
+
+int pattern[][4] = {
+    {200, 200, 200, 500},
+    {0, 0, 0, 500},
+};
+unsigned int patternSize = sizeof(pattern) / sizeof(int) / 4;
+
+bool clicked = false;
+
+void setup() {
+  Toy.attachClick(click);
+}
+
+void loop() {
+  if (clicked) {
+    Toy.runShortPattern(*pattern, patternSize);
+  } else {
+    Toy.setOutput(-1, 0);
+  }
+}
+
+void click() {
+  clicked = !clicked;
+}
+```
+
+A short example of `runShortPattern()`. We create the pattern in the two-dimensional array `pattern`: turn all motors to a power level of 200 for 500 milliseconds, then turn them all off for 500 milliseconds. We also attach a click handler for a button single-click: if the button is clicked, the `clicked` flag is toggled.
+
+In `loop()`, we check the status of the `clicked` flag. If it's true, we run the pattern, if not, we turn the motors off.
+
 # Full function reference
 
 ## Toy
