@@ -28,6 +28,10 @@ void c_click() {
   Toy.stop();
 }
 
+void c_doubleclick() {
+  Toy.cyclePattern();
+}
+
 // Likewise for z_update, z_click.
 void z_click() {
   Toy.increasePower();
@@ -43,6 +47,7 @@ void setup() {
 
   // Attach our click handlers
   nunchuck.attachCClick(c_click);
+  nunchuck.attachCDoubleClick(c_doubleclick);
   nunchuck.attachZClick(z_click);
 
   // Queue up our vibration patterns

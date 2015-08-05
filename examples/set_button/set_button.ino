@@ -7,7 +7,6 @@
 #include <Wire.h>
 
 void setup() {
-  Toy.setID(MOD);
   Toy.attachClick(led);
 }
 

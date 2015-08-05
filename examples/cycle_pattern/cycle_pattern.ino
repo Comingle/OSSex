@@ -7,11 +7,8 @@
 #include <Wire.h>
 
 void setup() {
-  Toy.setID(MOD);
-
   Toy.addPattern(fade_cos);
   Toy.addPattern(pulse);
-
   Toy.attachClick(click);  
 }
 
