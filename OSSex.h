@@ -41,6 +41,7 @@ class OSSex {
     int previousPattern();
     int addPattern(int (*callback)(int));
     unsigned int getInput(int);
+    void enableExtraInputs(bool);
     int getPattern();
     void update();
 

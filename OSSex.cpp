@@ -39,10 +39,12 @@ void OSSex::setID(int deviceId) {
 		device.ledCount = 1;
 		device.ledPins[0] = 13;
 
-		// Technically 4, but 2 inputs remain unconnected in most models
+		// Inputs 2 and 3 remain unconnected in most models. use enableExtraInputs() to enable.
 		device.inCount = 2;
 		device.inPins[0] = A7; // D-
 		device.inPins[1] = A9; // D+
+		device.inPins[2] = A2;
+		device.inPins[3] = A3;
 
     // Pins for setting the Hacker Port mode
 		device.muxPins[0] = 8;
@@ -543,6 +545,17 @@ unsigned int OSSex::getHackerPort() {
 unsigned int OSSex::getInput(int inNumber) {
 	inNumber = abs(inNumber) % device.inCount;
 	return analogRead(device.inPins[inNumber]);
+}
+
+// enables the 2 extra analog inputs present on the Dilduino. These are unconnected
+// on the Mod.
+void OSSex::enableExtraInputs(bool flag) {
+	if (device.deviceId != 1) return;
+	if (flag) {
+	  device.inCount = 4;
+	} else {
+		device.inCount = 2;
+	}
 }
 
 void OSSex::attachClick(void (*callback)()) {
