@@ -202,8 +202,9 @@ int OSSex::setOutput(int outNumber, int powerLevel) {
 
 	if (_powerScale * constrainedPower > 255) {
 		_powerScale = 255/constrainedPower;
+	} else if (_powerScale * constrainedPower < 0) {
+		_powerScale = 0.0;
 	}
-
 	for (int i = 0; i < iterations; i++) {
 		if (constrainedPower == 0) {
 			analogWrite(device.outPins[outNumber], 0);
