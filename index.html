@@ -81,8 +81,7 @@
 
 <h3 id="pin-setup">Pin setup</h3>
 
-<p>The motors and buttons and sensors attached to a Mod or Dilduino
-The various digital and analog pins used in the Mod and Dilduino are all listed in the <code class="prettyprint">setID()</code> function of OSSex.cpp in the OSSex library. Simply including the library will automatically create a <code class="prettyprint">Toy</code> object that is configured as a Mod/Dilduino, so you don&rsquo;t have to do anything else to get all of your pins set up. The Hacker Port in particular becomes far more convenient: it requires a high or low signal on two separate pins to set its state, and that state then exposes 2 of 6 possible different pins.</p>
+<p>The various digital and analog pins used in the Mod and Dilduino are all listed in the <code class="prettyprint">setID()</code> function of OSSex.cpp in the OSSex library. Simply including the library will automatically create a <code class="prettyprint">Toy</code> object that is configured as a Mod/Dilduino, so you don&rsquo;t have to do anything else to get all of your pins set up. The Hacker Port in particular becomes far more convenient: it requires a high or low signal on two separate pins to set its state, and that state then exposes 2 of 6 possible different pins.</p>
 
 <h3 id="unobtrusive-pattern-functions">Unobtrusive pattern functions</h3>
 
@@ -574,7 +573,7 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 <h2 id="available-functions">Available Functions</h2>
 
 <ul>
-<li><code class="prettyprint">begin()</code> &ndash; initiates the I2C connection with the nunchuck. Usually performed in <code class="prettyprint">setup()</code>` of the sketch.</li>
+<li><code class="prettyprint">begin()</code> &ndash; initiates the I2C connection with the nunchuck. Usually performed in <code class="prettyprint">setup()</code> of the sketch.</li>
 <li><code class="prettyprint">update()</code> &ndash; reads the nunchuck&rsquo;s status and updates various internal variables. Usually performed in <code class="prettyprint">loop()</code> to keep the status up-to-date.</li>
 <li><code class="prettyprint">readJoyX()</code>, <code class="prettyprint">readJoyY()</code> &ndash; returns the X and Y position of the nunchuck joystick.</li>
 <li><code class="prettyprint">readAccelX()</code>, <code class="prettyprint">readAccelY()</code>, <code class="prettyprint">readAccelZ()</code> &ndash; returns the X, Y, or Z acceleration.</li>
@@ -635,9 +634,11 @@ In short: When `runPattern()` calls your pattern function to get the next step i
 <p>Selector pins: D8, D12</p>
 
 <p>Selection Modes:
-* LOW, LOW: Analog Input / PWM Output. A7, A9 connected to <code class="prettyprint">HP0</code>, <code class="prettyprint">HP1</code>.
-* HIGH, LOW: I2C mode. <code class="prettyprint">SDA</code> (D2), <code class="prettyprint">SCL</code> (D3, PWM capable) connected to <code class="prettyprint">HP0</code>, <code class="prettyprint">HP1</code>.
-* LOW, HIGH: Software serial mode. <code class="prettyprint">SCK</code> (D15), <code class="prettyprint">MISO</code> (D14) connected to <code class="prettyprint">HP0</code>, <code class="prettyprint">HP1</code>. Recommended to use <code class="prettyprint">SCK</code> as the receive pin and <code class="prettyprint">MISO</code> as the transmit pin.</p>
+<ul>
+<li>LOW, LOW: Analog Input / PWM Output. A7, A9 connected to <code class="prettyprint">HP0</code>, <code class="prettyprint">HP1</code>.</li>
+<li>HIGH, LOW: I2C mode. <code class="prettyprint">SDA</code> (D2), <code class="prettyprint">SCL</code> (D3, PWM capable) connected to <code class="prettyprint">HP0</code>, <code class="prettyprint">HP1</code>.</li>
+<li>LOW, HIGH: Software serial mode. <code class="prettyprint">SCK</code> (D15), <code class="prettyprint">MISO</code> (D14) connected to <code class="prettyprint">HP0</code>, <code class="prettyprint">HP1</code>. Recommended to use <code class="prettyprint">SCK</code> as the receive pin and <code class="prettyprint">MISO</code> as the transmit pin.</li>
+</p>
 
 <h1 id="examples">Examples</h1>
 
