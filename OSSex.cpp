@@ -367,7 +367,11 @@ void OSSex::setPowerScaleStep(float step) {
 
 // Set power scaling factor to powerScale
 float OSSex::setPowerScaleFactor(float powerScale) {
-	_powerScale = constrain(powerScale, 0.0, 1.0);
+	if (powerScale < 0.0) {
+		_powerScale = 0.0;
+	} else {
+		_powerScale = powerScale;
+	}
 	return _powerScale;
 }
 
@@ -394,7 +398,11 @@ void OSSex::setTimeScaleStep(float step) {
 
 // Set time scaling factor to timeScale
 float OSSex::setTimeScaleFactor(float timeScale) {
-  _timeScale = constrain(timeScale, 0.0, 1.0);
+	if (timeScale < 0.0) {
+		_timeScale = 0.0;
+	} else {
+		_timeScale = timeScale;
+	}
   return _timeScale;
 }
 
