@@ -109,10 +109,9 @@ class WiiChuck {
     } buttonZ, buttonC;
     uint8_t baselineX;
     uint8_t baselineY;
-
+    uint8_t status[6];              // array to store wiichuck output
 
   private:
-    uint8_t status[6];              // array to store wiichuck output
     uint8_t zeroJoyX;   // these are about where mine are
     uint8_t zeroJoyY; // use calibrateJoy when the stick is at zero to correct
     int lastJoyX;
