@@ -60,33 +60,33 @@ void WiiChuck::update() {
 
   Wire.requestFrom (0x52, 6);
 
-  while (Wire.available()) {
-    // receive byte as an integer
-    status[cnt] = Wire.read();
-    cnt++;
-  }
-  if (cnt > 5) {
-    lastJoyX = readJoyX();
-    lastJoyY = readJoyY();
-    //averageCounter ++;
-    //if (averageCounter >= AVERAGE_N)
-    //    averageCounter = 0;
+  if (Wire.available()) {
+    do {
+      // receive byte as an integer
+      status[cnt] = Wire.read();
+      cnt++;
+    } while (Wire.available());
+    if (cnt > 5) {
+      lastJoyX = readJoyX();
+      lastJoyY = readJoyY();
 
-    joyX = status[0];
-    joyY = status[1];
-    for (int i = 0; i < 3; i++) {
-      //accelArray[i][averageCounter] = ((int)status[i+2] << 2) + ((status[5] & (B00000011 << ((i+1)*2) ) >> ((i+1)*2)));
-      angles[i] = (status[i+2] << 2) + ((status[5] & (B00000011 << ((i+1)*2) ) >> ((i+1)*2)));
+      joyX = status[0];
+      joyY = status[1];
+      for (int i = 0; i < 3; i++) {
+        angles[i] = (status[i+2] << 2) + ((status[5] & (B00000011 << ((i+1)*2) ) >> ((i+1)*2)));
+      }
+
+      buttonZ.value = !(status[5] & B00000001);
+      buttonC.value = !((status[5] & B00000010) >> 1);
+      buttonZ.button.tick();
+      buttonC.button.tick();
+      _send_zero(); // send the request for next bytes
+      cnt = 0;
     }
-    //accelYArray[averageCounter] = ((int)status[3] << 2) + ((status[5] & B00110000) >> 4);
-    //accelZArray[averageCounter] = ((int)status[4] << 2) + ((status[5] & B11000000) >> 6);
-
-    buttonZ.value = !(status[5] & B00000001);
-    buttonC.value = !((status[5] & B00000010) >> 1);
-    buttonZ.button.tick();
-    buttonC.button.tick();
-    _send_zero(); // send the request for next bytes
-    cnt = 0;
+  } else {
+    for (cnt; cnt < 6; cnt++) {
+      status[cnt] = 255;
+    }
   }
 }
 
