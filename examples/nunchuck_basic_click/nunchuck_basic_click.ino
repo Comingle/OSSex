@@ -7,6 +7,9 @@
 #include <Wire.h>
 #include <WiiChuck.h>
 
+bool c_update();
+bool z_update();
+
 // Create the nunchuck object
 // c_update and z_update are the button update functions. OSSex/OneButton normally works
 // only with physical buttons (something that is measurably high or low on a digital
